@@ -106,6 +106,26 @@ main .loader { color: var(--muted); padding: 2rem; text-align: center; }
 .preds .llm-side .llm-top1 .name { color: #234; font-weight: 600; }
 .preds .llm-side .conf-line { font-size: 11px; color: var(--muted); margin-top: 0.3rem; }
 
+.author-card .author-meta {
+  color: #444;
+  font-size: 13px;
+  margin: 0.45rem 0 0.65rem;
+}
+.author-card .author-meta div { margin-bottom: 0.2rem; }
+.author-papers {
+  margin: 0.85rem 0 0 1.15rem;
+  padding: 0;
+  color: #333;
+  font-size: 13px;
+}
+.author-papers li { margin-bottom: 0.35rem; padding-left: 0.1rem; }
+.author-papers .paper-title { display: block; }
+.author-papers .paper-meta {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+}
+
 .legend-pill { display: inline-block; width: 0.7em; height: 0.7em; border-radius: 50%;
                vertical-align: -1px; margin: 0 1px 0 4px; }
 .legend-pill.match { background: var(--good); }
@@ -207,8 +227,11 @@ body.home {
   display: inline-block; background: var(--accent); color: #fff;
   padding: 0.6rem 1.2rem; border-radius: 4px; text-decoration: none;
   font-weight: 600;
+  margin: 0.2rem;
 }
 .cta:hover { background: #1d4a82; }
+.cta-secondary { background: #4a6572; }
+.cta-secondary:hover { background: #344c57; }
 
 .home-footer {
   border-top: 1px solid var(--border);

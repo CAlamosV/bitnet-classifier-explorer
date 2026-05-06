@@ -1,10 +1,10 @@
 # Classifier explorer
 
-Browse field/subfield predictions for a sample of $\sim 7{,}000$ papers
-from the deployed model. About $2{,}300$ of the papers are also in the
-LLM-labelled training set — for those we display the LLM's labels
-alongside the model's predictions so you can spot agreement and
-disagreement at a glance.
+Browse field/subfield predictions for papers and career-level authors
+from the deployed model. Paper cards show model predictions beside LLM
+labels when available. Author cards show OpenAlex AuthorIDs with at
+least one paper in the 14.6M e5-frame, their career field/subfield
+aggregates, representative papers, and LLM judge labels when available.
 
 ## Live
 
@@ -27,7 +27,9 @@ python3 -m http.server 8000
 ## Files
 
 - `index.html` / `style.css` / `app.js` — static web UI.
+- `authors.html` / `authors.js` — author-level browser.
 - `papers.json` — the sampled records (~11 MB, 7k papers).
+- `authors.json` — sampled author records for the author browser.
 - `taxonomy.json` — code → human-readable name for the 30 fields and
   304 subfields.
 
@@ -46,8 +48,18 @@ python3 -m http.server 8000
 The server-side build script and SLURM wrapper live on Sherlock at
 `/scratch/users/alamos/oafc/code/build_explorer_sample.py` and
 `/tmp/explorer.slurm`. Re-running takes ~1 minute on `hns,normal`.
-After the job finishes:
+After the paper job finishes:
 
 ```bash
 scp sherlock:/scratch/users/alamos/oafc/data/explorer/papers.json papers.json
+```
+
+The author-level sample is built from
+`/scratch/users/alamos/oafc/data/author_preds/author_eval_sample.parquet`
+and optional LLM labels:
+
+```bash
+python3 build_author_explorer_sample.py \
+  --sample /scratch/users/alamos/oafc/data/author_preds/author_eval_sample.parquet \
+  --labels /scratch/users/alamos/oafc/data/author_preds/author_eval_labels.parquet
 ```

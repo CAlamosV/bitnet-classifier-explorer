@@ -11,7 +11,8 @@
   <h1>Classifying scientific papers into 30 fields and 304 subfields</h1>
   <nav>
     <a class="active" href="index.html">Overview</a>
-    <a href="explorer.html">Browse predictions →</a>
+    <a href="explorer.html">Papers</a>
+    <a href="authors.html">Authors</a>
   </nav>
 </header>
 
@@ -117,49 +118,83 @@
   <section class="how">
     <h2>How we built the model</h2>
     <p>
-      We trained two classifiers depending on what input data is available
-      for a paper.
+      Each prediction is a single
+      <a href="https://en.wikipedia.org/wiki/Logistic_regression">logistic regression</a>
+      — the simplest off-the-shelf classifier. We tried averaging in a
+      gradient-boosted tree and a small neural net, but on our held-out
+      slice they bought less than one percentage point and roughly
+      tripled the inference cost on 14.6&nbsp;million papers, so we
+      shipped the simple model.
+    </p>
+    <p>
+      The features that go into the regression are what matter. We use
+      three blocks:
     </p>
     <ul>
       <li>
-        <strong>Embedding-free model.</strong> Runs on every paper
-        OpenAlex has, even old ones with only a title and journal name.
-        Uses TF-IDF on the text plus a "metadata" feature: for each
-        paper, what fraction of its authors' past papers, references,
-        and journal-mates are in each of the 30 fields? This metadata
-        is the strongest signal we have for short historical papers.
+        <strong>Text.</strong> A
+        <a href="https://en.wikipedia.org/wiki/Tf%E2%80%93idf">TF-IDF</a>
+        bag-of-words over the title, abstract (when present), and journal
+        name; plus an
+        <a href="https://huggingface.co/intfloat/e5-base-v2"><code>e5-base-v2</code></a>
+        sentence embedding (768 numbers per paper) for the 14.6M frame.
       </li>
       <li>
-        <strong>Embedding model.</strong> For papers with abstracts (about
-        14.6 million), we add an <code>e5-base-v2</code> sentence
-        embedding of the title plus abstract plus journal. We feed this
-        plus the metadata above through a small ensemble of three heads
-        (logistic regression, gradient-boosted trees, and a small neural
-        network) and average their probabilities.
+        <strong>Metadata.</strong> For each paper, what fraction of its
+        authors' past papers, its references, and its journal-mates are
+        in each of the 30 fields? This is the strongest signal we have for
+        short historical papers with no abstract.
+      </li>
+      <li>
+        <strong>Field signal (subfield model only).</strong> The
+        subfield regression takes the field regression's 30-way softmax
+        as an input. Subfield predictions are also reranked at the very
+        end by multiplying through the field probabilities, so the
+        system never tells you "Computer Science → Marine Biology".
       </li>
     </ul>
     <p>
-      The metadata signal is recursive. A paper's neighbours' field shares
-      depend on which fields the neighbours are in, which the model itself
-      is predicting. We therefore re-ran the classifier in two iterations:
-      train on the LLM labels using OpenAlex's existing primary topic to
-      define neighbour shares, then re-define the shares using our own
-      first-pass predictions and re-train. The second iteration adds about
-      3 percentage points of accuracy; further iterations don't help.
+      The metadata signal is recursive: a paper's neighbours' field
+      shares depend on which fields the neighbours are in, which the
+      model itself is predicting. We therefore train in two passes: a
+      first model uses OpenAlex's existing primary topic to define
+      neighbour shares; a second model uses the first model's own
+      predictions on the corpus instead. A third pass adds nothing, so
+      we stop. The same trick is applied at the subfield grain on the
+      14.6M-paper deployment, and that "subfield-meta" feature is the
+      single largest contributor to subfield accuracy.
     </p>
     <p>
-      The subfield model (304 classes) sits on top of the field model and
-      uses its top-3 field predictions as a feature. Predictions that fall
-      outside the predicted parent field are downweighted before the final
-      ranking, so the system never tells you "Computer Science → Marine
-      Biology".
+      For the 94.7M-paper pre-2000 corpus we use only the text and
+      metadata blocks (no embeddings) — most of those papers are
+      title-and-journal-only records, so an embedding wouldn't have
+      anything to summarise. For the 14.6M-paper modern frame we add
+      the e5 sentence embedding on top.
+    </p>
+  </section>
+
+  <section class="how">
+    <h2>How we classify authors</h2>
+    <p>
+      Author fields are career-level aggregates over the same 14.6 million
+      paper predictions. For each OpenAlex AuthorID with at least one paper in
+      the frame, we sum the paper-level top-3 field probabilities across that
+      author's papers, renormalise the resulting 30-way vector, and take the
+      largest entries as the author's primary and secondary fields. We also
+      test variants that down-weight uncertain papers and very large teams.
+    </p>
+    <p>
+      Subfields use the same idea with the paper-level top-5 subfield
+      probabilities. We do not force an author's top subfield to sit under the
+      author's top field; interdisciplinary profiles are preserved and flagged
+      when the subfield's parent field differs from the field aggregate.
     </p>
   </section>
 
   <section class="how" id="explore">
     <h2>Browse the predictions</h2>
     <p>
-      The <a href="explorer.html">explorer</a> shows a sample of about
+      The <a href="explorer.html">paper explorer</a> shows a sample of about
       11,000 papers split across three sets:
     </p>
     <ul>
@@ -177,7 +212,8 @@
     <p>You can filter by field, subfield, year, and agreement state, sort
        by confidence, and search inside titles and abstracts.</p>
     <p style="text-align: center; margin: 2rem 0 1rem;">
-      <a class="cta" href="explorer.html">Open the explorer →</a>
+      <a class="cta" href="explorer.html">Open paper explorer</a>
+      <a class="cta cta-secondary" href="authors.html">Open author explorer</a>
     </p>
   </section>
 </main>
