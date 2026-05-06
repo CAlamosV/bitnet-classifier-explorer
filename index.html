@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Field/subfield classifier explorer</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<header>
+  <h1>Field/subfield classifier explorer</h1>
+  <p class="meta">
+    <span id="count-badge">loading…</span>
+    &nbsp;|&nbsp;
+    <a href="#" id="random-btn">randomize</a>
+    &nbsp;|&nbsp;
+    <a href="#" id="reset-btn">reset filters</a>
+  </p>
+</header>
+
+<aside class="filters">
+  <h2>Filters</h2>
+
+  <fieldset>
+    <legend>Set</legend>
+    <label><input type="radio" name="set" value="train" checked /> In training (LLM-labelled)</label>
+    <label><input type="radio" name="set" value="corpus" /> Corpus only (unlabelled)</label>
+    <label><input type="radio" name="set" value="all" /> All</label>
+  </fieldset>
+
+  <fieldset>
+    <legend>Predicted field (top-1)</legend>
+    <select id="filter-field">
+      <option value="">— any —</option>
+    </select>
+  </fieldset>
+
+  <fieldset>
+    <legend>Predicted subfield (top-1)</legend>
+    <select id="filter-subfield">
+      <option value="">— any —</option>
+    </select>
+  </fieldset>
+
+  <fieldset>
+    <legend>Sort</legend>
+    <select id="sort-by">
+      <option value="random">Random (re-shuffle each click)</option>
+      <option value="lowfield">Low field confidence first</option>
+      <option value="highfield">High field confidence first</option>
+      <option value="lowsub">Low subfield confidence first</option>
+      <option value="highsub">High subfield confidence first</option>
+      <option value="year_asc">Year ascending</option>
+      <option value="year_desc">Year descending</option>
+    </select>
+  </fieldset>
+
+  <fieldset>
+    <legend>Field confidence range</legend>
+    <label>min <input type="number" step="0.01" min="0" max="1" id="conf-field-min" value="0.00" />
+    max <input type="number" step="0.01" min="0" max="1" id="conf-field-max" value="1.00" /></label>
+  </fieldset>
+
+  <fieldset>
+    <legend>Subfield confidence range</legend>
+    <label>min <input type="number" step="0.01" min="0" max="1" id="conf-sub-min" value="0.00" />
+    max <input type="number" step="0.01" min="0" max="1" id="conf-sub-max" value="1.00" /></label>
+  </fieldset>
+
+  <fieldset>
+    <legend>Year</legend>
+    <label>from <input type="number" id="year-min" placeholder="any" />
+    to <input type="number" id="year-max" placeholder="any" /></label>
+  </fieldset>
+
+  <fieldset id="agreement-fs">
+    <legend>Agreement with LLM (training only)</legend>
+    <label><input type="radio" name="agree" value="any" checked /> any</label>
+    <label class="match"><input type="radio" name="agree" value="field_match" /> field — exact match</label>
+    <label class="partial"><input type="radio" name="agree" value="field_partial" /> field — partial (in LLM list, not top)</label>
+    <label class="miss"><input type="radio" name="agree" value="field_miss" /> field — no match</label>
+    <label class="match"><input type="radio" name="agree" value="sub_match" /> subfield — exact match</label>
+    <label class="partial"><input type="radio" name="agree" value="sub_partial" /> subfield — partial (in LLM list)</label>
+    <label class="miss"><input type="radio" name="agree" value="sub_miss" /> subfield — no match</label>
+  </fieldset>
+
+  <fieldset>
+    <legend>Search</legend>
+    <input type="text" id="text-search" placeholder="title / abstract substring" />
+  </fieldset>
+</aside>
+
+<main id="results">
+  <div class="loader">Loading sample…</div>
+</main>
+
+<footer>
+  <p>Built from <span id="data-source"></span>. Probabilities are model softmax outputs.
+  Top-1 prediction is colored
+  <span class="legend-pill match">green</span> when it matches the LLM's top label,
+  <span class="legend-pill partial">yellow</span> when it matches one of the LLM's alternatives,
+  and <span class="legend-pill miss">orange</span> when the LLM did not list it.</p>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
