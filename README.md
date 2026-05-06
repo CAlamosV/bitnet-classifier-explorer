@@ -6,12 +6,22 @@ LLM-labelled training set — for those we display the LLM's labels
 alongside the model's predictions so you can spot agreement and
 disagreement at a glance.
 
-## Run
+## Live
+
+<https://calamosv.github.io/bitnet-classifier-explorer/>
+
+## Run locally
 
 ```bash
 cd tools/classifier_explorer
 python3 -m http.server 8000
 # open http://localhost:8000
+```
+
+## Deploy
+
+```bash
+./deploy.sh   # rsyncs this folder to the public site repo and pushes
 ```
 
 ## Files

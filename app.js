@@ -71,12 +71,27 @@ function renderCard(p) {
     [p.subfield_top1, p.subfield_top2, p.subfield_top3, p.subfield_top4, p.subfield_top5],
     [p.sp1, p.sp2, p.sp3, p.sp4, p.sp5], 5);
 
-  const llm = p.in_training ? p : null;
-  const llmFields = (llm && llm.llm_fields) || [];
-  const llmSubs = (llm && llm.llm_subfields) || [];
+  // Two label sources possible per paper:
+  //   - in_training: full Sonnet/Opus labels (fields + subfields).
+  //   - in_active: Sonnet 4.5 active-batch on hard corpus papers
+  //                (subfields only; field is implied by the subfield's prefix).
+  const hasTrain = p.in_training;
+  const hasActive = p.in_active;
+  const llmFields = hasTrain ? (p.llm_fields || []) : [];
+  const llmSubsTrain = hasTrain ? (p.llm_subfields || []) : [];
+  const llmSubsActive = hasActive ? (p.llm_active_subfields || []) : [];
+  const llmSubs = hasTrain ? llmSubsTrain : llmSubsActive;
+  const llmSubConf = hasTrain ? p.llm_subfield_conf
+                              : hasActive ? p.llm_active_conf : null;
+  const llmFieldsForSubfield = (hasTrain ? llmFields :
+    (llmSubsActive.length ? [llmSubsActive[0].split("_")[0]] : []));
 
-  const fieldStatus = llm ? topMatchStatus(p.field_top1, llmFields) : "none";
-  const subStatus = llm ? topMatchStatus(p.subfield_top1, llmSubs) : "none";
+  const fieldStatus = hasTrain
+    ? topMatchStatus(p.field_top1, llmFields)
+    : (hasActive
+        ? topMatchStatus(p.field_top1, llmFieldsForSubfield)
+        : "none");
+  const subStatus = (hasTrain || hasActive) ? topMatchStatus(p.subfield_top1, llmSubs) : "none";
 
   const renderRow = (code, prob, table, isTop1, status, barScale = 1) => {
     const cls = isTop1 ? `row top1 ${status}` : "row";
@@ -94,7 +109,7 @@ function renderCard(p) {
   const subRows = subTops.map(([code, prob], i) =>
     renderRow(code, prob, subNames, i === 0, subStatus, 1.5)).join("");
 
-  const renderLlmList = (items, table, conf) => {
+  const renderLlmList = (items, table, conf, header = "LLM said") => {
     if (!items || items.length === 0) return "<span class='muted'>—</span>";
     return items.map((c, i) => `
       <div class="row llm-row${i === 0 ? " llm-top1" : ""}">
@@ -103,16 +118,14 @@ function renderCard(p) {
       + (conf != null ? `<div class="conf-line">LLM confidence: ${conf.toFixed(0)}</div>` : "");
   };
 
-  const llmFieldBlock = llm ? `
-    <div class="llm-side">
-      <h5>LLM said</h5>
-      ${renderLlmList(llmFields, fieldNames, llm.llm_field_conf)}
-    </div>` : "";
-  const llmSubBlock = llm ? `
-    <div class="llm-side">
-      <h5>LLM said</h5>
-      ${renderLlmList(llmSubs, subNames, llm.llm_subfield_conf)}
-    </div>` : "";
+  const llmFieldBlock = hasTrain
+    ? `<div class="llm-side"><h5>LLM said</h5>${renderLlmList(llmFields, fieldNames, p.llm_field_conf)}</div>`
+    : (hasActive
+        ? `<div class="llm-side"><h5>LLM said (hard set)</h5>${renderLlmList(llmFieldsForSubfield, fieldNames, null)}<div class="conf-line">implied from subfield</div></div>`
+        : "");
+  const llmSubBlock = (hasTrain || hasActive)
+    ? `<div class="llm-side"><h5>LLM said${hasActive && !hasTrain ? " (hard set)" : ""}</h5>${renderLlmList(llmSubs, subNames, llmSubConf)}</div>`
+    : "";
 
   const inst = topInst(p.authors);
   const byline = [
@@ -123,9 +136,11 @@ function renderCard(p) {
   ].filter(Boolean).join(" &middot; ");
 
   const badges = [
-    p.in_training
+    hasTrain
       ? `<span class="badge training">in training (${escapeHtml(p.llm_source || "llm")})</span>`
-      : `<span class="badge">corpus</span>`,
+      : (hasActive
+          ? `<span class="badge active">hard case (Sonnet re-judged)</span>`
+          : `<span class="badge">corpus</span>`),
   ].join("");
 
   const abstract = p.abstract ? `
@@ -233,7 +248,9 @@ function applyFilters() {
 
   xs = xs.filter((p) => {
     if (setFilter === "train" && !p.in_training) return false;
-    if (setFilter === "corpus" && p.in_training) return false;
+    if (setFilter === "active" && !p.in_active) return false;
+    if (setFilter === "judged" && !p.in_training && !p.in_active) return false;
+    if (setFilter === "corpus" && (p.in_training || p.in_active)) return false;
     if (fieldFilter && p.field_top1 !== fieldFilter) return false;
     if (subFilter && p.subfield_top1 !== subFilter) return false;
     if (p.field_p1 == null || p.field_p1 < cMinF || p.field_p1 > cMaxF) return false;
@@ -242,9 +259,18 @@ function applyFilters() {
     if (p.year == null && yearMin !== -Infinity) return false;
 
     if (agree !== "any") {
-      if (!p.in_training) return false;
-      const fStatus = topMatchStatus(p.field_top1, p.llm_fields || []);
-      const sStatus = topMatchStatus(p.subfield_top1, p.llm_subfields || []);
+      // Field judgement is only well-defined when we have a full training
+      // label; for active-batch papers we infer the field from the
+      // subfield prefix, which is enough for subfield agreement filters
+      // but only loose for field-level filters.
+      const llmFieldList = p.in_training ? (p.llm_fields || [])
+        : (p.in_active && p.llm_active_subfields && p.llm_active_subfields.length
+            ? [p.llm_active_subfields[0].split("_")[0]] : []);
+      const llmSubList = p.in_training ? (p.llm_subfields || [])
+        : (p.in_active ? (p.llm_active_subfields || []) : []);
+      if (llmFieldList.length === 0 && llmSubList.length === 0) return false;
+      const fStatus = topMatchStatus(p.field_top1, llmFieldList);
+      const sStatus = topMatchStatus(p.subfield_top1, llmSubList);
       if (agree === "field_match" && fStatus !== "match") return false;
       if (agree === "field_partial" && fStatus !== "partial") return false;
       if (agree === "field_miss" && fStatus !== "miss") return false;
@@ -338,9 +364,13 @@ async function init() {
     ]);
     state.papers = pp;
     state.taxonomy = tx;
+    const nTrain = pp.filter(p => p.in_training).length;
+    const nActive = pp.filter(p => p.in_active).length;
+    const nCorpus = pp.length - nTrain - nActive;
     $("data-source").textContent = `${pp.length.toLocaleString()} papers (`
-      + `${pp.filter(p => p.in_training).length.toLocaleString()} in LLM training set, `
-      + `${pp.filter(p => !p.in_training).length.toLocaleString()} from corpus)`;
+      + `${nTrain.toLocaleString()} training, `
+      + `${nActive.toLocaleString()} hard cases, `
+      + `${nCorpus.toLocaleString()} corpus only)`;
     buildDropdowns();
     attachFilterEvents();
     applyFilters();

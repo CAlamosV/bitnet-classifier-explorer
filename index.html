@@ -3,105 +3,189 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Field/subfield classifier explorer</title>
+<title>Field/subfield classifier — overview</title>
 <link rel="stylesheet" href="style.css" />
 </head>
-<body>
-<header>
-  <h1>Field/subfield classifier explorer</h1>
-  <p class="meta">
-    <span id="count-badge">loading…</span>
-    &nbsp;|&nbsp;
-    <a href="#" id="random-btn">randomize</a>
-    &nbsp;|&nbsp;
-    <a href="#" id="reset-btn">reset filters</a>
-  </p>
+<body class="home">
+<header class="home-header">
+  <h1>Classifying scientific papers into 30 fields and 304 subfields</h1>
+  <nav>
+    <a class="active" href="index.html">Overview</a>
+    <a href="explorer.html">Browse predictions →</a>
+  </nav>
 </header>
 
-<aside class="filters">
-  <h2>Filters</h2>
+<main class="home-main">
+  <section class="hero">
+    <p class="lede">
+      We trained a classifier that places any scientific paper into one of
+      <strong>30 fields</strong> (e.g. Computer Science, Economics) and
+      <strong>304 subfields</strong> (e.g. Artificial Intelligence &amp; Machine
+      Learning, Labor Economics) from the SciNET taxonomy. We ran it on
+      <strong>14.6&nbsp;million papers</strong> to replace the field labels
+      OpenAlex ships, which were trained on modern papers and degrade on the
+      historical record we care about (1900–2000).
+    </p>
+  </section>
 
-  <fieldset>
-    <legend>Set</legend>
-    <label><input type="radio" name="set" value="train" checked /> In training (LLM-labelled)</label>
-    <label><input type="radio" name="set" value="corpus" /> Corpus only (unlabelled)</label>
-    <label><input type="radio" name="set" value="all" /> All</label>
-  </fieldset>
+  <section class="metrics">
+    <h2>How well does it work?</h2>
+    <p>
+      We evaluate on a held-out set of papers labelled by Anthropic's
+      Claude Sonnet&nbsp;4.5 (with Claude Opus&nbsp;4.7 stepping in for the
+      hardest&nbsp;10%). We compare to OpenAlex's existing field labels.
+    </p>
 
-  <fieldset>
-    <legend>Predicted field (top-1)</legend>
-    <select id="filter-field">
-      <option value="">— any —</option>
-    </select>
-  </fieldset>
+    <div class="charts">
+      <div class="chart-card">
+        <h3>Field accuracy</h3>
+        <p class="chart-sub">Did the model put the paper in the right field?</p>
+        <div class="bars">
+          <div class="bar-row">
+            <span class="bar-label">OpenAlex</span>
+            <span class="bar"><span class="fill baseline" style="width: 48.2%"></span></span>
+            <span class="bar-val">48%</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">Our model</span>
+            <span class="bar"><span class="fill ours" style="width: 89.5%"></span></span>
+            <span class="bar-val">90%</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">Our top-2</span>
+            <span class="bar"><span class="fill ours-strong" style="width: 97.3%"></span></span>
+            <span class="bar-val">97%</span>
+          </div>
+        </div>
+        <p class="chart-note">
+          The model returns its top-3 fields for every paper. Our top-2 means
+          the right field appears in the model's top-2 predictions. OpenAlex
+          returns only one field per paper.
+        </p>
+      </div>
 
-  <fieldset>
-    <legend>Predicted subfield (top-1)</legend>
-    <select id="filter-subfield">
-      <option value="">— any —</option>
-    </select>
-  </fieldset>
+      <div class="chart-card">
+        <h3>Subfield accuracy</h3>
+        <p class="chart-sub">A harder problem — 10× more classes.</p>
+        <div class="bars">
+          <div class="bar-row">
+            <span class="bar-label">OpenAlex</span>
+            <span class="bar"><span class="fill baseline" style="width: 27.6%"></span></span>
+            <span class="bar-val">28%</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">Our top-1</span>
+            <span class="bar"><span class="fill ours" style="width: 70.1%"></span></span>
+            <span class="bar-val">70%</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">Our top-2 (lenient)</span>
+            <span class="bar"><span class="fill ours-strong" style="width: 95.8%"></span></span>
+            <span class="bar-val">96%</span>
+          </div>
+        </div>
+        <p class="chart-note">
+          At the subfield level, "the right answer" is itself fuzzy — the LLM
+          frequently lists several plausible subfields. We score the model
+          generous: a top-2 prediction is correct if it includes any of the
+          LLM's plausible subfields. The strict top-1 is shown for reference.
+        </p>
+      </div>
+    </div>
+  </section>
 
-  <fieldset>
-    <legend>Sort</legend>
-    <select id="sort-by">
-      <option value="random">Random (re-shuffle each click)</option>
-      <option value="lowfield">Low field confidence first</option>
-      <option value="highfield">High field confidence first</option>
-      <option value="lowsub">Low subfield confidence first</option>
-      <option value="highsub">High subfield confidence first</option>
-      <option value="year_asc">Year ascending</option>
-      <option value="year_desc">Year descending</option>
-    </select>
-  </fieldset>
+  <section class="how">
+    <h2>How we got the labels</h2>
+    <p>
+      We sampled 44,000 papers stratified across every research field that
+      OpenAlex covers and asked Anthropic's Claude Sonnet&nbsp;4.5 to read each
+      one's title, journal, and (where available) abstract, and pick the
+      best-fitting field and subfield from the SciNET taxonomy. The prompt
+      asks the model to return its top guess plus up to three alternatives
+      and a confidence score from 0–100 — the LLM admits when it's unsure
+      between, say, Materials Science and Chemistry, and that ambiguity is
+      preserved end-to-end in the labels and in our evaluation.
+    </p>
+    <p>
+      Papers where Sonnet returned a confidence below 60 (about 1 in 10)
+      were re-prompted under Claude Opus&nbsp;4.7, the more capable but
+      slower model, and the higher-confidence response was kept. Total cost
+      of labelling: about $245 in API credits.
+    </p>
+  </section>
 
-  <fieldset>
-    <legend>Field confidence range</legend>
-    <label>min <input type="number" step="0.01" min="0" max="1" id="conf-field-min" value="0.00" />
-    max <input type="number" step="0.01" min="0" max="1" id="conf-field-max" value="1.00" /></label>
-  </fieldset>
+  <section class="how">
+    <h2>How we built the model</h2>
+    <p>
+      We trained two classifiers depending on what input data is available
+      for a paper.
+    </p>
+    <ul>
+      <li>
+        <strong>Embedding-free model.</strong> Runs on every paper
+        OpenAlex has, even old ones with only a title and journal name.
+        Uses TF-IDF on the text plus a "metadata" feature: for each
+        paper, what fraction of its authors' past papers, references,
+        and journal-mates are in each of the 30 fields? This metadata
+        is the strongest signal we have for short historical papers.
+      </li>
+      <li>
+        <strong>Embedding model.</strong> For papers with abstracts (about
+        14.6 million), we add an <code>e5-base-v2</code> sentence
+        embedding of the title plus abstract plus journal. We feed this
+        plus the metadata above through a small ensemble of three heads
+        (logistic regression, gradient-boosted trees, and a small neural
+        network) and average their probabilities.
+      </li>
+    </ul>
+    <p>
+      The metadata signal is recursive. A paper's neighbours' field shares
+      depend on which fields the neighbours are in, which the model itself
+      is predicting. We therefore re-ran the classifier in two iterations:
+      train on the LLM labels using OpenAlex's existing primary topic to
+      define neighbour shares, then re-define the shares using our own
+      first-pass predictions and re-train. The second iteration adds about
+      3 percentage points of accuracy; further iterations don't help.
+    </p>
+    <p>
+      The subfield model (304 classes) sits on top of the field model and
+      uses its top-3 field predictions as a feature. Predictions that fall
+      outside the predicted parent field are downweighted before the final
+      ranking, so the system never tells you "Computer Science → Marine
+      Biology".
+    </p>
+  </section>
 
-  <fieldset>
-    <legend>Subfield confidence range</legend>
-    <label>min <input type="number" step="0.01" min="0" max="1" id="conf-sub-min" value="0.00" />
-    max <input type="number" step="0.01" min="0" max="1" id="conf-sub-max" value="1.00" /></label>
-  </fieldset>
-
-  <fieldset>
-    <legend>Year</legend>
-    <label>from <input type="number" id="year-min" placeholder="any" />
-    to <input type="number" id="year-max" placeholder="any" /></label>
-  </fieldset>
-
-  <fieldset id="agreement-fs">
-    <legend>Agreement with LLM (training only)</legend>
-    <label><input type="radio" name="agree" value="any" checked /> any</label>
-    <label class="match"><input type="radio" name="agree" value="field_match" /> field — exact match</label>
-    <label class="partial"><input type="radio" name="agree" value="field_partial" /> field — partial (in LLM list, not top)</label>
-    <label class="miss"><input type="radio" name="agree" value="field_miss" /> field — no match</label>
-    <label class="match"><input type="radio" name="agree" value="sub_match" /> subfield — exact match</label>
-    <label class="partial"><input type="radio" name="agree" value="sub_partial" /> subfield — partial (in LLM list)</label>
-    <label class="miss"><input type="radio" name="agree" value="sub_miss" /> subfield — no match</label>
-  </fieldset>
-
-  <fieldset>
-    <legend>Search</legend>
-    <input type="text" id="text-search" placeholder="title / abstract substring" />
-  </fieldset>
-</aside>
-
-<main id="results">
-  <div class="loader">Loading sample…</div>
+  <section class="how" id="explore">
+    <h2>Browse the predictions</h2>
+    <p>
+      The <a href="explorer.html">explorer</a> shows a sample of about
+      11,000 papers split across three sets:
+    </p>
+    <ul>
+      <li><strong>In training</strong> — papers Sonnet/Opus labelled directly.
+        Side-by-side, the model's top-3 / top-5 predictions and the LLM's
+        chosen labels, with green / yellow / orange colour coding for
+        agreement.</li>
+      <li><strong>Hard cases (active)</strong> — corpus papers our model was
+        least confident about; we re-asked Sonnet 4.5 to label these for
+        the explorer (not used in training). This is where you'll see the
+        most disagreement and where the colour coding is most useful.</li>
+      <li><strong>Corpus only</strong> — random papers from the deployed
+        14.6M-paper run, no LLM judge attached.</li>
+    </ul>
+    <p>You can filter by field, subfield, year, and agreement state, sort
+       by confidence, and search inside titles and abstracts.</p>
+    <p style="text-align: center; margin: 2rem 0 1rem;">
+      <a class="cta" href="explorer.html">Open the explorer →</a>
+    </p>
+  </section>
 </main>
 
-<footer>
-  <p>Built from <span id="data-source"></span>. Probabilities are model softmax outputs.
-  Top-1 prediction is colored
-  <span class="legend-pill match">green</span> when it matches the LLM's top label,
-  <span class="legend-pill partial">yellow</span> when it matches one of the LLM's alternatives,
-  and <span class="legend-pill miss">orange</span> when the LLM did not list it.</p>
+<footer class="home-footer">
+  <p>Cristian&nbsp;Álamos and Lukas&nbsp;Althoff. Built for the BitNet
+     internet-and-science project. Source code in the <code>bitnet</code>
+     repository.</p>
 </footer>
-
-<script src="app.js"></script>
 </body>
 </html>
