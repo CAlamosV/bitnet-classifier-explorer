@@ -154,7 +154,7 @@ footer code { background: var(--pill); padding: 0 4px; border-radius: 2px; }
 
 /* ==== Header nav (explorer page) ===== */
 .header-titles { display: flex; flex-direction: column; gap: 0.15rem; }
-.header-titles nav { display: flex; gap: 1rem; font-size: 12px; }
+.header-titles nav { display: flex; flex-wrap: wrap; gap: 0.4rem 1rem; font-size: 12px; }
 .header-titles nav a { color: var(--muted); }
 .header-titles nav a.active { color: var(--accent); font-weight: 600; }
 
@@ -176,7 +176,7 @@ body.home {
   margin: 0 0 0.5rem; font-size: 1.4rem; font-weight: 600;
   max-width: 920px;
 }
-.home-header nav { display: flex; gap: 1.25rem; font-size: 0.95rem; }
+.home-header nav { display: flex; flex-wrap: wrap; gap: 0.6rem 1.25rem; font-size: 0.95rem; }
 .home-header nav a { color: var(--muted); text-decoration: none; }
 .home-header nav a:hover { text-decoration: underline; }
 .home-header nav a.active { color: var(--accent); font-weight: 600; }

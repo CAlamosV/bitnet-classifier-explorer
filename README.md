@@ -26,7 +26,9 @@ python3 -m http.server 8000
 
 ## Files
 
-- `index.html` / `style.css` / `app.js` — static web UI.
+- `index.html` — paper-level overview.
+- `author_overview.html` — author-level overview.
+- `style.css` / `app.js` — static web UI.
 - `authors.html` / `authors.js` — author-level browser.
 - `papers.json` — the sampled records (~11 MB, 7k papers).
 - `authors.json` — sampled author records for the author browser.

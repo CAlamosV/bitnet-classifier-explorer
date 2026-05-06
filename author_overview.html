@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Author field/subfield classifier — overview</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body class="home">
+<header class="home-header">
+  <h1>Classifying authors into career fields and subfields</h1>
+  <nav>
+    <a href="index.html">Paper overview</a>
+    <a href="explorer.html">Paper explorer</a>
+    <a class="active" href="author_overview.html">Author overview</a>
+    <a href="authors.html">Author explorer</a>
+  </nav>
+</header>
+
+<main class="home-main">
+  <section class="hero">
+    <p class="lede">
+      We assign each OpenAlex author in the 14.6&nbsp;million-paper BITNET
+      frame a <strong>career field</strong> and <strong>career subfield</strong>
+      from the same SciNET taxonomy used for papers. The author label is not a
+      separate model. It is a careful average of the fields assigned to that
+      author's papers.
+    </p>
+  </section>
+
+  <section class="metrics">
+    <h2>How well does it work?</h2>
+    <p>
+      We evaluated a stratified sample of authors with Anthropic's
+      Claude Sonnet&nbsp;4.5. The judge saw the author's name, institutions,
+      journals, and representative paper titles, then chose the author's
+      primary and secondary field/subfield when appropriate.
+    </p>
+
+    <div class="charts">
+      <div class="chart-card">
+        <h3>Author field agreement</h3>
+        <p class="chart-sub">Does the career aggregate match the LLM judge?</p>
+        <div class="bars">
+          <div class="bar-row">
+            <span class="bar-label">Top-1 field</span>
+            <span class="bar"><span class="fill ours" style="width: 80.4%"></span></span>
+            <span class="bar-val">80%</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">Top-2 field</span>
+            <span class="bar"><span class="fill ours-strong" style="width: 95.7%"></span></span>
+            <span class="bar-val">96%</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">Lenient top-2</span>
+            <span class="bar"><span class="fill ours-strong" style="width: 98.7%"></span></span>
+            <span class="bar-val">99%</span>
+          </div>
+        </div>
+        <p class="chart-note">
+          Lenient top-2 accepts the LLM's primary, alternate, or secondary
+          field. This matters for interdisciplinary authors.
+        </p>
+      </div>
+
+      <div class="chart-card">
+        <h3>Author subfield agreement</h3>
+        <p class="chart-sub">The same problem at the 304-class grain.</p>
+        <div class="bars">
+          <div class="bar-row">
+            <span class="bar-label">Top-1 subfield</span>
+            <span class="bar"><span class="fill ours" style="width: 69.4%"></span></span>
+            <span class="bar-val">69%</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">Top-2 subfield</span>
+            <span class="bar"><span class="fill ours" style="width: 85.0%"></span></span>
+            <span class="bar-val">85%</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">Lenient top-2</span>
+            <span class="bar"><span class="fill ours-strong" style="width: 94.2%"></span></span>
+            <span class="bar-val">94%</span>
+          </div>
+        </div>
+        <p class="chart-note">
+          Subfields are intentionally not forced to sit under the author's
+          top field, so mixed careers can remain visible.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="how">
+    <h2>What an author field means</h2>
+    <p>
+      An author's primary field is the largest share of their observed
+      publication record in the BITNET frame. It is best read as a career
+      summary: "what field does this author's body of work mostly belong to?"
+      It is not a department, a current job title, or a manually cleaned
+      biography.
+    </p>
+    <p>
+      Every author also keeps a soft distribution over fields. A physicist
+      with substantial materials-science work, for example, may have Physics
+      as the top field and Materials Science as a close second. The browser
+      shows those secondary probabilities instead of collapsing the author to
+      a single hard label.
+    </p>
+  </section>
+
+  <section class="how">
+    <h2>How the assignment is made</h2>
+    <p>
+      First, each paper receives up to three field probabilities and up to
+      five subfield probabilities from the paper classifier. For each OpenAlex
+      AuthorID, we add those probabilities across all of the author's papers
+      in the 14.6&nbsp;million-paper frame, then renormalize the totals so they
+      sum to one. The largest entries become the author's top fields and
+      subfields.
+    </p>
+    <p>
+      We tested several weighting rules: treating every paper equally,
+      down-weighting uncertain papers, down-weighting very large teams, and
+      combining both adjustments. Equal weighting performed best overall, so
+      it is the version shown on the website.
+    </p>
+    <p>
+      We use OpenAlex AuthorIDs as they come. If OpenAlex splits one real
+      person into two IDs or merges two people into one ID, that issue is left
+      for a later disambiguation pass.
+    </p>
+  </section>
+
+  <section class="how">
+    <h2>When to be cautious</h2>
+    <p>
+      Single-paper authors are essentially classified by that one paper.
+      Authors with many papers are more stable because the aggregate averages
+      over more evidence. Mixed careers are also less naturally represented by
+      one top field, so the second field and the confidence values are part of
+      the output rather than decoration.
+    </p>
+    <p style="text-align: center; margin: 2rem 0 1rem;">
+      <a class="cta" href="authors.html">Open author explorer</a>
+      <a class="cta cta-secondary" href="index.html">Read paper overview</a>
+    </p>
+  </section>
+</main>
+
+<footer class="home-footer">
+  <p>Cristian&nbsp;Álamos and Lukas&nbsp;Althoff. Built for the BitNet
+     internet-and-science project. Source code in the <code>bitnet</code>
+     repository.</p>
+</footer>
+</body>
+</html>
