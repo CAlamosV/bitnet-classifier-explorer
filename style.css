@@ -189,6 +189,7 @@ body.home {
 .home-main h2 { font-size: 1.2rem; font-weight: 600; margin: 0 0 0.75rem;
                 border-bottom: 1px solid var(--border); padding-bottom: 0.3rem; }
 .home-main h3 { font-size: 1rem; font-weight: 600; margin: 0 0 0.4rem; }
+.home-main .section-subhead { margin-top: 1.5rem; }
 .home-main p { margin: 0 0 0.9rem; }
 .home-main ul { margin: 0 0 0.9rem 1.25rem; padding: 0; }
 .home-main li { margin-bottom: 0.5rem; }
@@ -221,6 +222,9 @@ body.home {
 .bar-row .bar .fill.ours-strong { background: #234d80; }
 .bar-val { width: 3em; text-align: right; font-variant-numeric: tabular-nums;
            font-size: 0.9rem; color: #333; flex-shrink: 0; }
+.bucket-bars .bar-label { width: 10.8em; }
+.bucket-bars .bar-val { width: 4.2em; }
+.bar-count { color: var(--muted); font-size: 0.82em; white-space: nowrap; }
 .chart-note { font-size: 0.85rem; color: var(--muted); margin: 0.9rem 0 0; }
 
 .cta {

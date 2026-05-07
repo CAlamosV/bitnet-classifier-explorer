@@ -90,6 +90,99 @@
         </p>
       </div>
     </div>
+
+    <h3 class="section-subhead">Accuracy by number of papers</h3>
+    <p>
+      Accuracy improves as the author-level aggregate has more papers to
+      average over. The buckets below count each author's publications in the
+      BITNET/e5 sample and use the same 833 LLM-judged authors as the overall
+      evaluation.
+    </p>
+    <div class="charts accuracy-by-papers">
+      <div class="chart-card">
+        <h3>Field top-1 accuracy</h3>
+        <p class="chart-sub">Share where the top career field matches the LLM judge.</p>
+        <div class="bars bucket-bars">
+          <div class="bar-row">
+            <span class="bar-label">1 paper <span class="bar-count">n=137</span></span>
+            <span class="bar"><span class="fill ours" style="width: 72.3%"></span></span>
+            <span class="bar-val">72.3%</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">2-5 papers <span class="bar-count">n=164</span></span>
+            <span class="bar"><span class="fill ours" style="width: 76.2%"></span></span>
+            <span class="bar-val">76.2%</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">6-10 papers <span class="bar-count">n=117</span></span>
+            <span class="bar"><span class="fill ours" style="width: 76.1%"></span></span>
+            <span class="bar-val">76.1%</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">11-25 papers <span class="bar-count">n=113</span></span>
+            <span class="bar"><span class="fill ours" style="width: 80.5%"></span></span>
+            <span class="bar-val">80.5%</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">26-50 papers <span class="bar-count">n=105</span></span>
+            <span class="bar"><span class="fill ours" style="width: 83.8%"></span></span>
+            <span class="bar-val">83.8%</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">51-100 papers <span class="bar-count">n=99</span></span>
+            <span class="bar"><span class="fill ours" style="width: 89.9%"></span></span>
+            <span class="bar-val">89.9%</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">100+ papers <span class="bar-count">n=98</span></span>
+            <span class="bar"><span class="fill ours" style="width: 90.8%"></span></span>
+            <span class="bar-val">90.8%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <h3>Subfield top-1 accuracy</h3>
+        <p class="chart-sub">The same evaluation at the 304-class subfield grain.</p>
+        <div class="bars bucket-bars">
+          <div class="bar-row">
+            <span class="bar-label">1 paper <span class="bar-count">n=137</span></span>
+            <span class="bar"><span class="fill ours" style="width: 59.9%"></span></span>
+            <span class="bar-val">59.9%</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">2-5 papers <span class="bar-count">n=164</span></span>
+            <span class="bar"><span class="fill ours" style="width: 61.0%"></span></span>
+            <span class="bar-val">61.0%</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">6-10 papers <span class="bar-count">n=117</span></span>
+            <span class="bar"><span class="fill ours" style="width: 76.1%"></span></span>
+            <span class="bar-val">76.1%</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">11-25 papers <span class="bar-count">n=113</span></span>
+            <span class="bar"><span class="fill ours" style="width: 66.4%"></span></span>
+            <span class="bar-val">66.4%</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">26-50 papers <span class="bar-count">n=105</span></span>
+            <span class="bar"><span class="fill ours" style="width: 77.1%"></span></span>
+            <span class="bar-val">77.1%</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">51-100 papers <span class="bar-count">n=99</span></span>
+            <span class="bar"><span class="fill ours" style="width: 78.8%"></span></span>
+            <span class="bar-val">78.8%</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">100+ papers <span class="bar-count">n=98</span></span>
+            <span class="bar"><span class="fill ours" style="width: 74.5%"></span></span>
+            <span class="bar-val">74.5%</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </section>
 
   <section class="how">
