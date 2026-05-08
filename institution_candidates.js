@@ -3,11 +3,14 @@
 const PAGE = 100;
 const state = {
   meta: null,
-  taxonomy: { fields: {} },
+  taxonomy: { fields: {}, subfields: {} },
   payload: null,
   rows: [],
   filtered: [],
   shown: 0,
+  institutionValues: new Map(),
+  fieldValues: new Map(),
+  loadTimer: null,
 };
 
 const $ = (id) => document.getElementById(id);
@@ -32,8 +35,63 @@ function fieldLabel(code) {
   return state.taxonomy.fields[code] || code || "field";
 }
 
+function subfieldLabel(code) {
+  return state.taxonomy.subfields?.[code] || code || "subfield";
+}
+
+function institutionLabel(u) {
+  if (!u) return "";
+  const suffix = [u.country_code, u.institution_id].filter(Boolean).join(", ");
+  return suffix ? `${u.name} (${suffix})` : u.name;
+}
+
 function authorUrl(authorId) {
   return authorId ? `https://openalex.org/${encodeURIComponent(authorId)}` : "#";
+}
+
+function workUrl(paperId) {
+  return paperId ? `https://openalex.org/${encodeURIComponent(paperId)}` : "#";
+}
+
+function institutionOptions() {
+  if (Array.isArray(state.meta.institutions) && state.meta.institutions.length) {
+    return state.meta.institutions;
+  }
+  return (state.meta.universities || []).map((u) => ({
+    ...u,
+    institution_id: u.institution_id,
+    author_count: u.author_count,
+    year_min: u.year_min,
+    year_max: u.year_max,
+  }));
+}
+
+function selectedInstitution() {
+  const raw = $("university-input").value.trim();
+  const low = raw.toLowerCase();
+  if (state.institutionValues.has(raw)) return state.institutionValues.get(raw);
+  const opts = institutionOptions();
+  return opts.find((u) => u.institution_id?.toLowerCase() === low)
+    || opts.find((u) => u.name?.toLowerCase() === low)
+    || opts.find((u) => institutionLabel(u).toLowerCase().includes(low))
+    || opts.find((u) => u.key === state.meta.defaults.university_key)
+    || opts[0];
+}
+
+function selectedYear() {
+  const m = $("year-input").value.match(/\d{4}/);
+  return m ? Number(m[0]) : Number(state.meta.defaults.year);
+}
+
+function selectedField() {
+  const raw = $("field-input").value.trim();
+  const low = raw.toLowerCase();
+  if (state.fieldValues.has(raw)) return state.fieldValues.get(raw);
+  const codes = ["COMP_ENGG", ...(state.meta.fields || [])];
+  return codes.find((code) => code.toLowerCase() === low)
+    || codes.find((code) => fieldLabel(code).toLowerCase() === low)
+    || codes.find((code) => fieldLabel(code).toLowerCase().includes(low))
+    || state.meta.defaults.field;
 }
 
 function fieldProb(a, code) {
@@ -52,15 +110,23 @@ function probChip(label, value) {
   return `<span class="prob-chip">${escapeHtml(label)} <strong>${fmtPct(value)}</strong></span>`;
 }
 
-function fieldsHtml(a, selectedField) {
+function fieldsHtml(a, selectedFieldCode) {
   const top = (a.tf || []).map(([code, p]) => [fieldLabel(code), p]);
   const chips = top.length
     ? top.map(([label, p]) => probChip(label, p)).join("")
     : `<span class="table-sub">No career field probabilities in classifier sample.</span>`;
   return `
     <div class="chip-stack">${chips}</div>
-    <div class="table-sub">selected ${escapeHtml(fieldLabel(selectedField))}: ${fmtPct(fieldProb(a, selectedField))}</div>
+    <div class="table-sub">selected ${escapeHtml(fieldLabel(selectedFieldCode))}: ${fmtPct(fieldProb(a, selectedFieldCode))}</div>
   `;
+}
+
+function subfieldsHtml(a) {
+  const top = (a.ts || []).map(([code, p]) => [subfieldLabel(code), p]);
+  if (!top.length) {
+    return `<span class="table-sub">No career subfield probabilities in this browser sample.</span>`;
+  }
+  return `<div class="chip-stack">${top.map(([label, p]) => probChip(label, p)).join("")}</div>`;
 }
 
 function metricsHtml(a) {
@@ -84,45 +150,100 @@ function evidenceHtml(a) {
   `;
 }
 
+function worksHtml(a) {
+  const works = a.wk || [];
+  if (!works.length) {
+    return `<span class="table-sub">No titled works for this university-year in the browser data.</span>`;
+  }
+  const rows = works.map((w) => {
+    const title = w.t || w.p;
+    const field = w.f ? `${fieldLabel(w.f)} ${fmtPct(w.fp)}` : "field unavailable";
+    const subfield = w.s ? `${subfieldLabel(w.s)} ${fmtPct(w.sp)}` : "subfield unavailable";
+    const evidence = Number(w.raw || 0) > 0 ? "observed affiliation" : "imputed affiliation";
+    return `
+      <li>
+        <a href="${workUrl(w.p)}" target="_blank" rel="noopener">${escapeHtml(title)}</a>
+        <span class="paper-meta">${fmtInt(w.y)}; ${escapeHtml(field)}; ${escapeHtml(subfield)}; ${escapeHtml(evidence)}</span>
+      </li>
+    `;
+  }).join("");
+  return `
+    <details class="pub-details">
+      <summary>${works.length} works at this university-year</summary>
+      <ol class="mini-list work-list">${rows}</ol>
+    </details>
+  `;
+}
+
 function selectedKey() {
-  return `${$("university-select").value}-${$("year-select").value}`;
+  const inst = selectedInstitution();
+  return `${inst?.institution_id || inst?.key || ""}-${selectedYear()}`;
 }
 
 function yearMeta() {
-  const key = selectedKey();
-  return state.meta.school_years.find((d) => `${d.university_key}-${d.year}` === key);
+  const inst = selectedInstitution();
+  const year = selectedYear();
+  if (!inst || !year) return null;
+  return state.meta.school_years.find((d) =>
+    Number(d.year) === year
+    && (d.institution_id === inst.institution_id || d.university_key === inst.key)
+  );
 }
 
 function buildDropdowns() {
-  $("university-select").innerHTML = state.meta.universities.map((u) =>
-    `<option value="${escapeHtml(u.key)}">${escapeHtml(u.name)}</option>`
+  state.institutionValues.clear();
+  const instOptions = institutionOptions().map((u) => {
+    const label = institutionLabel(u);
+    state.institutionValues.set(label, u);
+    return `<option value="${escapeHtml(label)}"></option>`;
+  });
+  $("university-options").innerHTML = instOptions.join("");
+  $("year-options").innerHTML = (state.meta.years || []).map((y) =>
+    `<option value="${escapeHtml(y)}"></option>`
   ).join("");
-  $("year-select").innerHTML = state.meta.years.map((y) =>
-    `<option value="${escapeHtml(y)}">${escapeHtml(y)}</option>`
-  ).join("");
-  const fieldOptions = [
-    `<option value="COMP_ENGG">Computer Science plus Engineering</option>`,
-    ...state.meta.fields.map((code) =>
-      `<option value="${escapeHtml(code)}">${escapeHtml(fieldLabel(code))}</option>`
-    ),
-  ];
-  $("field-select").innerHTML = fieldOptions.join("");
+
+  state.fieldValues.clear();
+  const fields = ["COMP_ENGG", ...(state.meta.fields || [])];
+  $("field-options").innerHTML = fields.map((code) => {
+    const label = fieldLabel(code);
+    state.fieldValues.set(label, code);
+    state.fieldValues.set(code, code);
+    return `<option value="${escapeHtml(label)}"></option>`;
+  }).join("");
 
   const defaults = state.meta.defaults;
-  $("university-select").value = defaults.university_key;
-  $("year-select").value = String(defaults.year);
-  $("field-select").value = defaults.field;
+  const defaultInst = institutionOptions().find((u) =>
+    u.key === defaults.university_key || u.institution_id === defaults.institution_id
+  ) || institutionOptions()[0];
+  $("university-input").value = institutionLabel(defaultInst);
+  $("year-input").value = String(defaults.year);
+  $("field-input").value = fieldLabel(defaults.field);
   $("min-works").value = defaults.min_works;
   $("min-prob").value = Number(defaults.min_field_probability).toFixed(2);
   $("min-school-papers").value = defaults.min_school_papers;
 }
 
+function noDataHtml(inst, year) {
+  const label = inst ? institutionLabel(inst) : "that institution";
+  return `
+    <div class="empty">
+      No precomputed candidate file for ${escapeHtml(label)} in ${escapeHtml(year)}.
+      <br>
+      The institution is searchable in the imputed affiliation index, but this static site only loads exported candidate slices.
+    </div>
+  `;
+}
+
 async function loadSelectedYear() {
+  const inst = selectedInstitution();
+  const year = selectedYear();
   const meta = yearMeta();
   if (!meta) {
     state.payload = null;
     state.rows = [];
-    $("results").innerHTML = `<div class="empty">No candidate data for that institution-year.</div>`;
+    state.filtered = [];
+    $("count-badge").textContent = "no exported candidate file";
+    $("results").innerHTML = noDataHtml(inst, year);
     return;
   }
   $("count-badge").textContent = "loading candidates...";
@@ -131,7 +252,8 @@ async function loadSelectedYear() {
     if (!r.ok) throw new Error(`Failed to load ${meta.data_file}: ${r.status}`);
     return r.json();
   });
-  if (selectedKey() !== `${payload.university_key}-${payload.year}`) return;
+  const currentInst = selectedInstitution();
+  if ((currentInst?.institution_id || "") !== (payload.institution_id || "") || selectedYear() !== Number(payload.year)) return;
   state.payload = payload;
   state.rows = payload.authors || [];
   applyFilters();
@@ -139,7 +261,7 @@ async function loadSelectedYear() {
 
 function currentParams() {
   return {
-    field: $("field-select").value,
+    field: selectedField(),
     minWorks: Number($("min-works").value || 0),
     minProb: Number($("min-prob").value || 0),
     minSchoolPapers: Number($("min-school-papers").value || 1),
@@ -172,7 +294,7 @@ function summaryHtml() {
       <h2>${escapeHtml(p.university)}, ${p.year} - ${escapeHtml(fieldLabel(params.field))}</h2>
       <p>
         OpenAlex-only view: authors are included when the imputed paper-author affiliation file attaches them to this university in this year.
-        Faculty roster data are not used here. This static build covers the four validation universities.
+        Faculty roster data are not used here.
       </p>
       <p class="active-filter">
         Current filter:
@@ -202,7 +324,7 @@ function summaryHtml() {
   `;
 }
 
-function rowHtml(a, selectedField) {
+function rowHtml(a, selectedFieldCode) {
   return `
     <tr>
       <td>
@@ -210,8 +332,10 @@ function rowHtml(a, selectedField) {
         <div class="table-sub">${escapeHtml(a.a)}</div>
       </td>
       <td>${metricsHtml(a)}</td>
-      <td>${fieldsHtml(a, selectedField)}</td>
+      <td>${fieldsHtml(a, selectedFieldCode)}</td>
+      <td>${subfieldsHtml(a)}</td>
       <td>${evidenceHtml(a)}</td>
+      <td>${worksHtml(a)}</td>
       <td>
         <div>${a.yf || a.yl ? `${fmtInt(a.yf)}-${fmtInt(a.yl)}` : ""}</div>
         <div class="table-sub">classifier-sample career span</div>
@@ -233,7 +357,7 @@ function tableHtml() {
         <table class="data-table candidate-table">
           <thead>
             <tr>
-              <th>OpenAlex author</th><th>Works/citations</th><th>Field probabilities</th><th>Institution-year evidence</th><th>Classifier span</th>
+              <th>OpenAlex author</th><th>Works/citations</th><th>Field probabilities</th><th>Subfield probabilities</th><th>Institution-year evidence</th><th>Works</th><th>Classifier span</th>
             </tr>
           </thead>
           <tbody id="candidate-rows"></tbody>
@@ -246,13 +370,13 @@ function tableHtml() {
 
 function renderRows(reset = true) {
   const container = $("candidate-rows");
-  const selectedField = $("field-select").value;
+  const selectedFieldCode = selectedField();
   if (reset) {
     state.shown = 0;
     container.innerHTML = "";
   }
   const next = state.filtered.slice(state.shown, state.shown + PAGE);
-  container.insertAdjacentHTML("beforeend", next.map((a) => rowHtml(a, selectedField)).join(""));
+  container.insertAdjacentHTML("beforeend", next.map((a) => rowHtml(a, selectedFieldCode)).join(""));
   state.shown += next.length;
   const btn = $("more-btn");
   if (btn) {
@@ -288,18 +412,28 @@ function applyFilters() {
   render();
 }
 
+function debounceLoad() {
+  clearTimeout(state.loadTimer);
+  state.loadTimer = setTimeout(loadSelectedYear, 250);
+}
+
 function attachEvents() {
-  $("university-select").addEventListener("change", loadSelectedYear);
-  $("year-select").addEventListener("change", loadSelectedYear);
-  ["field-select", "min-works", "min-prob", "min-school-papers", "evidence-select", "sort-by", "text-search"].forEach((id) => {
+  $("university-input").addEventListener("input", debounceLoad);
+  $("university-input").addEventListener("change", loadSelectedYear);
+  $("year-input").addEventListener("input", debounceLoad);
+  $("year-input").addEventListener("change", loadSelectedYear);
+  ["field-input", "min-works", "min-prob", "min-school-papers", "evidence-select", "sort-by", "text-search"].forEach((id) => {
     $(id).addEventListener("input", applyFilters);
   });
   $("reset-btn").onclick = (e) => {
     e.preventDefault();
     const defaults = state.meta.defaults;
-    $("university-select").value = defaults.university_key;
-    $("year-select").value = String(defaults.year);
-    $("field-select").value = defaults.field;
+    const defaultInst = institutionOptions().find((u) =>
+      u.key === defaults.university_key || u.institution_id === defaults.institution_id
+    ) || institutionOptions()[0];
+    $("university-input").value = institutionLabel(defaultInst);
+    $("year-input").value = String(defaults.year);
+    $("field-input").value = fieldLabel(defaults.field);
     $("min-works").value = defaults.min_works;
     $("min-prob").value = Number(defaults.min_field_probability).toFixed(2);
     $("min-school-papers").value = defaults.min_school_papers;

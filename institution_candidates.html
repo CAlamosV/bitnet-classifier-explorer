@@ -32,13 +32,16 @@
 
   <fieldset>
     <legend>Institution-year</legend>
-    <label>university <select id="university-select"></select></label>
-    <label>year <select id="year-select"></select></label>
+    <label>university <input type="text" id="university-input" list="university-options" autocomplete="off" /></label>
+    <datalist id="university-options"></datalist>
+    <label>year <input type="text" id="year-input" list="year-options" autocomplete="off" /></label>
+    <datalist id="year-options"></datalist>
   </fieldset>
 
   <fieldset>
     <legend>Field</legend>
-    <select id="field-select"></select>
+    <input type="text" id="field-input" list="field-options" autocomplete="off" />
+    <datalist id="field-options"></datalist>
   </fieldset>
 
   <fieldset>
@@ -79,9 +82,10 @@
 
 <footer>
   <p>Built from the original <code>paper_author_edu_imputed_1940_2000.parquet</code>
-  file. This static browser currently covers Stanford, UC Berkeley, UC Davis,
-  and UCLA for 1940-2000. It intentionally ignores faculty roster data and only
-  displays OpenAlex authors attached to the selected institution-year.</p>
+  file. The university search box indexes every institution in that file; the
+  static candidate rows are currently exported for Stanford, UC Berkeley, UC
+  Davis, and UCLA for 1940-2000. It intentionally ignores faculty roster data
+  and only displays OpenAlex authors attached to the selected institution-year.</p>
 </footer>
 
 <script src="institution_candidates.js"></script>

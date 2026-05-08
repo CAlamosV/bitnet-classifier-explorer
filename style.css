@@ -367,7 +367,7 @@ body.home {
 }
 .browser-panel .data-table { min-width: 1220px; }
 .browser-panel .roster-table { min-width: 1500px; }
-.browser-panel .candidate-table { min-width: 1100px; }
+.browser-panel .candidate-table { min-width: 1450px; }
 .data-table th,
 .data-table td {
   padding: 0.45rem 0.55rem;
@@ -419,6 +419,13 @@ body.home {
 }
 .mini-list li {
   margin-bottom: 0.25rem;
+}
+.work-list {
+  min-width: 260px;
+  max-width: 380px;
+}
+.work-list a {
+  font-weight: 600;
 }
 .metric-stack {
   display: grid;
