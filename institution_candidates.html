@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Institution-year candidates</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<header>
+  <div class="header-titles">
+    <h1>Institution-year candidates - OpenAlex only</h1>
+    <nav>
+      <a href="index.html">Paper overview</a>
+      <a href="explorer.html">Paper explorer</a>
+      <a href="author_overview.html">Author overview</a>
+      <a href="authors.html">Author explorer</a>
+      <a href="institution_overview.html">Institution overview</a>
+      <a class="active" href="institution_candidates.html">Institution candidates</a>
+      <a href="departments.html">Department browser</a>
+    </nav>
+  </div>
+  <p class="meta">
+    <span id="count-badge">loading...</span>
+    &nbsp;|&nbsp;
+    <a href="#" id="reset-btn">reset filters</a>
+  </p>
+</header>
+
+<aside class="filters">
+  <h2>Filters</h2>
+
+  <fieldset>
+    <legend>Institution-year</legend>
+    <label>university <select id="university-select"></select></label>
+    <label>year <select id="year-select"></select></label>
+  </fieldset>
+
+  <fieldset>
+    <legend>Field</legend>
+    <select id="field-select"></select>
+  </fieldset>
+
+  <fieldset>
+    <legend>OpenAlex filters</legend>
+    <label>min OpenAlex works <input type="number" min="0" step="1" id="min-works" value="5" /></label>
+    <label>min field probability <input type="number" min="0" max="1" step="0.05" id="min-prob" value="0.50" /></label>
+    <label>min papers at selected university-year <input type="number" min="1" step="1" id="min-school-papers" value="1" /></label>
+  </fieldset>
+
+  <fieldset>
+    <legend>Affiliation evidence</legend>
+    <select id="evidence-select">
+      <option value="all">observed or imputed</option>
+      <option value="raw">observed raw affiliation only</option>
+      <option value="imputed">imputed only</option>
+    </select>
+  </fieldset>
+
+  <fieldset>
+    <legend>Sort authors</legend>
+    <select id="sort-by">
+      <option value="field_desc">Highest selected-field probability</option>
+      <option value="works_desc">Most OpenAlex works</option>
+      <option value="school_papers_desc">Most selected-university papers</option>
+      <option value="name">Name</option>
+    </select>
+  </fieldset>
+
+  <fieldset>
+    <legend>Search</legend>
+    <input type="text" id="text-search" placeholder="name / OpenAlex ID" />
+  </fieldset>
+</aside>
+
+<main id="results">
+  <div class="loader">Loading institution candidates...</div>
+</main>
+
+<footer>
+  <p>Built from the original <code>paper_author_edu_imputed_1940_2000.parquet</code>
+  file. This static browser currently covers Stanford, UC Berkeley, UC Davis,
+  and UCLA for 1940-2000. It intentionally ignores faculty roster data and only
+  displays OpenAlex authors attached to the selected institution-year.</p>
+</footer>
+
+<script src="institution_candidates.js"></script>
+</body>
+</html>

@@ -6,8 +6,9 @@ labels when available. Author cards show OpenAlex AuthorIDs with at
 least one paper in the 14.6M e5-frame, their career field/subfield
 aggregates, representative papers, and LLM judge labels when available.
 The institution pages describe the original paper-author affiliation
-imputation and compare audited faculty department rosters with OpenAlex
-authors assigned to the same school-year.
+imputation, expose an OpenAlex-only university-year-field candidate browser,
+and compare audited faculty department rosters with OpenAlex authors assigned
+to the same school-year.
 
 ## Live
 
@@ -32,12 +33,17 @@ python3 -m http.server 8000
 - `index.html` - paper-level overview.
 - `author_overview.html` - author-level overview.
 - `institution_overview.html` - institution-affiliation overview.
+- `institution_candidates.html` / `institution_candidates.js` -
+  OpenAlex-only university-year-field candidate browser for the four
+  validation universities.
 - `departments.html` / `departments.js` - department roster browser.
 - `style.css` / `app.js` - static web UI.
 - `authors.html` / `authors.js` - author-level browser.
 - `papers.json` - the sampled records (~11 MB, 7k papers).
 - `authors.json` - sampled author records for the author browser.
 - `departments.json` - nine audited 1985 department-year slices.
+- `institution_candidates.json` and `institution_candidates/*.json` -
+  compact per-university-year OpenAlex candidate data.
 - `taxonomy.json` - code to human-readable name for the 30 fields and
   304 subfields.
 
@@ -76,4 +82,11 @@ The department browser is local-data only:
 
 ```bash
 python3 tools/classifier_explorer/build_department_browser_sample.py
+```
+
+The OpenAlex-only institution candidate browser is also local-data only and is
+generated from the imputed paper-author affiliation file:
+
+```bash
+python3 tools/classifier_explorer/build_institution_candidate_browser_data.py
 ```
