@@ -36,7 +36,8 @@ python3 -m http.server 8000
 - `institution_candidates.html` / `institution_candidates.js` -
   OpenAlex-only university-year-field candidate browser. The institution
   search index covers every institution in the imputed file; the static
-  candidate rows are exported for the four validation universities.
+  candidate rows are exported for a selected comparison set of validation
+  schools, prominent research universities, and smaller institutions.
 - `departments.html` / `departments.js` - department roster browser.
 - `style.css` / `app.js` - static web UI.
 - `authors.html` / `authors.js` - author-level browser.

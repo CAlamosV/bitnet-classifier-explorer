@@ -25,6 +25,18 @@ SCHOOLS = [
     {"key": "ucb", "name": "UC Berkeley", "institution_id": "I95457486"},
     {"key": "ucd", "name": "UC Davis", "institution_id": "I84218800"},
     {"key": "ucla", "name": "UCLA", "institution_id": "I161318765"},
+    {"key": "harvard", "name": "Harvard University", "institution_id": "I136199984"},
+    {"key": "mit", "name": "Massachusetts Institute of Technology", "institution_id": "I63966007"},
+    {"key": "michigan", "name": "University of Michigan", "institution_id": "I27837315"},
+    {"key": "princeton", "name": "Princeton University", "institution_id": "I20089843"},
+    {"key": "caltech", "name": "California Institute of Technology", "institution_id": "I122411786"},
+    {"key": "ucsc", "name": "UC Santa Cruz", "institution_id": "I185103710"},
+    {"key": "ucr", "name": "UC Riverside", "institution_id": "I103635307"},
+    {"key": "sjsu", "name": "San Jose State University", "institution_id": "I51504820"},
+    {"key": "csun", "name": "California State University, Northridge", "institution_id": "I157638225"},
+    {"key": "howard", "name": "Howard University", "institution_id": "I137853757"},
+    {"key": "pomona", "name": "Pomona College", "institution_id": "I177881444"},
+    {"key": "reed", "name": "Reed College", "institution_id": "I55486353"},
 ]
 
 
