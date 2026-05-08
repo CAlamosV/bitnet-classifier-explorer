@@ -104,8 +104,8 @@ function institutionHtml(a) {
 function metricsHtml(a) {
   if (!a) return "";
   const items = [
-    ["sample pubs", a.n_papers],
     ["OpenAlex works", a.openalex_works_count],
+    ["publications in classifier sample", a.n_papers],
     ["citations", a.openalex_cited_by_count],
     ["h-index", a.sciscinet_h_index],
   ].filter(([, value]) => value != null && value !== "");
@@ -151,10 +151,14 @@ function currentFilterParams() {
   };
 }
 
+function authorWorksCount(a) {
+  return Number(a?.openalex_works_count || 0);
+}
+
 function passesAuthorFilters(a, params, checkStatus = false) {
   if (!a) return false;
   if (checkStatus && !params.statuses.has(a.bleemer_status || "not_in_bleemer")) return false;
-  if (Number(a.n_papers || 0) < params.minPapers) return false;
+  if (authorWorksCount(a) < params.minPapers) return false;
   if (fieldProb(a, params.thresholdField) < params.minProb) return false;
   return true;
 }
@@ -202,7 +206,7 @@ function filterSentence(d) {
     <p class="active-filter">
       Current OpenAlex filter:
       <strong>${escapeHtml(selected)} >= ${fmtPct(params.minProb)}</strong>,
-      <strong>${fmtInt(params.minPapers)}+ sample publications</strong>,
+      <strong>${fmtInt(params.minPapers)}+ OpenAlex works</strong>,
       and <strong>${fmtInt(params.minRosterYears)}+ roster year${params.minRosterYears === 1 ? "" : "s"}</strong>.
       ${warning}
     </p>
@@ -370,7 +374,10 @@ function openAlexRowHtml(a, thresholdField) {
         <div class="table-title"><a href="${authorUrl(a.AuthorID)}" target="_blank" rel="noopener">${escapeHtml(a.display_name)}</a></div>
         <div class="table-sub">${escapeHtml(a.AuthorID)}</div>
       </td>
-      <td>${fmtInt(a.n_papers)}</td>
+      <td>
+        <strong>${fmtInt(authorWorksCount(a))}</strong>
+        <div class="table-sub">${fmtInt(a.n_papers)} publications in classifier sample</div>
+      </td>
       <td>${authorFieldHtml(a, thresholdField)}</td>
       <td>${authorSubfieldHtml(a)}</td>
       <td>${fmtInt(a.papers_at_school_year)}</td>
@@ -411,7 +418,7 @@ function openAlexTableHtml() {
         <table class="data-table">
           <thead>
             <tr>
-              <th>Roster status</th><th>OpenAlex author</th><th>Total pubs</th><th>Field probabilities</th><th>Subfields</th><th>Selected-university papers</th><th>Career institutions</th><th>Recent publications</th><th>Roster match</th>
+              <th>Roster status</th><th>OpenAlex author</th><th>OpenAlex works</th><th>Field probabilities</th><th>Subfields</th><th>Selected-university papers</th><th>Career institutions</th><th>Recent publications</th><th>Roster match</th>
             </tr>
           </thead>
           <tbody id="openalex-rows"></tbody>
@@ -447,9 +454,9 @@ function applyFilters() {
 
   const statusRank = { department_roster: 0, same_department_other_year: 1, other_bleemer_roster: 2, not_in_bleemer: 3 };
   if (sortBy === "field_desc") {
-    xs.sort((a, b) => fieldProb(b, thresholdField) - fieldProb(a, thresholdField) || Number(b.n_papers || 0) - Number(a.n_papers || 0));
+    xs.sort((a, b) => fieldProb(b, thresholdField) - fieldProb(a, thresholdField) || authorWorksCount(b) - authorWorksCount(a));
   } else if (sortBy === "papers_desc") {
-    xs.sort((a, b) => Number(b.n_papers || 0) - Number(a.n_papers || 0));
+    xs.sort((a, b) => authorWorksCount(b) - authorWorksCount(a));
   } else if (sortBy === "school_papers_desc") {
     xs.sort((a, b) => Number(b.papers_at_school_year || 0) - Number(a.papers_at_school_year || 0));
   } else if (sortBy === "bleemer_first") {

@@ -49,7 +49,7 @@
 
   <fieldset>
     <legend>OpenAlex filters</legend>
-    <label>min publications <input type="number" min="0" step="1" id="min-papers" value="5" /></label>
+    <label>min OpenAlex works <input type="number" min="0" step="1" id="min-papers" value="5" /></label>
     <label>min field probability <input type="number" min="0" max="1" step="0.05" id="min-prob" value="0.50" /></label>
     <p class="filter-note">The field threshold applies to exactly the selected field. The combined CS plus Engineering option is available only when selected.</p>
   </fieldset>
@@ -67,7 +67,7 @@
     <legend>Sort OpenAlex authors</legend>
     <select id="sort-by">
       <option value="field_desc">Highest selected-field probability</option>
-      <option value="papers_desc">Most total publications</option>
+      <option value="papers_desc">Most OpenAlex works</option>
       <option value="school_papers_desc">Most selected-university papers</option>
       <option value="bleemer_first">Faculty roster matches first</option>
       <option value="name">Name</option>
