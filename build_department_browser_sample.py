@@ -58,6 +58,30 @@ AUDIT_DEPARTMENTS = [
         "target_label": "Economics",
     },
     {
+        "key": "stanford-econ-1985",
+        "university": "Stanford",
+        "department": "Economics",
+        "year": 1985,
+        "target_field": "ECON",
+        "target_label": "Economics",
+    },
+    {
+        "key": "ucd-econ-1985",
+        "university": "UC Davis",
+        "department": "Economics",
+        "year": 1985,
+        "target_field": "ECON",
+        "target_label": "Economics",
+    },
+    {
+        "key": "ucla-econ-1985",
+        "university": "UCLA",
+        "department": "Economics",
+        "year": 1985,
+        "target_field": "ECON",
+        "target_label": "Economics",
+    },
+    {
         "key": "stanford-soc-1985",
         "university": "Stanford",
         "department": "Sociology",
@@ -302,6 +326,8 @@ def build_data(args: argparse.Namespace) -> dict[str, Any]:
             d.dept_key,
             a.AuthorID,
             coalesce(sa.display_name, ad.display_name, a.AuthorID) AS display_name,
+            ad.works_count AS openalex_works_count,
+            ad.cited_by_count AS openalex_cited_by_count,
             a.papers_at_school_year,
             a.raw_rows_at_school_year,
             a.min_imputed_at_school_year,
@@ -589,18 +615,18 @@ def build_data(args: argparse.Namespace) -> dict[str, Any]:
             s.match_share,
             count(o.AuthorID) AS openalex_author_count,
             sum(CASE
-                WHEN o.n_papers >= 5
+                WHEN coalesce(o.openalex_works_count, 0) >= 5
                  AND coalesce(o.target_field_prob, 0) >= 0.5
                 THEN 1 ELSE 0 END
             ) AS default_openalex_count,
             sum(CASE
-                WHEN o.n_papers >= 5
+                WHEN coalesce(o.openalex_works_count, 0) >= 5
                  AND coalesce(o.target_field_prob, 0) >= 0.5
                  AND o.bleemer_status = 'department_roster'
                 THEN 1 ELSE 0 END
             ) AS default_matched_department_count,
             sum(CASE
-                WHEN o.n_papers >= 5
+                WHEN coalesce(o.openalex_works_count, 0) >= 5
                 AND coalesce(o.target_field_prob, 0) >= 0.5
                  AND o.bleemer_status = 'other_bleemer_roster'
                 THEN 1 ELSE 0 END
@@ -621,8 +647,11 @@ def build_data(args: argparse.Namespace) -> dict[str, Any]:
                 WHEN 'stanford-cs-1985' THEN 2
                 WHEN 'ucla-cs-1985' THEN 3
                 WHEN 'ucb-econ-1985' THEN 4
-                WHEN 'stanford-soc-1985' THEN 5
-                ELSE 6
+                WHEN 'stanford-econ-1985' THEN 5
+                WHEN 'ucd-econ-1985' THEN 6
+                WHEN 'ucla-econ-1985' THEN 7
+                WHEN 'stanford-soc-1985' THEN 8
+                ELSE 9
             END
     """).fetchall()
     summary_cols = [d[0] for d in con.description]
@@ -649,7 +678,7 @@ def build_data(args: argparse.Namespace) -> dict[str, Any]:
                 ELSE 3
             END,
             target_field_prob DESC NULLS LAST,
-            n_papers DESC,
+            openalex_works_count DESC NULLS LAST,
             lower(display_name)
     """).fetchall()
     oa_cols = [d[0] for d in con.description]

@@ -37,7 +37,7 @@ python3 -m http.server 8000
 - `authors.html` / `authors.js` - author-level browser.
 - `papers.json` - the sampled records (~11 MB, 7k papers).
 - `authors.json` - sampled author records for the author browser.
-- `departments.json` - six audited 1985 department-year slices.
+- `departments.json` - nine audited 1985 department-year slices.
 - `taxonomy.json` - code to human-readable name for the 30 fields and
   304 subfields.
 
