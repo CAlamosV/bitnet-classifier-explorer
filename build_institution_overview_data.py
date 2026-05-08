@@ -15,6 +15,8 @@ OPENALEX_ROOT = Path(
 )
 OUT = ROOT / "tools" / "classifier_explorer" / "institution_overview_1980.json"
 CANDIDATES = ROOT / "tools" / "classifier_explorer" / "institution_candidates.json"
+EXPOSURE = ROOT / "data" / "intermediate" / "exposure" / "bitnet" / "institution_field_year_exposure.parquet"
+EXPOSURE_MANIFEST = EXPOSURE.with_suffix(EXPOSURE.suffix + ".manifest.json")
 
 
 def _pq(path: Path | str) -> str:
@@ -26,6 +28,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--openalex-root", type=Path, default=OPENALEX_ROOT)
     parser.add_argument("--output", type=Path, default=OUT)
     parser.add_argument("--candidate-metadata", type=Path, default=CANDIDATES)
+    parser.add_argument("--exposure-frame", type=Path, default=EXPOSURE)
+    parser.add_argument("--exposure-manifest", type=Path, default=EXPOSURE_MANIFEST)
     parser.add_argument("--year", type=int, default=1980)
     parser.add_argument("--threads", type=int, default=4)
     parser.add_argument("--memory", default="8GB")
@@ -41,12 +45,12 @@ def main() -> None:
         / "paper_author_edu_imputed_1940_2000.parquet"
     )
     institution_types = args.openalex_root / "data" / "institution_types.parquet"
-    candidate_metadata = json.loads(args.candidate_metadata.read_text())
-    selected = candidate_metadata["universities"]
-    values_sql = ",\n".join(
-        "('{key}', '{name}', '{institution_id}')".format(**row)
-        for row in selected
-    )
+    manifest = json.loads(args.exposure_manifest.read_text())
+    diagnostics = manifest.get("diagnostics", {})
+    min_pubs = int(diagnostics.get("min_pubs", 2000))
+    pre_start = int(diagnostics.get("pre_start", 1970))
+    pre_end = int(diagnostics.get("pre_end", 1979))
+    network = str(diagnostics.get("network", "bitnet"))
 
     con = duckdb.connect()
     con.execute(f"SET threads={args.threads}")
@@ -54,16 +58,39 @@ def main() -> None:
     con.execute("SET preserve_insertion_order=false")
     con.execute(f"""
         CREATE OR REPLACE TEMP TABLE selected_institutions AS
-        SELECT *
-        FROM (VALUES
-            {values_sql}
-        ) AS t(university_key, display_name, institution_id);
+        WITH frame_fields AS (
+            SELECT DISTINCT
+                institution_id,
+                field,
+                w_if_pre,
+                connect_year
+            FROM read_parquet('{_pq(args.exposure_frame)}')
+        ),
+        frame AS (
+            SELECT
+                institution_id,
+                SUM(COALESCE(w_if_pre, 0))::BIGINT AS pre_period_papers,
+                MIN(connect_year) FILTER (WHERE connect_year IS NOT NULL) AS connect_year
+            FROM frame_fields
+            GROUP BY institution_id
+        )
+        SELECT
+            f.institution_id AS university_key,
+            COALESCE(t.InstitutionName, f.institution_id) AS display_name,
+            f.institution_id,
+            f.pre_period_papers,
+            f.connect_year
+        FROM frame f
+        LEFT JOIN read_parquet('{_pq(institution_types)}') t
+          ON f.institution_id = t.InstitutionID;
 
         CREATE OR REPLACE TEMP TABLE institution_counts AS
         SELECT
             s.university_key,
             s.display_name,
             s.institution_id,
+            s.pre_period_papers,
+            s.connect_year,
             COALESCE(MAX(t.InstitutionName), s.display_name, s.institution_id) AS institution_name,
             MAX(t.country_code) AS country_code,
             COUNT(DISTINCT i.AuthorID) AS author_count,
@@ -76,13 +103,20 @@ def main() -> None:
          AND i.year = {args.year}
         LEFT JOIN read_parquet('{_pq(institution_types)}') t
           ON s.institution_id = t.InstitutionID
-        GROUP BY s.university_key, s.display_name, s.institution_id;
+        GROUP BY
+            s.university_key,
+            s.display_name,
+            s.institution_id,
+            s.pre_period_papers,
+            s.connect_year;
 
         CREATE OR REPLACE TEMP TABLE ranked AS
         SELECT
             university_key,
             display_name,
             institution_id,
+            pre_period_papers,
+            connect_year,
             institution_name,
             country_code,
             COALESCE(author_count, 0) AS author_count,
@@ -100,6 +134,10 @@ def main() -> None:
         SELECT
             {args.year} AS year,
             COUNT(*) AS total_institutions,
+            COUNT(*) FILTER (WHERE author_count > 0) AS institutions_with_authors,
+            COUNT(*) FILTER (WHERE pre_period_papers >= {min_pubs}) AS institutions_passing_pub_threshold,
+            COUNT(*) FILTER (WHERE pre_period_papers < {min_pubs} AND connect_year IS NOT NULL)
+                AS connected_below_pub_threshold,
             COUNT(*) FILTER (WHERE author_count >= 100) AS institutions_with_100_plus_authors,
             SUM(author_count) AS total_author_institution_placements,
             (SELECT COUNT(DISTINCT i.AuthorID)
@@ -172,7 +210,10 @@ def main() -> None:
             institution_id,
             institution_name,
             country_code,
+            pre_period_papers,
+            connect_year,
             author_count,
+            paper_count,
             SUM(author_count) OVER (
                 ORDER BY rank ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
             ) AS cumulative_author_institution_placements,
@@ -192,7 +233,10 @@ def main() -> None:
             institution_id,
             institution_name,
             country_code,
-            author_count
+            pre_period_papers,
+            connect_year,
+            author_count,
+            paper_count
         FROM ranked
         WHERE rank <= 20
         ORDER BY rank
@@ -201,8 +245,19 @@ def main() -> None:
 
     out = {
         "year": args.year,
-        "scope": "institutions exported in the Institution candidates browser",
-        "selected_institutions": selected,
+        "scope": "BitNet event-study exposure frame",
+        "frame": {
+            "network": network,
+            "min_pubs": min_pubs,
+            "pre_start": pre_start,
+            "pre_end": pre_end,
+            "source": str(args.exposure_frame.relative_to(ROOT)),
+            "definition": (
+                f"institutions with at least {min_pubs:,} distinct pre-period "
+                f"papers in {pre_start}-{pre_end}, plus BitNet-connected "
+                "institutions with any pre-period output"
+            ),
+        },
         "stats": stats,
         "histogram": [dict(zip(hist_cols, row)) for row in histogram],
         "institutions": [dict(zip(cum_cols, row)) for row in cumulative],
@@ -213,6 +268,10 @@ def main() -> None:
             "counting": (
                 "An author attached to two institutions in the same year counts "
                 "once for each institution."
+            ),
+            "denominator": (
+                "The cumulative chart sums to 100% over the event-study frame, "
+                "not only over the institutions exported for browsing."
             ),
         },
     }

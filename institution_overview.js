@@ -19,10 +19,11 @@ function shortName(d) {
 
 function summaryHtml(data) {
   const s = data.stats;
+  const f = data.frame || {};
   return `
     <div class="summary-primary">
       <strong>${fmtInt(s.total_institutions)}</strong>
-      <span>loaded institutions with 1980 data</span>
+      <span>institutions in the BitNet event-study frame</span>
     </div>
     <div>
       <strong>${fmtInt(s.total_author_institution_placements)}</strong>
@@ -34,7 +35,23 @@ function summaryHtml(data) {
     </div>
     <div>
       <strong>${fmtPct(s.top_5_share)}</strong>
-      <span>covered by the top 5 loaded institutions</span>
+      <span>covered by the top 5 in-frame institutions</span>
+    </div>
+    <div>
+      <strong>${fmtInt(s.institutions_passing_pub_threshold)}</strong>
+      <span>with at least ${fmtInt(f.min_pubs || 0)} pre-period papers</span>
+    </div>
+    <div>
+      <strong>${fmtInt(s.connected_below_pub_threshold)}</strong>
+      <span>connected below the publication threshold</span>
+    </div>
+    <div>
+      <strong>${fmtInt(s.institutions_with_authors)}</strong>
+      <span>with at least one 1980 author</span>
+    </div>
+    <div>
+      <strong>${escapeHtml(`${f.pre_start || ""}-${f.pre_end || ""}`)}</strong>
+      <span>pre-period used for the threshold</span>
     </div>
   `;
 }
@@ -50,18 +67,22 @@ function axisTicks(maxValue, steps = 4) {
 
 function barChart(data) {
   const rows = data.institutions.filter((d) => Number(d.author_count) > 0);
-  const width = 920;
+  const compact = rows.length > 80;
+  const width = compact ? Math.max(920, Math.min(1800, rows.length * 2.2 + 90)) : 920;
   const height = 420;
-  const margin = { top: 18, right: 24, bottom: 112, left: 58 };
+  const margin = { top: 18, right: 24, bottom: compact ? 54 : 112, left: 58 };
   const innerW = width - margin.left - margin.right;
   const innerH = height - margin.top - margin.bottom;
   const maxY = Math.max(...rows.map((d) => Number(d.author_count)));
   const ticks = axisTicks(maxY, 5);
   const yMax = ticks[ticks.length - 1] || maxY || 1;
-  const gap = 4;
-  const barW = Math.max(8, (innerW - gap * (rows.length - 1)) / rows.length);
+  const gap = compact ? 0.75 : 4;
+  const barW = Math.max(1, (innerW - gap * (rows.length - 1)) / rows.length);
   const y = (v) => margin.top + innerH - (Number(v) / yMax) * innerH;
   const x = (i) => margin.left + i * (barW + gap);
+  const xTicks = compact
+    ? Array.from(new Set([1, 50, 100, 250, 500, rows.length].filter((v) => v <= rows.length)))
+    : [];
 
   const grid = ticks.map((t) => `
     <g>
@@ -83,14 +104,22 @@ function barChart(data) {
       </g>
     `;
   }).join("");
+  const xRankLabels = xTicks.map((t) => `
+    <g>
+      <line x1="${x(t - 1)}" y1="${height - margin.bottom}" x2="${x(t - 1)}" y2="${height - margin.bottom + 5}" class="viz-axis" />
+      <text x="${x(t - 1)}" y="${height - margin.bottom + 22}" text-anchor="middle" class="viz-axis-label">${t}</text>
+    </g>
+  `).join("");
 
   return `
     <svg class="viz-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="Authors per loaded institution in 1980">
       ${grid}
       <line x1="${margin.left}" y1="${margin.top}" x2="${margin.left}" y2="${height - margin.bottom}" class="viz-axis" />
       <line x1="${margin.left}" y1="${height - margin.bottom}" x2="${width - margin.right}" y2="${height - margin.bottom}" class="viz-axis" />
+      ${xRankLabels}
       ${bars}
       <text x="${margin.left}" y="14" class="viz-axis-title">authors in 1980</text>
+      ${compact ? `<text x="${width / 2}" y="${height - 10}" text-anchor="middle" class="viz-axis-title">institution rank, sorted largest first</text>` : ""}
     </svg>
   `;
 }
@@ -107,7 +136,8 @@ function cumulativeChart(data) {
   const y = (share) => margin.top + innerH - Number(share) * innerH;
   const points = rows.map((d) => `${x(d.rank)},${y(d.cumulative_share)}`).join(" ");
   const yTicks = [0, 0.25, 0.5, 0.75, 1];
-  const xTicks = Array.from(new Set([1, 5, 10, 15, 20, n].filter((v) => v <= n)));
+  const xTickSeed = n > 100 ? [1, 100, 250, 500, n] : [1, 5, 10, 15, 20, n];
+  const xTicks = Array.from(new Set(xTickSeed.filter((v) => v <= n)));
 
   const grid = yTicks.map((t) => `
     <g>
@@ -136,7 +166,7 @@ function cumulativeChart(data) {
       <polyline points="${points}" class="viz-line" />
       ${dots}
       <text x="${margin.left}" y="14" class="viz-axis-title">cumulative share of placements</text>
-      <text x="${width / 2}" y="${height - 10}" text-anchor="middle" class="viz-axis-title">number of loaded universities, sorted largest first</text>
+      <text x="${width / 2}" y="${height - 10}" text-anchor="middle" class="viz-axis-title">number of in-frame universities, sorted largest first</text>
     </svg>
   `;
 }
@@ -148,12 +178,14 @@ function tableHtml(data) {
       <td>${escapeHtml(shortName(d))}</td>
       <td>${escapeHtml(d.country_code || "")}</td>
       <td>${fmtInt(d.author_count)}</td>
+      <td>${fmtInt(d.paper_count)}</td>
+      <td>${fmtInt(d.pre_period_papers)}</td>
     </tr>
   `).join("");
   return `
     <div class="table-wrap">
       <table class="data-table compact-table">
-        <thead><tr><th>Rank</th><th>Institution</th><th>Country</th><th>1980 authors</th></tr></thead>
+        <thead><tr><th>Rank</th><th>Institution</th><th>Country</th><th>1980 authors</th><th>1980 works</th><th>Pre-period works</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>
     </div>
