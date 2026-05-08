@@ -163,11 +163,32 @@ function buildDepartmentDropdown() {
   });
 }
 
-function setDepartment(key) {
-  state.department = state.data.departments.find((d) => d.dept_key === key) || state.data.departments[0];
-  $("dept-select").value = state.department.dept_key;
-  $("field-select").value = state.department.target_field || "COMP";
-  applyFilters();
+async function loadDepartment(meta) {
+  if (meta.openalex_authors) return meta;
+  const payload = await fetch(meta.data_file).then((r) => {
+    if (!r.ok) throw new Error(`Failed to load ${meta.data_file}: ${r.status}`);
+    return r.json();
+  });
+  Object.assign(meta, payload.department);
+  return meta;
+}
+
+async function setDepartment(key) {
+  const meta = state.data.departments.find((d) => d.dept_key === key) || state.data.departments[0];
+  state.department = meta;
+  $("dept-select").value = meta.dept_key;
+  $("field-select").value = meta.target_field || "COMP";
+  $("count-badge").textContent = "loading department data...";
+  $("results").innerHTML = `<div class="loader">Loading ${escapeHtml(meta.university)} - ${escapeHtml(meta.department)}...</div>`;
+  try {
+    const loaded = await loadDepartment(meta);
+    if (state.department.dept_key !== loaded.dept_key) return;
+    state.department = loaded;
+    applyFilters();
+  } catch (err) {
+    $("results").innerHTML = `<div class="empty">Failed to load department data:<br><pre>${escapeHtml(err.message)}</pre></div>`;
+    console.error(err);
+  }
 }
 
 function summaryHtml(d) {
@@ -397,7 +418,7 @@ async function init() {
     $("min-prob").value = Number(data.defaults.field_probability).toFixed(2);
     buildDepartmentDropdown();
     attachEvents();
-    setDepartment(data.departments[0].dept_key);
+    await setDepartment(data.departments[0].dept_key);
   } catch (err) {
     $("results").innerHTML = `<div class="empty">Failed to load department data:<br><pre>${escapeHtml(err.message)}</pre></div>`;
     console.error(err);

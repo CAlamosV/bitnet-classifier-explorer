@@ -686,8 +686,31 @@ def main() -> None:
     args = parse_args()
     data = build_data(args)
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(data, ensure_ascii=True, separators=(",", ":")))
+    dept_dir = args.output.parent / "departments"
+    dept_dir.mkdir(parents=True, exist_ok=True)
+
+    metadata_departments = []
+    for dept in data["departments"]:
+        key = dept["dept_key"]
+        file_name = f"{key}.json"
+        dept_payload = {
+            "built_from": data["built_from"],
+            "defaults": data["defaults"],
+            "department": dept,
+        }
+        (dept_dir / file_name).write_text(
+            json.dumps(dept_payload, ensure_ascii=True, separators=(",", ":"))
+        )
+        meta = dict(dept)
+        meta.pop("openalex_authors", None)
+        meta["data_file"] = f"departments/{file_name}"
+        metadata_departments.append(meta)
+
+    metadata = dict(data)
+    metadata["departments"] = metadata_departments
+    args.output.write_text(json.dumps(metadata, ensure_ascii=True, separators=(",", ":")))
     print(f"Wrote {args.output}")
+    print(f"Wrote per-department data to {dept_dir}")
     print(
         "Departments: "
         + ", ".join(d["dept_key"] for d in data["departments"])
