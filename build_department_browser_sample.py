@@ -122,6 +122,8 @@ def build_data(args: argparse.Namespace) -> dict[str, Any]:
     audit_status = ROOT / "data" / "intermediate" / "faculty_rosters" / "department_audit_research_person_status.csv"
     audit_summary = ROOT / "data" / "intermediate" / "faculty_rosters" / "department_audit_slice_summary.csv"
     matches = ROOT / "data" / "intermediate" / "faculty_rosters" / "bleemer_openalex_matches_full.csv"
+    raw_roster = ROOT / "data" / "raw" / "faculty_rosters" / "bleemer_faculty_panel.parquet"
+    cluster_map = ROOT / "data" / "intermediate" / "faculty_rosters" / "bleemer_person_cluster_map_1940_2000.parquet"
 
     dept_values = ",\n".join(
         "('{key}', '{university}', '{department}', {year}, '{institution_id}', "
@@ -181,6 +183,9 @@ def build_data(args: argparse.Namespace) -> dict[str, Any]:
             a.found_in_openalex_after_hard_search,
             a.hard_search_source,
             a.matched_author_id,
+            coalesce(p.dept_years, 0) AS years_in_selected_department,
+            p.dept_min_year AS selected_department_min_year,
+            p.dept_max_year AS selected_department_max_year,
             coalesce(nullif(a.automatic_display_name, ''),
                      nullif(a.api_display_name, ''),
                      nullif(a.local_display_name, '')) AS matched_display_name,
@@ -190,7 +195,23 @@ def build_data(args: argparse.Namespace) -> dict[str, Any]:
         JOIN audit_status a
           ON d.university = a.university
          AND d.department = a.audit_department
-         AND d.audit_year = a.audit_year;
+         AND d.audit_year = a.audit_year
+        LEFT JOIN (
+            SELECT
+                p.university,
+                cm.bleemer_person_cluster_id,
+                p.department,
+                COUNT(DISTINCT p.year) AS dept_years,
+                MIN(p.year) AS dept_min_year,
+                MAX(p.year) AS dept_max_year
+            FROM read_parquet('{_pq(raw_roster)}') p
+            JOIN read_parquet('{_pq(cluster_map)}') cm
+              ON p.faculty_uid = cm.faculty_uid
+            GROUP BY p.university, cm.bleemer_person_cluster_id, p.department
+        ) p
+          ON a.university = p.university
+         AND a.bleemer_person_cluster_id = p.bleemer_person_cluster_id
+         AND a.audit_department = p.department;
 
         CREATE OR REPLACE TEMP TABLE dept_author_map AS
         SELECT
@@ -765,6 +786,7 @@ def build_data(args: argparse.Namespace) -> dict[str, Any]:
         "defaults": {
             "min_papers": 5,
             "field_probability": 0.5,
+            "min_roster_department_years": 1,
         },
         "departments": departments,
     }

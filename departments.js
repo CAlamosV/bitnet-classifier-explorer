@@ -129,6 +129,7 @@ function currentFilterParams() {
   return {
     minPapers: Number($("min-papers").value || 0),
     minProb: Number($("min-prob").value || 0),
+    minRosterYears: Number($("min-roster-years").value || 1),
     thresholdField: $("field-select").value,
     statuses: new Set(selectedStatuses()),
   };
@@ -146,10 +147,13 @@ function currentSummary(d) {
   const rows = state.filteredOpenAlex || [];
   const params = currentFilterParams();
   const rosterRows = d.bleemer_roster || [];
+  const rosterRowsCurrent = rosterRows.filter((r) => Number(r.years_in_selected_department || 0) >= params.minRosterYears);
   const rosterTotal = rosterRows.length;
-  const rosterMatched = rosterRows.filter((r) => r.matched_author_id).length;
-  const rosterPass = rosterRows.filter((r) => passesAuthorFilters(r.openalex_profile, params)).length;
-  const rosterNotPass = Math.max(0, rosterTotal - rosterPass);
+  const rosterCurrentTotal = rosterRowsCurrent.length;
+  const rosterExcludedYears = Math.max(0, rosterTotal - rosterCurrentTotal);
+  const rosterMatched = rosterRowsCurrent.filter((r) => r.matched_author_id).length;
+  const rosterPass = rosterRowsCurrent.filter((r) => passesAuthorFilters(r.openalex_profile, params)).length;
+  const rosterNotPass = Math.max(0, rosterCurrentTotal - rosterPass);
   const statusCount = (status) => rows.filter((r) => (r.bleemer_status || "not_in_bleemer") === status).length;
   const inDept = statusCount("department_roster");
   const sameDeptOtherYear = statusCount("same_department_other_year");
@@ -158,6 +162,8 @@ function currentSummary(d) {
   return {
     rows,
     rosterTotal,
+    rosterCurrentTotal,
+    rosterExcludedYears,
     rosterMatched,
     rosterPass,
     rosterNotPass,
@@ -220,11 +226,13 @@ function summaryHtml(d) {
         <h2>${escapeHtml(d.university)} - ${escapeHtml(d.department)}, ${d.audit_year}</h2>
         <p>
           Faculty roster: ${fmtInt(s.rosterTotal)} people; ${fmtInt(s.rosterMatched)} have an OpenAlex match in the manual audit.
-          The counts below update with the current filters.
+          The counts below update with the current filters, including the minimum-years roster filter.
         </p>
       </div>
       <div class="summary-grid">
-        <div><strong>${fmtInt(s.rosterPass)}</strong><span>roster people passing filters (${fmtPct(s.rosterPass / Math.max(1, s.rosterTotal))})</span></div>
+        <div><strong>${fmtInt(s.rosterCurrentTotal)}</strong><span>roster people after min-years filter</span></div>
+        <div><strong>${fmtInt(s.rosterExcludedYears)}</strong><span>roster people excluded by min-years filter</span></div>
+        <div><strong>${fmtInt(s.rosterPass)}</strong><span>roster people passing OpenAlex filters (${fmtPct(s.rosterPass / Math.max(1, s.rosterCurrentTotal))})</span></div>
         <div><strong>${fmtInt(s.rosterNotPass)}</strong><span>roster people not passing filters or unmatched</span></div>
         <div><strong>${fmtInt(s.rows.length)}</strong><span>OpenAlex authors passing filters</span></div>
         <div><strong>${fmtInt(s.inDept)}</strong><span>also in this department roster (${fmtPct(s.inDept / Math.max(1, s.rows.length))})</span></div>
@@ -248,7 +256,9 @@ function sourceNoteHtml(d) {
 
 function rosterTableHtml(rows) {
   const thresholdField = $("field-select").value;
-  const body = rows.map((r) => {
+  const params = currentFilterParams();
+  const visibleRows = rows.filter((r) => Number(r.years_in_selected_department || 0) >= params.minRosterYears);
+  const body = visibleRows.map((r) => {
     const status = r.audit_status || "";
     const a = r.openalex_profile;
     const pass = passesAuthorFilters(a, currentFilterParams());
@@ -264,6 +274,7 @@ function rosterTableHtml(rows) {
         <td>
           <div class="table-title">${escapeHtml(r.bleemer_name)}</div>
           <div class="table-sub">${r.is_research_role ? "research" : "other"}</div>
+          <div class="table-sub">${fmtInt(r.years_in_selected_department)} years in selected department${r.selected_department_min_year ? ` (${r.selected_department_min_year}-${r.selected_department_max_year})` : ""}</div>
         </td>
         <td>${escapeHtml(r.audit_position_label || "")}</td>
         <td class="dept-cell">${escapeHtml(r.cluster_departments || "")}</td>
@@ -278,7 +289,7 @@ function rosterTableHtml(rows) {
   return `
     <section class="browser-panel">
       <h3>Faculty roster for this department-year</h3>
-      <p class="panel-note">Course-catalog roster data. The match column reflects the manual audit against OpenAlex authors.</p>
+      <p class="panel-note">Course-catalog roster data. The table applies the minimum-years roster filter, currently showing ${fmtInt(visibleRows.length)} of ${fmtInt(rows.length)} people.</p>
       <div class="table-wrap">
         <table class="data-table roster-table">
           <thead>
@@ -419,7 +430,7 @@ function render() {
 
 function attachEvents() {
   $("dept-select").addEventListener("change", () => setDepartment($("dept-select").value));
-  ["field-select", "min-papers", "min-prob", "sort-by", "text-search"].forEach((id) => {
+  ["field-select", "min-papers", "min-prob", "min-roster-years", "sort-by", "text-search"].forEach((id) => {
     $(id).addEventListener("input", applyFilters);
   });
   document.querySelectorAll(".status-filter").forEach((el) => el.addEventListener("change", applyFilters));
@@ -427,6 +438,7 @@ function attachEvents() {
     e.preventDefault();
     $("min-papers").value = state.data.defaults.min_papers;
     $("min-prob").value = Number(state.data.defaults.field_probability).toFixed(2);
+    $("min-roster-years").value = state.data.defaults.min_roster_department_years || 1;
     $("sort-by").value = "field_desc";
     $("text-search").value = "";
     document.querySelectorAll(".status-filter").forEach((el) => { el.checked = true; });
@@ -445,6 +457,7 @@ async function init() {
     state.taxonomy = taxonomy;
     $("min-papers").value = data.defaults.min_papers;
     $("min-prob").value = Number(data.defaults.field_probability).toFixed(2);
+    $("min-roster-years").value = data.defaults.min_roster_department_years || 1;
     buildDepartmentDropdown();
     attachEvents();
     await setDepartment(data.departments[0].dept_key);
