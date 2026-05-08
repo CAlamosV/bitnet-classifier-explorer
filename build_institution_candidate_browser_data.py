@@ -37,6 +37,12 @@ SCHOOLS = [
     {"key": "howard", "name": "Howard University", "institution_id": "I137853757"},
     {"key": "pomona", "name": "Pomona College", "institution_id": "I177881444"},
     {"key": "reed", "name": "Reed College", "institution_id": "I55486353"},
+    {"key": "lehigh", "name": "Lehigh University", "institution_id": "I186143895"},
+    {"key": "clemson", "name": "Clemson University", "institution_id": "I8078737"},
+    {"key": "ndsu", "name": "North Dakota State University", "institution_id": "I57328836"},
+    {"key": "williams", "name": "Williams College", "institution_id": "I22675022"},
+    {"key": "oberlin", "name": "Oberlin College", "institution_id": "I70571728"},
+    {"key": "lmu", "name": "Loyola Marymount University", "institution_id": "I35566140"},
 ]
 
 

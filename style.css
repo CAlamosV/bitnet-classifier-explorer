@@ -226,6 +226,63 @@ body.home {
 .bucket-bars .bar-val { width: 4.2em; }
 .bar-count { color: var(--muted); font-size: 0.82em; white-space: nowrap; }
 .chart-note { font-size: 0.85rem; color: var(--muted); margin: 0.9rem 0 0; }
+.concentration-charts { grid-template-columns: 1fr; }
+.chart-wide { overflow: hidden; }
+.viz-frame {
+  width: 100%;
+  overflow-x: auto;
+}
+.viz-svg {
+  width: 100%;
+  min-width: 680px;
+  height: auto;
+  display: block;
+}
+.viz-axis,
+.viz-grid {
+  stroke: #d9dee4;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+.viz-axis { stroke: #89939e; }
+.viz-axis-label {
+  fill: var(--muted);
+  font-size: 12px;
+}
+.viz-axis-title {
+  fill: #444;
+  font-size: 12px;
+  font-weight: 600;
+}
+.viz-x-label {
+  fill: #555;
+  font-size: 11px;
+  text-anchor: start;
+}
+.viz-bar {
+  fill: var(--accent);
+}
+.viz-bar:hover {
+  fill: #1d4a82;
+}
+.viz-line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 3;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.viz-dot {
+  fill: #fff;
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+.compact-table {
+  min-width: 0;
+}
+.concentration-table-card {
+  margin-top: 1rem;
+}
 
 .cta {
   display: inline-block; background: var(--accent); color: #fff;
