@@ -41,8 +41,7 @@ function subfieldLabel(code) {
 
 function institutionLabel(u) {
   if (!u) return "";
-  const suffix = [u.country_code, u.institution_id].filter(Boolean).join(", ");
-  return suffix ? `${u.name} (${suffix})` : u.name;
+  return u.name || "";
 }
 
 function authorUrl(authorId) {
@@ -214,11 +213,12 @@ function yearMeta() {
 function buildDropdowns() {
   state.institutionValues.clear();
   const instOptions = institutionOptions().map((u) => {
-    const label = institutionLabel(u);
-    state.institutionValues.set(label, u);
-    return `<option value="${escapeHtml(label)}"></option>`;
+    const value = u.institution_id || u.key || u.name;
+    state.institutionValues.set(value, u);
+    state.institutionValues.set(institutionLabel(u), u);
+    return `<option value="${escapeHtml(value)}">${escapeHtml(institutionLabel(u))}</option>`;
   });
-  $("university-options").innerHTML = instOptions.join("");
+  $("university-input").innerHTML = instOptions.join("");
   $("year-options").innerHTML = (state.meta.years || []).map((y) =>
     `<option value="${escapeHtml(y)}"></option>`
   ).join("");
@@ -236,7 +236,7 @@ function buildDropdowns() {
   const defaultInst = institutionOptions().find((u) =>
     u.key === defaults.university_key || u.institution_id === defaults.institution_id
   ) || institutionOptions()[0];
-  $("university-input").value = institutionLabel(defaultInst);
+  $("university-input").value = defaultInst?.institution_id || defaultInst?.key || defaultInst?.name || "";
   $("year-input").value = String(defaults.year);
   $("field-input").value = fieldLabel(defaults.field);
   $("min-works").value = defaults.min_works;
@@ -439,7 +439,6 @@ function debounceLoad() {
 }
 
 function attachEvents() {
-  $("university-input").addEventListener("input", debounceLoad);
   $("university-input").addEventListener("change", loadSelectedYear);
   $("year-input").addEventListener("input", debounceLoad);
   $("year-input").addEventListener("change", loadSelectedYear);
@@ -452,7 +451,7 @@ function attachEvents() {
     const defaultInst = institutionOptions().find((u) =>
       u.key === defaults.university_key || u.institution_id === defaults.institution_id
     ) || institutionOptions()[0];
-    $("university-input").value = institutionLabel(defaultInst);
+    $("university-input").value = defaultInst?.institution_id || defaultInst?.key || defaultInst?.name || "";
     $("year-input").value = String(defaults.year);
     $("field-input").value = fieldLabel(defaults.field);
     $("min-works").value = defaults.min_works;
