@@ -54,8 +54,29 @@ function workUrl(paperId) {
 }
 
 function institutionOptions() {
-  if (Array.isArray(state.meta.institutions) && state.meta.institutions.length) {
-    return state.meta.institutions;
+  const exported = new Map();
+  for (const row of state.meta.school_years || []) {
+    const id = row.institution_id || row.university_key;
+    if (!id || exported.has(id)) continue;
+    exported.set(id, {
+      key: row.university_key,
+      name: row.university,
+      institution_id: row.institution_id,
+      author_count: row.author_count,
+      year_min: row.year,
+      year_max: row.year,
+    });
+  }
+  for (const row of state.meta.school_years || []) {
+    const id = row.institution_id || row.university_key;
+    const current = exported.get(id);
+    if (!current) continue;
+    current.year_min = Math.min(Number(current.year_min), Number(row.year));
+    current.year_max = Math.max(Number(current.year_max), Number(row.year));
+    current.author_count = Math.max(Number(current.author_count || 0), Number(row.author_count || 0));
+  }
+  if (exported.size) {
+    return [...exported.values()].sort((a, b) => a.name.localeCompare(b.name));
   }
   return (state.meta.universities || []).map((u) => ({
     ...u,
