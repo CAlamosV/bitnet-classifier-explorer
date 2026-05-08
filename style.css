@@ -238,6 +238,9 @@ body.home {
   height: auto;
   display: block;
 }
+@media (max-width: 640px) {
+  .viz-svg { min-width: 0; }
+}
 .viz-axis,
 .viz-grid {
   stroke: #d9dee4;

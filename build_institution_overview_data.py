@@ -31,6 +31,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--exposure-frame", type=Path, default=EXPOSURE)
     parser.add_argument("--exposure-manifest", type=Path, default=EXPOSURE_MANIFEST)
     parser.add_argument("--year", type=int, default=1980)
+    parser.add_argument("--min-author-works", type=int, default=10)
     parser.add_argument("--threads", type=int, default=4)
     parser.add_argument("--memory", default="8GB")
     return parser.parse_args()
@@ -45,6 +46,12 @@ def main() -> None:
         / "paper_author_edu_imputed_1940_2000.parquet"
     )
     institution_types = args.openalex_root / "data" / "institution_types.parquet"
+    author_details = (
+        args.openalex_root
+        / "data"
+        / "sciscinet"
+        / "sciscinet_author_details.parquet"
+    )
     manifest = json.loads(args.exposure_manifest.read_text())
     diagnostics = manifest.get("diagnostics", {})
     min_pubs = int(diagnostics.get("min_pubs", 2000))
@@ -83,6 +90,23 @@ def main() -> None:
         FROM frame f
         LEFT JOIN read_parquet('{_pq(institution_types)}') t
           ON f.institution_id = t.InstitutionID;
+        DELETE FROM selected_institutions
+        WHERE pre_period_papers < {min_pubs};
+
+        CREATE OR REPLACE TEMP TABLE eligible_affiliations AS
+        SELECT
+            i.PaperID,
+            i.AuthorID,
+            i.year,
+            i.InstitutionID,
+            i.imputed
+        FROM read_parquet('{_pq(imputed)}') i
+        JOIN selected_institutions s
+          ON i.InstitutionID = s.institution_id
+        JOIN read_parquet('{_pq(author_details)}') ad
+          ON i.AuthorID = ad.authorid
+        WHERE i.year = {args.year}
+          AND COALESCE(ad.works_count, 0) >= {args.min_author_works};
 
         CREATE OR REPLACE TEMP TABLE institution_counts AS
         SELECT
@@ -98,9 +122,8 @@ def main() -> None:
             COUNT(*) FILTER (WHERE i.imputed = 0) AS raw_rows,
             COUNT(i.PaperID) AS affiliation_rows
         FROM selected_institutions s
-        LEFT JOIN read_parquet('{_pq(imputed)}') i
+        LEFT JOIN eligible_affiliations i
           ON i.InstitutionID = s.institution_id
-         AND i.year = {args.year}
         LEFT JOIN read_parquet('{_pq(institution_types)}') t
           ON s.institution_id = t.InstitutionID
         GROUP BY
@@ -136,14 +159,10 @@ def main() -> None:
             COUNT(*) AS total_institutions,
             COUNT(*) FILTER (WHERE author_count > 0) AS institutions_with_authors,
             COUNT(*) FILTER (WHERE pre_period_papers >= {min_pubs}) AS institutions_passing_pub_threshold,
-            COUNT(*) FILTER (WHERE pre_period_papers < {min_pubs} AND connect_year IS NOT NULL)
-                AS connected_below_pub_threshold,
             COUNT(*) FILTER (WHERE author_count >= 100) AS institutions_with_100_plus_authors,
             SUM(author_count) AS total_author_institution_placements,
             (SELECT COUNT(DISTINCT i.AuthorID)
-             FROM read_parquet('{_pq(imputed)}') i
-             JOIN selected_institutions s ON i.InstitutionID = s.institution_id
-             WHERE i.year = {args.year}) AS total_unique_authors,
+             FROM eligible_affiliations i) AS total_unique_authors,
             AVG(author_count) AS mean_authors_per_institution,
             MEDIAN(author_count) AS median_authors_per_institution,
             MAX(author_count) AS max_authors_per_institution,
@@ -245,17 +264,18 @@ def main() -> None:
 
     out = {
         "year": args.year,
-        "scope": "BitNet event-study exposure frame",
+        "scope": "BitNet institution publication-threshold sample",
         "frame": {
             "network": network,
             "min_pubs": min_pubs,
             "pre_start": pre_start,
             "pre_end": pre_end,
+            "min_author_works": args.min_author_works,
             "source": str(args.exposure_frame.relative_to(ROOT)),
             "definition": (
                 f"institutions with at least {min_pubs:,} distinct pre-period "
-                f"papers in {pre_start}-{pre_end}, plus BitNet-connected "
-                "institutions with any pre-period output"
+                f"papers in {pre_start}-{pre_end}; author counts include only "
+                f"authors with at least {args.min_author_works:,} OpenAlex works"
             ),
         },
         "stats": stats,
@@ -270,7 +290,7 @@ def main() -> None:
                 "once for each institution."
             ),
             "denominator": (
-                "The cumulative chart sums to 100% over the event-study frame, "
+                "The cumulative chart sums to 100% over this institution sample, "
                 "not only over the institutions exported for browsing."
             ),
         },

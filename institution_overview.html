@@ -86,16 +86,18 @@
   <section class="metrics" id="institution-concentration">
     <h2>Where authors are concentrated in 1980</h2>
     <p>
-      These charts use the BitNet event-study institution frame: universities
-      with enough pre-period publication activity to enter the exposure frame,
-      plus connected institutions with any pre-period output. We count distinct
-      authors attached to each institution in 1980. If an author is attached to
-      two in-frame institutions in 1980, they count once for each institution.
+      These charts use the institution sample that clears the publication
+      threshold used in the codebase. We count distinct authors attached to each
+      institution in 1980, keeping only authors with at least 10 OpenAlex
+      publications. If an author is attached to two sample institutions in
+      1980, they count once for each institution. In the broader institution
+      frame used elsewhere in the codebase, the publication-count screen is
+      based on pre-1969 publications.
     </p>
     <div id="institution-concentration-summary" class="summary-grid summary-grid-compact"></div>
     <div class="charts concentration-charts">
       <div class="chart-card chart-wide">
-        <h3>Authors per event-study institution</h3>
+        <h3>Authors per institution</h3>
         <p class="chart-sub">Linear scale, sorted by number of 1980 authors.</p>
         <div id="institution-bars" class="viz-frame">
           <div class="loader">Loading 1980 concentration data...</div>
@@ -103,14 +105,14 @@
       </div>
       <div class="chart-card chart-wide">
         <h3>Cumulative share by number of universities</h3>
-        <p class="chart-sub">Share of in-frame author placements covered by the top N universities.</p>
+        <p class="chart-sub">Share of sample author placements covered by the top N universities.</p>
         <div id="institution-cumulative" class="viz-frame">
           <div class="loader">Loading 1980 concentration data...</div>
         </div>
       </div>
     </div>
     <div class="chart-card concentration-table-card">
-      <h3>Largest event-study institutions in 1980</h3>
+      <h3>Largest institutions in 1980</h3>
       <div id="institution-top-table"></div>
     </div>
   </section>

@@ -23,27 +23,23 @@ function summaryHtml(data) {
   return `
     <div class="summary-primary">
       <strong>${fmtInt(s.total_institutions)}</strong>
-      <span>institutions in the BitNet event-study frame</span>
+      <span>institutions in the sample</span>
     </div>
     <div>
       <strong>${fmtInt(s.total_author_institution_placements)}</strong>
-      <span>author-institution placements</span>
+      <span>author-institution placements, 10+ publication authors</span>
     </div>
     <div>
       <strong>${fmtInt(s.total_unique_authors)}</strong>
-      <span>distinct authors</span>
+      <span>distinct authors with at least ${fmtInt(f.min_author_works || 10)} publications</span>
     </div>
     <div>
       <strong>${fmtPct(s.top_5_share)}</strong>
-      <span>covered by the top 5 in-frame institutions</span>
+      <span>covered by the top 5 institutions</span>
     </div>
     <div>
       <strong>${fmtInt(s.institutions_passing_pub_threshold)}</strong>
-      <span>with at least ${fmtInt(f.min_pubs || 0)} pre-period papers</span>
-    </div>
-    <div>
-      <strong>${fmtInt(s.connected_below_pub_threshold)}</strong>
-      <span>connected below the publication threshold</span>
+      <span>clear the ${fmtInt(f.min_pubs || 0)}-paper institution threshold</span>
     </div>
     <div>
       <strong>${fmtInt(s.institutions_with_authors)}</strong>
@@ -51,7 +47,11 @@ function summaryHtml(data) {
     </div>
     <div>
       <strong>${escapeHtml(`${f.pre_start || ""}-${f.pre_end || ""}`)}</strong>
-      <span>pre-period used for the threshold</span>
+      <span>publication window used for the threshold</span>
+    </div>
+    <div>
+      <strong>${fmtPct(s.top_25_share)}</strong>
+      <span>covered by the top 25 institutions</span>
     </div>
   `;
 }
@@ -80,8 +80,9 @@ function barChart(data) {
   const barW = Math.max(1, (innerW - gap * (rows.length - 1)) / rows.length);
   const y = (v) => margin.top + innerH - (Number(v) / yMax) * innerH;
   const x = (i) => margin.left + i * (barW + gap);
+  const barTickSeed = rows.length > 300 ? [1, 100, 250, 500, rows.length] : [1, 50, 100, 200, rows.length];
   const xTicks = compact
-    ? Array.from(new Set([1, 50, 100, 250, 500, rows.length].filter((v) => v <= rows.length)))
+    ? Array.from(new Set(barTickSeed.filter((v) => v <= rows.length)))
     : [];
 
   const grid = ticks.map((t) => `
@@ -112,7 +113,7 @@ function barChart(data) {
   `).join("");
 
   return `
-    <svg class="viz-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="Authors per loaded institution in 1980">
+    <svg class="viz-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="Authors per institution in 1980">
       ${grid}
       <line x1="${margin.left}" y1="${margin.top}" x2="${margin.left}" y2="${height - margin.bottom}" class="viz-axis" />
       <line x1="${margin.left}" y1="${height - margin.bottom}" x2="${width - margin.right}" y2="${height - margin.bottom}" class="viz-axis" />
@@ -136,7 +137,7 @@ function cumulativeChart(data) {
   const y = (share) => margin.top + innerH - Number(share) * innerH;
   const points = rows.map((d) => `${x(d.rank)},${y(d.cumulative_share)}`).join(" ");
   const yTicks = [0, 0.25, 0.5, 0.75, 1];
-  const xTickSeed = n > 100 ? [1, 100, 250, 500, n] : [1, 5, 10, 15, 20, n];
+  const xTickSeed = n > 300 ? [1, 100, 250, 500, n] : [1, 50, 100, 200, n];
   const xTicks = Array.from(new Set(xTickSeed.filter((v) => v <= n)));
 
   const grid = yTicks.map((t) => `
@@ -158,7 +159,7 @@ function cumulativeChart(data) {
   `).join("");
 
   return `
-    <svg class="viz-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="Cumulative author share by number of loaded universities">
+    <svg class="viz-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="Cumulative author share by number of universities">
       ${grid}
       <line x1="${margin.left}" y1="${margin.top}" x2="${margin.left}" y2="${height - margin.bottom}" class="viz-axis" />
       <line x1="${margin.left}" y1="${height - margin.bottom}" x2="${width - margin.right}" y2="${height - margin.bottom}" class="viz-axis" />
@@ -166,7 +167,7 @@ function cumulativeChart(data) {
       <polyline points="${points}" class="viz-line" />
       ${dots}
       <text x="${margin.left}" y="14" class="viz-axis-title">cumulative share of placements</text>
-      <text x="${width / 2}" y="${height - 10}" text-anchor="middle" class="viz-axis-title">number of in-frame universities, sorted largest first</text>
+      <text x="${width / 2}" y="${height - 10}" text-anchor="middle" class="viz-axis-title">number of sample institutions, sorted largest first</text>
     </svg>
   `;
 }
