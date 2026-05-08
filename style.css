@@ -243,3 +243,114 @@ body.home {
   font-size: 0.85rem; color: var(--muted);
 }
 .home-footer code { background: var(--pill); padding: 0 4px; border-radius: 2px; }
+
+/* ==== Department browser ========================================== */
+.dept-summary {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
+}
+.dept-summary h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1.05rem;
+}
+.dept-summary p {
+  margin: 0;
+  color: #444;
+}
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(110px, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.85rem;
+}
+.summary-grid div {
+  background: #f7f8fa;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 0.55rem 0.65rem;
+}
+.summary-grid strong {
+  display: block;
+  font-size: 1.15rem;
+  line-height: 1.2;
+}
+.summary-grid span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+}
+.browser-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+.browser-panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1rem;
+}
+.browser-panel h3 {
+  margin: 0 0 0.15rem;
+  font-size: 1rem;
+}
+.panel-note {
+  color: var(--muted);
+  font-size: 12px;
+  margin: 0 0 0.75rem;
+}
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+}
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.data-table th,
+.data-table td {
+  padding: 0.45rem 0.55rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+}
+.data-table th {
+  background: #f4f6f8;
+  color: #444;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.data-table tr:last-child td { border-bottom: 0; }
+.table-title {
+  font-weight: 600;
+  color: #2d2d2d;
+}
+.table-sub {
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 0.08rem;
+}
+.status-badge {
+  display: inline-block;
+  padding: 0.12rem 0.45rem;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.status-good { background: #e6f3e8; color: var(--good); }
+.status-warn { background: #fff4d6; color: #8a6500; }
+.status-muted { background: var(--pill); color: #566; }
+
+@media (max-width: 900px) {
+  .summary-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 520px) {
+  .summary-grid { grid-template-columns: 1fr; }
+  .data-table { font-size: 11px; }
+}

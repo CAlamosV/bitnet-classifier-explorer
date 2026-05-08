@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Institution affiliation imputation - overview</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body class="home">
+<header class="home-header">
+  <h1>Assigning authors to institutions</h1>
+  <nav>
+    <a href="index.html">Paper overview</a>
+    <a href="explorer.html">Paper explorer</a>
+    <a href="author_overview.html">Author overview</a>
+    <a href="authors.html">Author explorer</a>
+    <a class="active" href="institution_overview.html">Institution overview</a>
+    <a href="departments.html">Department browser</a>
+  </nav>
+</header>
+
+<main class="home-main">
+  <section class="hero">
+    <p class="lede">
+      We assign institutions at the <strong>paper-author level</strong>: for a
+      given paper, author A can be attached to Berkeley while author B is
+      attached to Stanford if the underlying authorship data records those
+      affiliations separately. The file is not an all-paper-institutions-to-all-authors
+      expansion.
+    </p>
+  </section>
+
+  <section class="metrics">
+    <h2>How well does it work?</h2>
+    <p>
+      We validate the author-institution file against Bleemer faculty rosters
+      for Stanford, UC Berkeley, UC Davis, and UCLA. The main check asks:
+      when Bleemer says a matched person is at one of these schools in a
+      stable year, does the paper-author affiliation include that school?
+    </p>
+    <div class="charts">
+      <div class="chart-card">
+        <h3>Conservative validation rows</h3>
+        <p class="chart-sub">Stable person-years in the four-school faculty panel.</p>
+        <div class="bars">
+          <div class="bar-row">
+            <span class="bar-label">Correct school</span>
+            <span class="bar"><span class="fill ours" style="width: 89.0%"></span></span>
+            <span class="bar-val">89%</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">Other school</span>
+            <span class="bar"><span class="fill baseline" style="width: 0.4%"></span></span>
+            <span class="bar-val">0.4%</span>
+          </div>
+        </div>
+        <p class="chart-note">
+          This is the original imputed affiliation file. We tested broader
+          home-institution rules, but keep this more conservative version for now.
+        </p>
+      </div>
+      <div class="chart-card">
+        <h3>Multi-school coauthor stress test</h3>
+        <p class="chart-sub">Papers with matched authors from different validation schools.</p>
+        <div class="bars">
+          <div class="bar-row">
+            <span class="bar-label">Correct school</span>
+            <span class="bar"><span class="fill ours" style="width: 71.7%"></span></span>
+            <span class="bar-val">72%</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">Coauthor school</span>
+            <span class="bar"><span class="fill baseline" style="width: 12.7%"></span></span>
+            <span class="bar-val">13%</span>
+          </div>
+        </div>
+        <p class="chart-note">
+          This is deliberately hard: it directly tests whether a Stanford-Berkeley
+          paper assigns each school to the correct author.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="how">
+    <h2>How the institution file is built</h2>
+    <p>
+      We start from SciSciNet/OpenAlex paper-author-institution rows and keep
+      only institutions whose OpenAlex type is <code>education</code>. The goal
+      is a university/college affiliation file for publication analysis, not a
+      complete employer-history file.
+    </p>
+    <p>
+      For each <code>PaperID, AuthorID</code> slot, if the raw data lists
+      multiple education institutions, we keep the one that appears most often
+      in that author's publication history. This produces at most one education
+      institution per author on a paper.
+    </p>
+    <p>
+      Missing paper-author affiliations are filled conservatively. First, we
+      look one year before and one year after the publication year and fill only
+      when the nearest observations on both sides agree. Remaining gaps are
+      filled only when the same institution appears before and after the gap in
+      the author's observed career. We do not use the wider ten-year home-institution
+      rule for the main website data.
+    </p>
+  </section>
+
+  <section class="how">
+    <h2>How to read it</h2>
+    <p>
+      The file is useful for asking where authors appear to be publishing from
+      in a given paper-year. It is not a personnel roster. It can miss campus
+      labels when OpenAlex records a parent system, medical campus, or older
+      institution name, and it can be noisy for authors with common names or
+      genuine multi-institution careers.
+    </p>
+    <p>
+      The <a href="departments.html">department browser</a> gives a concrete
+      way to inspect this. It compares six manually audited 1985 Bleemer
+      department rosters against OpenAlex authors assigned to the same school
+      and year, with adjustable publication-count and field-probability thresholds.
+    </p>
+  </section>
+</main>
+
+<footer class="home-footer">
+  <p>Cristian&nbsp;Alamos and Lukas&nbsp;Althoff. Built for the BitNet
+     internet-and-science project. Source code in the <code>bitnet</code>
+     repository.</p>
+</footer>
+</body>
+</html>

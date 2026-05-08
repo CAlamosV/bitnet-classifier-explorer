@@ -5,6 +5,9 @@ from the deployed model. Paper cards show model predictions beside LLM
 labels when available. Author cards show OpenAlex AuthorIDs with at
 least one paper in the 14.6M e5-frame, their career field/subfield
 aggregates, representative papers, and LLM judge labels when available.
+The institution pages describe the original paper-author affiliation
+imputation and compare audited Bleemer department rosters with OpenAlex
+authors assigned to the same school-year.
 
 ## Live
 
@@ -26,13 +29,16 @@ python3 -m http.server 8000
 
 ## Files
 
-- `index.html` — paper-level overview.
-- `author_overview.html` — author-level overview.
-- `style.css` / `app.js` — static web UI.
-- `authors.html` / `authors.js` — author-level browser.
-- `papers.json` — the sampled records (~11 MB, 7k papers).
-- `authors.json` — sampled author records for the author browser.
-- `taxonomy.json` — code → human-readable name for the 30 fields and
+- `index.html` - paper-level overview.
+- `author_overview.html` - author-level overview.
+- `institution_overview.html` - institution-affiliation overview.
+- `departments.html` / `departments.js` - department roster browser.
+- `style.css` / `app.js` - static web UI.
+- `authors.html` / `authors.js` - author-level browser.
+- `papers.json` - the sampled records (~11 MB, 7k papers).
+- `authors.json` - sampled author records for the author browser.
+- `departments.json` - six audited 1985 department-year slices.
+- `taxonomy.json` - code to human-readable name for the 30 fields and
   304 subfields.
 
 ## Sample composition
@@ -64,4 +70,10 @@ and optional LLM labels:
 python3 build_author_explorer_sample.py \
   --sample /scratch/users/alamos/oafc/data/author_preds/author_eval_sample.parquet \
   --labels /scratch/users/alamos/oafc/data/author_preds/author_eval_labels.parquet
+```
+
+The department browser is local-data only:
+
+```bash
+python3 tools/classifier_explorer/build_department_browser_sample.py
 ```
