@@ -104,7 +104,7 @@ function institutionHtml(a) {
 function metricsHtml(a) {
   if (!a) return "";
   const items = [
-    ["e5 pubs", a.n_papers],
+    ["sample pubs", a.n_papers],
     ["OpenAlex works", a.openalex_works_count],
     ["citations", a.openalex_cited_by_count],
     ["h-index", a.sciscinet_h_index],
