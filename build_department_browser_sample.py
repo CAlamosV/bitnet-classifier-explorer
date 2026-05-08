@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[2]
 OPENALEX_ROOT = Path(
     "/Users/alamos/US Inequality Dropbox/US Inequality Team Folder/OpenAlex"
 )
+OAFC_ROOT = OPENALEX_ROOT / "code" / "field_classification"
 OUT = ROOT / "tools" / "classifier_explorer" / "departments.json"
 
 SCHOOL_IDS = {
@@ -29,8 +30,8 @@ AUDIT_DEPARTMENTS = [
         "university": "UC Berkeley",
         "department": "Electrical Engineering and Computer Science",
         "year": 1985,
-        "target_field": "COMP_ENGG",
-        "target_label": "Computer Science or Engineering",
+        "target_field": "COMP",
+        "target_label": "Computer Science",
     },
     {
         "key": "stanford-cs-1985",
@@ -69,8 +70,8 @@ AUDIT_DEPARTMENTS = [
         "university": "UC Davis",
         "department": "Electrical and Computer Engineering",
         "year": 1985,
-        "target_field": "COMP_ENGG",
-        "target_label": "Computer Science or Engineering",
+        "target_field": "ENGG",
+        "target_label": "Engineering",
     },
 ]
 
@@ -82,6 +83,7 @@ def _pq(path: Path | str) -> str:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--openalex-root", type=Path, default=OPENALEX_ROOT)
+    parser.add_argument("--oafc-root", type=Path, default=OAFC_ROOT)
     parser.add_argument("--output", type=Path, default=OUT)
     parser.add_argument("--threads", type=int, default=4)
     parser.add_argument("--memory", default="8GB")
@@ -112,7 +114,11 @@ def build_data(args: argparse.Namespace) -> dict[str, Any]:
     imputed = args.openalex_root / "data" / "imputed" / "paper_author_edu_imputed_1940_2000.parquet"
     authors = args.openalex_root / "data" / "sciscinet" / "sciscinet_authors.parquet"
     author_details = args.openalex_root / "data" / "sciscinet" / "sciscinet_author_details.parquet"
+    affiliations = args.openalex_root / "data" / "sciscinet" / "sciscinet_affiliations.parquet"
     fields = ROOT / "data" / "intermediate" / "scinet" / "author_preds" / "author_field_career.parquet"
+    paper_text = args.oafc_root / "data" / "intermediate" / "scinet" / "oafc_text_full.parquet"
+    field_preds = args.oafc_root / "data" / "intermediate" / "scinet" / "preds_e5_v1v2" / "preds_*.parquet"
+    subfield_preds = args.oafc_root / "data" / "intermediate" / "scinet" / "preds_subfield_v1" / "preds_*.parquet"
     audit_status = ROOT / "data" / "intermediate" / "faculty_rosters" / "department_audit_research_person_status.csv"
     audit_summary = ROOT / "data" / "intermediate" / "faculty_rosters" / "department_audit_slice_summary.csv"
     matches = ROOT / "data" / "intermediate" / "faculty_rosters" / "bleemer_openalex_matches_full.csv"
@@ -199,6 +205,34 @@ def build_data(args: argparse.Namespace) -> dict[str, Any]:
           AND matched_author_id != ''
         GROUP BY dept_key, matched_author_id;
 
+        CREATE OR REPLACE TEMP TABLE same_dept_other_year_map AS
+        SELECT
+            d.dept_key,
+            m.author_id AS AuthorID,
+            string_agg(DISTINCT m.bleemer_name, ' | ' ORDER BY m.bleemer_name)
+                AS same_department_names,
+            string_agg(DISTINCT m.position_label, ' | ' ORDER BY m.position_label)
+                AS same_department_positions,
+            string_agg(
+                DISTINCT CAST(m.bleemer_min_year AS VARCHAR) || '-' ||
+                         CAST(m.bleemer_max_year AS VARCHAR),
+                ' | ' ORDER BY CAST(m.bleemer_min_year AS VARCHAR) || '-' ||
+                             CAST(m.bleemer_max_year AS VARCHAR)
+            ) AS same_department_year_ranges,
+            MIN(CAST(m.bleemer_min_year AS INTEGER)) AS same_department_min_year,
+            MAX(CAST(m.bleemer_max_year AS INTEGER)) AS same_department_max_year
+        FROM depts d
+        JOIN read_csv_auto('{_pq(matches)}') m
+          ON d.university = m.university
+         AND (
+                m.department = d.department
+             OR contains(m.department, d.department)
+             OR contains(d.department, m.department)
+         )
+         AND NOT d.audit_year BETWEEN CAST(m.bleemer_min_year AS INTEGER)
+                                  AND CAST(m.bleemer_max_year AS INTEGER)
+        GROUP BY d.dept_key, m.author_id;
+
         CREATE OR REPLACE TEMP TABLE university_roster_map AS
         SELECT
             d.dept_key,
@@ -207,13 +241,26 @@ def build_data(args: argparse.Namespace) -> dict[str, Any]:
                 AS university_bleemer_names,
             string_agg(DISTINCT m.department, ' | ' ORDER BY m.department)
                 AS university_bleemer_departments,
+            string_agg(DISTINCT m.university, ' | ' ORDER BY m.university)
+                AS university_bleemer_universities,
+            string_agg(
+                DISTINCT m.university || ' - ' || m.department,
+                ' | ' ORDER BY m.university || ' - ' || m.department
+            ) AS university_bleemer_locations,
             string_agg(DISTINCT m.position_label, ' | ' ORDER BY m.position_label)
                 AS university_bleemer_positions
         FROM depts d
         JOIN read_csv_auto('{_pq(matches)}') m
-          ON d.university = m.university
-         AND d.audit_year BETWEEN CAST(m.bleemer_min_year AS INTEGER)
+          ON d.audit_year BETWEEN CAST(m.bleemer_min_year AS INTEGER)
                               AND CAST(m.bleemer_max_year AS INTEGER)
+         AND NOT (
+                d.university = m.university
+            AND (
+                   m.department = d.department
+                OR contains(m.department, d.department)
+                OR contains(d.department, m.department)
+            )
+         )
         GROUP BY d.dept_key, m.author_id;
 
         CREATE OR REPLACE TEMP TABLE author_year_inst AS
@@ -255,13 +302,21 @@ def build_data(args: argparse.Namespace) -> dict[str, Any]:
             f.field_prob_PHYS,
             CASE
                 WHEN dm.AuthorID IS NOT NULL THEN 'department_roster'
+                WHEN sd.AuthorID IS NOT NULL THEN 'same_department_other_year'
                 WHEN um.AuthorID IS NOT NULL THEN 'other_bleemer_roster'
                 ELSE 'not_in_bleemer'
             END AS bleemer_status,
             dm.bleemer_names AS department_bleemer_names,
             dm.bleemer_positions AS department_bleemer_positions,
+            sd.same_department_names,
+            sd.same_department_positions,
+            sd.same_department_year_ranges,
+            sd.same_department_min_year,
+            sd.same_department_max_year,
             um.university_bleemer_names,
             um.university_bleemer_departments,
+            um.university_bleemer_universities,
+            um.university_bleemer_locations,
             um.university_bleemer_positions
         FROM depts d
         JOIN author_year_inst a USING (dept_key)
@@ -274,9 +329,167 @@ def build_data(args: argparse.Namespace) -> dict[str, Any]:
         LEFT JOIN dept_author_map dm
           ON a.dept_key = dm.dept_key
          AND a.AuthorID = dm.AuthorID
+        LEFT JOIN same_dept_other_year_map sd
+          ON a.dept_key = sd.dept_key
+         AND a.AuthorID = sd.AuthorID
         LEFT JOIN university_roster_map um
           ON a.dept_key = um.dept_key
          AND a.AuthorID = um.AuthorID;
+
+        CREATE OR REPLACE TEMP TABLE selected_dept_authors AS
+        SELECT DISTINCT dept_key, AuthorID
+        FROM openalex_rows;
+
+        CREATE OR REPLACE TEMP TABLE selected_authors AS
+        SELECT DISTINCT AuthorID
+        FROM selected_dept_authors;
+
+        CREATE OR REPLACE TEMP TABLE selected_author_papers AS
+        SELECT
+            i.AuthorID,
+            i.PaperID,
+            MIN(CAST(i.year AS INTEGER)) AS year
+        FROM read_parquet('{_pq(imputed)}') i
+        JOIN selected_authors a USING (AuthorID)
+        GROUP BY i.AuthorID, i.PaperID;
+
+        CREATE OR REPLACE TEMP TABLE career_inst_counts AS
+        WITH counts AS (
+            SELECT
+                i.AuthorID,
+                i.InstitutionID,
+                coalesce(aff.display_name, i.InstitutionID) AS institution_name,
+                COUNT(DISTINCT i.PaperID) AS n_papers,
+                MIN(CAST(i.year AS INTEGER)) AS year_first,
+                MAX(CAST(i.year AS INTEGER)) AS year_last
+            FROM read_parquet('{_pq(imputed)}') i
+            JOIN selected_authors a USING (AuthorID)
+            LEFT JOIN read_parquet('{_pq(affiliations)}') aff
+              ON i.InstitutionID = aff.institution_id
+            GROUP BY i.AuthorID, i.InstitutionID, institution_name
+        )
+        SELECT *
+        FROM (
+            SELECT
+                *,
+                ROW_NUMBER() OVER (
+                    PARTITION BY AuthorID
+                    ORDER BY n_papers DESC, institution_name
+                ) AS rn
+            FROM counts
+        )
+        WHERE rn <= 8;
+
+        CREATE OR REPLACE TEMP TABLE author_subfield_long AS
+        SELECT sap.AuthorID, p.subfield_top1 AS subfield_code, CAST(p.sp1 AS DOUBLE) AS mass
+        FROM selected_author_papers sap
+        JOIN read_parquet('{_pq(subfield_preds)}') p ON sap.PaperID = p.paper_id
+        WHERE p.subfield_top1 IS NOT NULL AND p.sp1 IS NOT NULL AND p.sp1 > 0
+        UNION ALL
+        SELECT sap.AuthorID, p.subfield_top2 AS subfield_code, CAST(p.sp2 AS DOUBLE) AS mass
+        FROM selected_author_papers sap
+        JOIN read_parquet('{_pq(subfield_preds)}') p ON sap.PaperID = p.paper_id
+        WHERE p.subfield_top2 IS NOT NULL AND p.sp2 IS NOT NULL AND p.sp2 > 0
+        UNION ALL
+        SELECT sap.AuthorID, p.subfield_top3 AS subfield_code, CAST(p.sp3 AS DOUBLE) AS mass
+        FROM selected_author_papers sap
+        JOIN read_parquet('{_pq(subfield_preds)}') p ON sap.PaperID = p.paper_id
+        WHERE p.subfield_top3 IS NOT NULL AND p.sp3 IS NOT NULL AND p.sp3 > 0
+        UNION ALL
+        SELECT sap.AuthorID, p.subfield_top4 AS subfield_code, CAST(p.sp4 AS DOUBLE) AS mass
+        FROM selected_author_papers sap
+        JOIN read_parquet('{_pq(subfield_preds)}') p ON sap.PaperID = p.paper_id
+        WHERE p.subfield_top4 IS NOT NULL AND p.sp4 IS NOT NULL AND p.sp4 > 0
+        UNION ALL
+        SELECT sap.AuthorID, p.subfield_top5 AS subfield_code, CAST(p.sp5 AS DOUBLE) AS mass
+        FROM selected_author_papers sap
+        JOIN read_parquet('{_pq(subfield_preds)}') p ON sap.PaperID = p.paper_id
+        WHERE p.subfield_top5 IS NOT NULL AND p.sp5 IS NOT NULL AND p.sp5 > 0;
+
+        CREATE OR REPLACE TEMP TABLE author_subfield_top AS
+        WITH mass AS (
+            SELECT AuthorID, subfield_code, SUM(mass) AS mass
+            FROM author_subfield_long
+            GROUP BY AuthorID, subfield_code
+        ),
+        denom AS (
+            SELECT AuthorID, SUM(mass) AS total_mass
+            FROM mass
+            GROUP BY AuthorID
+        ),
+        ranked AS (
+            SELECT
+                m.AuthorID,
+                m.subfield_code,
+                m.mass / NULLIF(d.total_mass, 0) AS prob,
+                ROW_NUMBER() OVER (
+                    PARTITION BY m.AuthorID
+                    ORDER BY m.mass / NULLIF(d.total_mass, 0) DESC, m.subfield_code
+                ) AS rn
+            FROM mass m
+            JOIN denom d USING (AuthorID)
+            WHERE d.total_mass > 0
+        )
+        SELECT
+            AuthorID,
+            MAX(CASE WHEN rn = 1 THEN subfield_code END) AS subfield_top1,
+            MAX(CASE WHEN rn = 2 THEN subfield_code END) AS subfield_top2,
+            MAX(CASE WHEN rn = 3 THEN subfield_code END) AS subfield_top3,
+            MAX(CASE WHEN rn = 1 THEN prob END) AS sp1,
+            MAX(CASE WHEN rn = 2 THEN prob END) AS sp2,
+            MAX(CASE WHEN rn = 3 THEN prob END) AS sp3
+        FROM ranked
+        WHERE rn <= 3
+        GROUP BY AuthorID;
+
+        CREATE OR REPLACE TEMP TABLE recent_publications AS
+        WITH dept_papers AS (
+            SELECT
+                s.dept_key,
+                d.audit_year,
+                sap.AuthorID,
+                sap.PaperID,
+                sap.year,
+                fp.field_top1,
+                fp.p1 AS field_p1,
+                fp.field_top2,
+                fp.p2 AS field_p2
+            FROM selected_dept_authors s
+            JOIN depts d USING (dept_key)
+            JOIN selected_author_papers sap USING (AuthorID)
+            JOIN read_parquet('{_pq(field_preds)}') fp
+              ON sap.PaperID = fp.paper_id
+        ),
+        ranked AS (
+            SELECT
+                *,
+                ROW_NUMBER() OVER (
+                    PARTITION BY dept_key, AuthorID
+                    ORDER BY abs(year - audit_year), year DESC, PaperID
+                ) AS rn
+            FROM dept_papers
+        )
+        SELECT
+            r.dept_key,
+            r.AuthorID,
+            r.PaperID,
+            r.year,
+            coalesce(t.title, '') AS title,
+            r.field_top1,
+            r.field_p1,
+            r.field_top2,
+            r.field_p2,
+            sp.subfield_top1,
+            sp.sp1,
+            sp.subfield_top2,
+            sp.sp2,
+            r.rn
+        FROM ranked r
+        LEFT JOIN read_parquet('{_pq(paper_text)}') t
+          ON r.PaperID = t.paper_id
+        LEFT JOIN read_parquet('{_pq(subfield_preds)}') sp
+          ON r.PaperID = sp.paper_id
+        WHERE r.rn <= 5;
     """)
 
     summary_rows = con.execute("""
@@ -306,7 +519,7 @@ def build_data(args: argparse.Namespace) -> dict[str, Any]:
             ) AS default_matched_department_count,
             sum(CASE
                 WHEN o.n_papers >= 5
-                 AND coalesce(o.target_field_prob, 0) >= 0.5
+                AND coalesce(o.target_field_prob, 0) >= 0.5
                  AND o.bleemer_status = 'other_bleemer_roster'
                 THEN 1 ELSE 0 END
             ) AS default_other_roster_count
@@ -359,6 +572,26 @@ def build_data(args: argparse.Namespace) -> dict[str, Any]:
     """).fetchall()
     oa_cols = [d[0] for d in con.description]
 
+    inst_rows = con.execute("""
+        SELECT AuthorID, InstitutionID, institution_name, n_papers, year_first, year_last
+        FROM career_inst_counts
+        ORDER BY AuthorID, n_papers DESC, institution_name
+    """).fetchall()
+    inst_cols = [d[0] for d in con.description]
+
+    subfield_rows = con.execute("""
+        SELECT *
+        FROM author_subfield_top
+    """).fetchall()
+    subfield_cols = [d[0] for d in con.description]
+
+    recent_rows = con.execute("""
+        SELECT *
+        FROM recent_publications
+        ORDER BY dept_key, AuthorID, rn
+    """).fetchall()
+    recent_cols = [d[0] for d in con.description]
+
     def dicts(rows: list[tuple[Any, ...]], cols: list[str]) -> list[dict[str, Any]]:
         out = []
         for row in rows:
@@ -369,22 +602,77 @@ def build_data(args: argparse.Namespace) -> dict[str, Any]:
             out.append(item)
         return out
 
+    roster_items = dicts(roster_rows, roster_cols)
+    oa_items = dicts(oa_rows, oa_cols)
+    inst_items = dicts(inst_rows, inst_cols)
+    subfield_items = dicts(subfield_rows, subfield_cols)
+    recent_items = dicts(recent_rows, recent_cols)
+
+    inst_by_author: dict[str, list[dict[str, Any]]] = {}
+    for item in inst_items:
+        inst_by_author.setdefault(item["AuthorID"], []).append({
+            "institution_id": item["InstitutionID"],
+            "name": item["institution_name"],
+            "n_papers": item["n_papers"],
+            "year_first": item["year_first"],
+            "year_last": item["year_last"],
+        })
+
+    subfield_by_author = {
+        item["AuthorID"]: {
+            "subfield_top1": item["subfield_top1"],
+            "subfield_top2": item["subfield_top2"],
+            "subfield_top3": item["subfield_top3"],
+            "sp1": item["sp1"],
+            "sp2": item["sp2"],
+            "sp3": item["sp3"],
+        }
+        for item in subfield_items
+    }
+
+    recent_by_dept_author: dict[tuple[str, str], list[dict[str, Any]]] = {}
+    for item in recent_items:
+        recent_by_dept_author.setdefault((item["dept_key"], item["AuthorID"]), []).append({
+            "paper_id": item["PaperID"],
+            "year": item["year"],
+            "title": item["title"],
+            "field_top1": item["field_top1"],
+            "field_p1": item["field_p1"],
+            "field_top2": item["field_top2"],
+            "field_p2": item["field_p2"],
+            "subfield_top1": item["subfield_top1"],
+            "sp1": item["sp1"],
+            "subfield_top2": item["subfield_top2"],
+            "sp2": item["sp2"],
+        })
+
+    roster_by_dept: dict[str, list[dict[str, Any]]] = {}
+    for item in roster_items:
+        roster_by_dept.setdefault(item["dept_key"], []).append(item)
+
+    oa_by_dept: dict[str, list[dict[str, Any]]] = {}
+    for item in oa_items:
+        item.update(subfield_by_author.get(item["AuthorID"], {}))
+        item["career_institutions"] = inst_by_author.get(item["AuthorID"], [])
+        item["recent_publications"] = recent_by_dept_author.get(
+            (item["dept_key"], item["AuthorID"]), []
+        )
+        oa_by_dept.setdefault(item["dept_key"], []).append(item)
+
     departments = []
     for row in dicts(summary_rows, summary_cols):
         key = row["dept_key"]
-        row["bleemer_roster"] = [
-            r for r in dicts(roster_rows, roster_cols) if r["dept_key"] == key
-        ]
-        row["openalex_authors"] = [
-            r for r in dicts(oa_rows, oa_cols) if r["dept_key"] == key
-        ]
+        row["bleemer_roster"] = roster_by_dept.get(key, [])
+        row["openalex_authors"] = oa_by_dept.get(key, [])
         departments.append(row)
 
     return {
         "built_from": {
             "imputed_affiliations": "paper_author_edu_imputed_1940_2000.parquet",
             "author_fields": "author_field_career.parquet",
-            "bleemer_audit": "department_audit_research_person_status.csv",
+            "faculty_roster_audit": "department_audit_research_person_status.csv",
+            "paper_field_predictions": "preds_e5_v1v2/preds_*.parquet",
+            "paper_subfield_predictions": "preds_subfield_v1/preds_*.parquet",
         },
         "defaults": {
             "min_papers": 5,

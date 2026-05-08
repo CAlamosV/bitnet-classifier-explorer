@@ -6,7 +6,7 @@ labels when available. Author cards show OpenAlex AuthorIDs with at
 least one paper in the 14.6M e5-frame, their career field/subfield
 aggregates, representative papers, and LLM judge labels when available.
 The institution pages describe the original paper-author affiliation
-imputation and compare audited Bleemer department rosters with OpenAlex
+imputation and compare audited faculty department rosters with OpenAlex
 authors assigned to the same school-year.
 
 ## Live

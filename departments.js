@@ -27,8 +27,12 @@ function fmtInt(x) {
 }
 
 function fieldLabel(code) {
-  if (code === "COMP_ENGG") return "Computer Science or Engineering";
+  if (code === "COMP_ENGG") return "Computer Science plus Engineering";
   return state.taxonomy.fields[code] || code || "field";
+}
+
+function subfieldLabel(code) {
+  return state.taxonomy.subfields?.[code] || code || "subfield";
 }
 
 function fieldProb(author, code) {
@@ -40,14 +44,108 @@ function fieldProb(author, code) {
 
 function statusLabel(status) {
   if (status === "department_roster") return "in this roster";
-  if (status === "other_bleemer_roster") return "other Bleemer roster";
-  return "not in Bleemer";
+  if (status === "same_department_other_year") return "same department, other years";
+  if (status === "other_bleemer_roster") return "other faculty roster";
+  return "not in roster";
 }
 
 function statusClass(status) {
   if (status === "department_roster") return "status-good";
+  if (status === "same_department_other_year") return "status-info";
   if (status === "other_bleemer_roster") return "status-warn";
   return "status-muted";
+}
+
+function authorUrl(authorId) {
+  return authorId ? `https://openalex.org/${encodeURIComponent(authorId)}` : "#";
+}
+
+function paperUrl(paperId) {
+  return paperId ? `https://openalex.org/${encodeURIComponent(paperId)}` : "#";
+}
+
+function probChip(label, value) {
+  if (!label) return "";
+  return `<span class="prob-chip">${escapeHtml(label)} <strong>${fmtPct(value)}</strong></span>`;
+}
+
+function authorFieldHtml(a, thresholdField) {
+  const top = [
+    [a.field_top1, a.field_p1],
+    [a.field_top2, a.field_p2],
+    [a.field_top3, a.field_p3],
+  ].filter(([code]) => code).map(([code, p]) => [fieldLabel(code), p]);
+  return `
+    <div class="chip-stack">${top.map(([label, p]) => probChip(label, p)).join("")}</div>
+    <div class="table-sub">selected ${escapeHtml(fieldLabel(thresholdField))}: ${fmtPct(fieldProb(a, thresholdField))}</div>
+  `;
+}
+
+function authorSubfieldHtml(a) {
+  const top = [
+    [a.subfield_top1, a.sp1],
+    [a.subfield_top2, a.sp2],
+    [a.subfield_top3, a.sp3],
+  ].filter(([code]) => code).map(([code, p]) => [subfieldLabel(code), p]);
+  if (!top.length) return `<span class="table-sub">No subfield probabilities in local paper predictions.</span>`;
+  return `<div class="chip-stack">${top.map(([label, p]) => probChip(label, p)).join("")}</div>`;
+}
+
+function institutionHtml(a) {
+  const xs = a.career_institutions || [];
+  if (!xs.length) return `<span class="table-sub">No education-affiliation rows.</span>`;
+  const visible = xs.slice(0, 5).map((x) => {
+    const years = x.year_first && x.year_last ? ` (${x.year_first}-${x.year_last})` : "";
+    return `<li><strong>${fmtInt(x.n_papers)}</strong> ${escapeHtml(x.name)}${escapeHtml(years)}</li>`;
+  }).join("");
+  return `<ol class="mini-list">${visible}</ol>`;
+}
+
+function publicationHtml(a) {
+  const pubs = a.recent_publications || [];
+  if (!pubs.length) return `<span class="table-sub">No classified publications found for this author.</span>`;
+  const rows = pubs.map((p) => {
+    const title = p.title || p.paper_id;
+    return `
+      <li>
+        <a href="${paperUrl(p.paper_id)}" target="_blank" rel="noopener">${escapeHtml(title)}</a>
+        <div class="table-sub">${escapeHtml(p.year)} - ${escapeHtml(fieldLabel(p.field_top1))} ${fmtPct(p.field_p1)}; ${escapeHtml(subfieldLabel(p.subfield_top1))} ${fmtPct(p.sp1)}</div>
+      </li>
+    `;
+  }).join("");
+  return `
+    <details class="pub-details">
+      <summary>${pubs.length} classified publications closest to ${state.department.audit_year}</summary>
+      <ol class="mini-list">${rows}</ol>
+    </details>
+  `;
+}
+
+function currentSummary(d) {
+  const rows = state.filteredOpenAlex || [];
+  const ids = new Set(rows.map((x) => x.AuthorID));
+  const rosterRows = d.bleemer_roster || [];
+  const rosterTotal = rosterRows.length;
+  const rosterMatched = rosterRows.filter((r) => r.matched_author_id).length;
+  const rosterPass = rosterRows.filter((r) => r.matched_author_id && ids.has(r.matched_author_id)).length;
+  const rosterNotPass = Math.max(0, rosterTotal - rosterPass);
+  const statusCount = (status) => rows.filter((r) => (r.bleemer_status || "not_in_bleemer") === status).length;
+  const inDept = statusCount("department_roster");
+  const sameDeptOtherYear = statusCount("same_department_other_year");
+  const otherRoster = statusCount("other_bleemer_roster");
+  const noRoster = statusCount("not_in_bleemer");
+  return {
+    rows,
+    rosterTotal,
+    rosterMatched,
+    rosterPass,
+    rosterNotPass,
+    inDept,
+    sameDeptOtherYear,
+    otherRoster,
+    noRoster,
+    extraNotInCurrentRoster: Math.max(0, rows.length - inDept),
+  };
 }
 
 function selectedStatuses() {
@@ -73,27 +171,35 @@ function setDepartment(key) {
 }
 
 function summaryHtml(d) {
-  const totalBleemer = Number(d.clusters || d.bleemer_roster.length || 0);
-  const matched = Number(d.matched || 0);
-  const defaultCount = Number(d.default_openalex_count || 0);
-  const defaultDept = Number(d.default_matched_department_count || 0);
-  const defaultOther = Number(d.default_other_roster_count || 0);
-  const missingDefault = Math.max(0, defaultCount - defaultDept - defaultOther);
+  const s = currentSummary(d);
   return `
     <section class="dept-summary">
       <div>
         <h2>${escapeHtml(d.university)} - ${escapeHtml(d.department)}, ${d.audit_year}</h2>
         <p>
-          Bleemer roster: ${fmtInt(totalBleemer)} people, ${fmtInt(matched)} matched to OpenAlex in the manual audit
-          (${fmtPct(d.match_share)}).
+          Faculty roster: ${fmtInt(s.rosterTotal)} people; ${fmtInt(s.rosterMatched)} have an OpenAlex match in the manual audit.
+          The counts below update with the current filters.
         </p>
       </div>
       <div class="summary-grid">
-        <div><strong>${fmtInt(defaultCount)}</strong><span>OpenAlex authors at default filters</span></div>
-        <div><strong>${fmtInt(defaultDept)}</strong><span>also in this Bleemer department</span></div>
-        <div><strong>${fmtInt(defaultOther)}</strong><span>in another Bleemer roster</span></div>
-        <div><strong>${fmtInt(missingDefault)}</strong><span>not found in Bleemer</span></div>
+        <div><strong>${fmtInt(s.rosterPass)}</strong><span>roster people passing filters (${fmtPct(s.rosterPass / Math.max(1, s.rosterTotal))})</span></div>
+        <div><strong>${fmtInt(s.rosterNotPass)}</strong><span>roster people not passing filters or unmatched</span></div>
+        <div><strong>${fmtInt(s.rows.length)}</strong><span>OpenAlex authors passing filters</span></div>
+        <div><strong>${fmtInt(s.inDept)}</strong><span>also in this department roster (${fmtPct(s.inDept / Math.max(1, s.rows.length))})</span></div>
+        <div><strong>${fmtInt(s.sameDeptOtherYear)}</strong><span>same department in other roster years</span></div>
+        <div><strong>${fmtInt(s.extraNotInCurrentRoster)}</strong><span>extra OpenAlex authors not in this roster (${fmtPct(s.extraNotInCurrentRoster / Math.max(1, s.rows.length))})</span></div>
+        <div><strong>${fmtInt(s.otherRoster)}</strong><span>in another faculty roster in ${d.audit_year}</span></div>
+        <div><strong>${fmtInt(s.noRoster)}</strong><span>not found in faculty rosters</span></div>
       </div>
+    </section>
+  `;
+}
+
+function sourceNoteHtml(d) {
+  return `
+    <section class="source-note">
+      <div><strong>Faculty roster data</strong><span>Names, positions, and department membership in ${d.audit_year} come from the manually audited California faculty roster slice.</span></div>
+      <div><strong>OpenAlex data</strong><span>OpenAlex names, author links, publications, institution histories, and field/subfield predictions come from SciSciNet/OpenAlex plus our classifier outputs.</span></div>
     </section>
   `;
 }
@@ -108,7 +214,7 @@ function rosterTableHtml(rows) {
       <tr>
         <td>${escapeHtml(r.bleemer_name)}</td>
         <td>${escapeHtml(r.audit_position_label || "")}</td>
-        <td>${escapeHtml(r.cluster_departments || "")}</td>
+        <td class="dept-cell">${escapeHtml(r.cluster_departments || "")}</td>
         <td>${r.is_research_role ? "research" : "other"}</td>
         <td>${found}</td>
         <td>${escapeHtml(r.matched_display_name || "")}</td>
@@ -117,10 +223,10 @@ function rosterTableHtml(rows) {
   }).join("");
   return `
     <section class="browser-panel">
-      <h3>Bleemer faculty roster</h3>
-      <p class="panel-note">Course-catalog roster for this department-year. The match column reflects the manual department audit.</p>
+      <h3>Faculty roster for this department-year</h3>
+      <p class="panel-note">Course-catalog roster data. The match column reflects the manual audit against OpenAlex authors.</p>
       <div class="table-wrap">
-        <table class="data-table">
+        <table class="data-table roster-table">
           <thead>
             <tr>
               <th>Name</th><th>Position</th><th>Departments</th><th>Role</th><th>Matched?</th><th>OpenAlex name</th><th>Audit status</th>
@@ -134,24 +240,27 @@ function rosterTableHtml(rows) {
 }
 
 function openAlexRowHtml(a, thresholdField) {
-  const p = fieldProb(a, thresholdField);
   const status = a.bleemer_status || "not_in_bleemer";
   const rosterText = status === "department_roster"
-    ? `${a.department_bleemer_names || ""} ${a.department_bleemer_positions ? "· " + a.department_bleemer_positions : ""}`
+    ? `${a.department_bleemer_names || ""} ${a.department_bleemer_positions ? " - " + a.department_bleemer_positions : ""}`
+    : status === "same_department_other_year"
+      ? `${a.same_department_names || ""} ${a.same_department_year_ranges ? " - years " + a.same_department_year_ranges : ""}${a.same_department_positions ? " - " + a.same_department_positions : ""}`
     : status === "other_bleemer_roster"
-      ? `${a.university_bleemer_names || ""} ${a.university_bleemer_departments ? "· " + a.university_bleemer_departments : ""}`
+      ? `${a.university_bleemer_locations || ""}${a.university_bleemer_positions ? " - " + a.university_bleemer_positions : ""}`
       : "";
   return `
     <tr>
       <td><span class="status-badge ${statusClass(status)}">${statusLabel(status)}</span></td>
       <td>
-        <div class="table-title">${escapeHtml(a.display_name)}</div>
+        <div class="table-title"><a href="${authorUrl(a.AuthorID)}" target="_blank" rel="noopener">${escapeHtml(a.display_name)}</a></div>
         <div class="table-sub">${escapeHtml(a.AuthorID)}</div>
       </td>
       <td>${fmtInt(a.n_papers)}</td>
-      <td>${fmtPct(p)}</td>
-      <td>${escapeHtml(fieldLabel(a.field_top1))}<div class="table-sub">${fmtPct(a.field_p1)}</div></td>
+      <td>${authorFieldHtml(a, thresholdField)}</td>
+      <td>${authorSubfieldHtml(a)}</td>
       <td>${fmtInt(a.papers_at_school_year)}</td>
+      <td>${institutionHtml(a)}</td>
+      <td>${publicationHtml(a)}</td>
       <td>${escapeHtml(rosterText)}</td>
     </tr>
   `;
@@ -175,17 +284,19 @@ function renderOpenAlex(reset = true) {
 }
 
 function openAlexTableHtml() {
+  const d = state.department;
   return `
     <section class="browser-panel">
-      <h3>OpenAlex authors assigned to this school in 1985</h3>
+      <h3>OpenAlex authors assigned to ${escapeHtml(d.university)} in ${d.audit_year}</h3>
       <p class="panel-note">
-        Rows come from the original imputed paper-author institution file. The field threshold uses career-level author field probabilities.
+        Rows come from the original imputed paper-author institution file. "Selected-university papers" is the number of distinct papers in ${d.audit_year}
+        where this author is assigned to ${escapeHtml(d.university)}. Field filters use career-level author probabilities.
       </p>
       <div class="table-wrap">
         <table class="data-table">
           <thead>
             <tr>
-              <th>Bleemer status</th><th>Author</th><th>Publications</th><th>Threshold field prob.</th><th>Top field</th><th>School papers in 1985</th><th>Roster link</th>
+              <th>Roster status</th><th>OpenAlex author</th><th>Total pubs</th><th>Field probabilities</th><th>Subfields</th><th>Selected-university papers</th><th>Career institutions</th><th>Recent publications</th><th>Roster match</th>
             </tr>
           </thead>
           <tbody id="openalex-rows"></tbody>
@@ -214,14 +325,16 @@ function applyFilters() {
       const hay = [
         a.display_name, a.AuthorID, a.department_bleemer_names,
         a.department_bleemer_positions, a.university_bleemer_names,
-        a.university_bleemer_departments,
+        a.university_bleemer_departments, a.university_bleemer_locations,
+        a.same_department_names, a.same_department_positions,
+        a.same_department_year_ranges,
       ].filter(Boolean).join(" ").toLowerCase();
       if (!hay.includes(search)) return false;
     }
     return true;
   });
 
-  const statusRank = { department_roster: 0, other_bleemer_roster: 1, not_in_bleemer: 2 };
+  const statusRank = { department_roster: 0, same_department_other_year: 1, other_bleemer_roster: 2, not_in_bleemer: 3 };
   if (sortBy === "field_desc") {
     xs.sort((a, b) => fieldProb(b, thresholdField) - fieldProb(a, thresholdField) || Number(b.n_papers || 0) - Number(a.n_papers || 0));
   } else if (sortBy === "papers_desc") {
@@ -235,7 +348,7 @@ function applyFilters() {
   }
 
   state.filteredOpenAlex = xs;
-  $("count-badge").textContent = `${xs.length.toLocaleString()} OpenAlex authors match`;
+  $("count-badge").textContent = `${xs.length.toLocaleString()} OpenAlex authors displayed`;
   render(true);
 }
 
@@ -244,6 +357,7 @@ function render() {
   const main = $("results");
   main.innerHTML = `
     ${summaryHtml(d)}
+    ${sourceNoteHtml(d)}
     <div class="browser-grid">
       ${rosterTableHtml(d.bleemer_roster)}
       ${openAlexTableHtml()}

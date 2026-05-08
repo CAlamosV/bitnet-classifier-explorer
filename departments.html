@@ -9,7 +9,7 @@
 <body>
 <header>
   <div class="header-titles">
-    <h1>Department browser - Bleemer rosters vs. OpenAlex</h1>
+    <h1>Department browser - faculty rosters vs. OpenAlex</h1>
     <nav>
       <a href="index.html">Paper overview</a>
       <a href="explorer.html">Paper explorer</a>
@@ -37,9 +37,9 @@
   <fieldset>
     <legend>Threshold field</legend>
     <select id="field-select">
-      <option value="COMP_ENGG">Computer Science or Engineering</option>
       <option value="COMP">Computer Science</option>
       <option value="ENGG">Engineering</option>
+      <option value="COMP_ENGG">Computer Science plus Engineering</option>
       <option value="ECON">Economics</option>
       <option value="SOCI">Sociology</option>
       <option value="MATH">Mathematics</option>
@@ -51,22 +51,24 @@
     <legend>OpenAlex filters</legend>
     <label>min publications <input type="number" min="0" step="1" id="min-papers" value="5" /></label>
     <label>min field probability <input type="number" min="0" max="1" step="0.05" id="min-prob" value="0.50" /></label>
+    <p class="filter-note">The field threshold applies to exactly the selected field. The combined CS plus Engineering option is available only when selected.</p>
   </fieldset>
 
   <fieldset>
-    <legend>Bleemer status</legend>
+    <legend>Faculty roster status</legend>
     <label><input type="checkbox" class="status-filter" value="department_roster" checked /> in this department roster</label>
-    <label><input type="checkbox" class="status-filter" value="other_bleemer_roster" checked /> in another Bleemer roster</label>
-    <label><input type="checkbox" class="status-filter" value="not_in_bleemer" checked /> not found in Bleemer</label>
+    <label><input type="checkbox" class="status-filter" value="same_department_other_year" checked /> same department, other years</label>
+    <label><input type="checkbox" class="status-filter" value="other_bleemer_roster" checked /> in another faculty roster</label>
+    <label><input type="checkbox" class="status-filter" value="not_in_bleemer" checked /> not found in faculty rosters</label>
   </fieldset>
 
   <fieldset>
     <legend>Sort OpenAlex authors</legend>
     <select id="sort-by">
-      <option value="field_desc">Field probability first</option>
-      <option value="papers_desc">Most publications first</option>
-      <option value="school_papers_desc">Most papers at school in 1985</option>
-      <option value="bleemer_first">Bleemer matches first</option>
+      <option value="field_desc">Highest selected-field probability</option>
+      <option value="papers_desc">Most total publications</option>
+      <option value="school_papers_desc">Most selected-university papers</option>
+      <option value="bleemer_first">Faculty roster matches first</option>
       <option value="name">Name</option>
     </select>
   </fieldset>
@@ -83,8 +85,9 @@
 
 <footer>
   <p>Built from the original <code>paper_author_edu_imputed_1940_2000.parquet</code>
-  file and six manually audited Bleemer department-year slices. Publication
-  counts and field probabilities come from the career-level author field file.</p>
+  file and six manually audited faculty roster department-year slices. The roster
+  table comes from the faculty roster audit. The OpenAlex table comes from
+  OpenAlex/SciSciNet author, paper, institution, and prediction files.</p>
 </footer>
 
 <script src="departments.js"></script>
