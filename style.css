@@ -393,6 +393,26 @@ body.home {
 .mini-list li {
   margin-bottom: 0.25rem;
 }
+.metric-stack {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(70px, 1fr));
+  gap: 0.25rem;
+  min-width: 160px;
+}
+.metric-stack div {
+  background: #f7f8fa;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.25rem 0.35rem;
+}
+.metric-stack strong,
+.metric-stack span {
+  display: block;
+}
+.metric-stack span {
+  color: var(--muted);
+  font-size: 10px;
+}
 .pub-details summary {
   cursor: pointer;
   color: var(--accent);

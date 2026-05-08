@@ -101,6 +101,22 @@ function institutionHtml(a) {
   return `<ol class="mini-list">${visible}</ol>`;
 }
 
+function metricsHtml(a) {
+  if (!a) return "";
+  const items = [
+    ["e5 pubs", a.n_papers],
+    ["OpenAlex works", a.openalex_works_count],
+    ["citations", a.openalex_cited_by_count],
+    ["h-index", a.sciscinet_h_index],
+  ].filter(([, value]) => value != null && value !== "");
+  if (!items.length) return `<span class="table-sub">No counts available.</span>`;
+  return `
+    <div class="metric-stack">
+      ${items.map(([label, value]) => `<div><strong>${fmtInt(value)}</strong><span>${escapeHtml(label)}</span></div>`).join("")}
+    </div>
+  `;
+}
+
 function publicationHtml(a) {
   const pubs = a.recent_publications || [];
   if (!pubs.length) return `<span class="table-sub">No classified publications found for this author.</span>`;
@@ -279,6 +295,7 @@ function rosterTableHtml(rows) {
         <td>${escapeHtml(r.audit_position_label || "")}</td>
         <td class="dept-cell">${escapeHtml(r.cluster_departments || "")}</td>
         <td>${found}</td>
+        <td>${a ? metricsHtml(a) : ""}</td>
         <td>${a ? authorFieldHtml(a, thresholdField) : ""}</td>
         <td>${a ? authorSubfieldHtml(a) : ""}</td>
         <td>${a ? institutionHtml(a) : ""}</td>
@@ -294,7 +311,7 @@ function rosterTableHtml(rows) {
         <table class="data-table roster-table">
           <thead>
             <tr>
-              <th>Roster person</th><th>Position</th><th>Departments</th><th>OpenAlex match</th><th>Field probabilities</th><th>Subfields</th><th>Career institutions</th><th>Recent publications</th><th>Audit status</th>
+              <th>Roster person</th><th>Position</th><th>Departments</th><th>OpenAlex match</th><th>Works/citations</th><th>Field probabilities</th><th>Subfields</th><th>Career institutions</th><th>Recent publications</th><th>Audit status</th>
             </tr>
           </thead>
           <tbody>${body}</tbody>

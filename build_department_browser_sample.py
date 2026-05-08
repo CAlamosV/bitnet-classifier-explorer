@@ -374,6 +374,10 @@ def build_data(args: argparse.Namespace) -> dict[str, Any]:
         SELECT
             a.AuthorID,
             coalesce(sa.display_name, ad.display_name, a.AuthorID) AS display_name,
+            ad.works_count AS openalex_works_count,
+            ad.cited_by_count AS openalex_cited_by_count,
+            sa.productivity AS sciscinet_productivity,
+            sa.h_index AS sciscinet_h_index,
             coalesce(f.n_papers, 0) AS n_papers,
             f.year_first,
             f.year_last,
