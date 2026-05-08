@@ -340,7 +340,7 @@ body.home {
   font-size: 12px;
 }
 .browser-panel .data-table { min-width: 1220px; }
-.browser-panel .roster-table { min-width: 880px; }
+.browser-panel .roster-table { min-width: 1500px; }
 .data-table th,
 .data-table td {
   padding: 0.45rem 0.55rem;

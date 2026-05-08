@@ -338,11 +338,43 @@ def build_data(args: argparse.Namespace) -> dict[str, Any]:
 
         CREATE OR REPLACE TEMP TABLE selected_dept_authors AS
         SELECT DISTINCT dept_key, AuthorID
-        FROM openalex_rows;
+        FROM openalex_rows
+        UNION
+        SELECT DISTINCT dept_key, matched_author_id AS AuthorID
+        FROM audit_roster
+        WHERE matched_author_id IS NOT NULL
+          AND matched_author_id != '';
 
         CREATE OR REPLACE TEMP TABLE selected_authors AS
         SELECT DISTINCT AuthorID
         FROM selected_dept_authors;
+
+        CREATE OR REPLACE TEMP TABLE author_profiles AS
+        SELECT
+            a.AuthorID,
+            coalesce(sa.display_name, ad.display_name, a.AuthorID) AS display_name,
+            coalesce(f.n_papers, 0) AS n_papers,
+            f.year_first,
+            f.year_last,
+            f.field_top1,
+            f.field_top2,
+            f.field_top3,
+            f.field_p1,
+            f.field_p2,
+            f.field_p3,
+            f.field_prob_COMP,
+            f.field_prob_ENGG,
+            f.field_prob_ECON,
+            f.field_prob_SOCI,
+            f.field_prob_MATH,
+            f.field_prob_PHYS
+        FROM selected_authors a
+        LEFT JOIN read_parquet('{_pq(authors)}') sa
+          ON a.AuthorID = sa.authorid
+        LEFT JOIN read_parquet('{_pq(author_details)}') ad
+          ON a.AuthorID = ad.authorid
+        LEFT JOIN read_parquet('{_pq(fields)}') f
+          ON a.AuthorID = f.AuthorID;
 
         CREATE OR REPLACE TEMP TABLE selected_author_papers AS
         SELECT
@@ -351,6 +383,26 @@ def build_data(args: argparse.Namespace) -> dict[str, Any]:
             MIN(CAST(i.year AS INTEGER)) AS year
         FROM read_parquet('{_pq(imputed)}') i
         JOIN selected_authors a USING (AuthorID)
+        GROUP BY i.AuthorID, i.PaperID;
+
+        CREATE OR REPLACE TEMP TABLE selected_author_paper_institutions AS
+        SELECT
+            i.AuthorID,
+            i.PaperID,
+            string_agg(
+                DISTINCT coalesce(aff.display_name, i.InstitutionID),
+                ' | ' ORDER BY coalesce(aff.display_name, i.InstitutionID)
+            ) AS assigned_institutions,
+            string_agg(
+                DISTINCT i.InstitutionID,
+                ' | ' ORDER BY i.InstitutionID
+            ) AS assigned_institution_ids
+        FROM read_parquet('{_pq(imputed)}') i
+        JOIN selected_author_papers sap
+          ON i.AuthorID = sap.AuthorID
+         AND i.PaperID = sap.PaperID
+        LEFT JOIN read_parquet('{_pq(affiliations)}') aff
+          ON i.InstitutionID = aff.institution_id
         GROUP BY i.AuthorID, i.PaperID;
 
         CREATE OR REPLACE TEMP TABLE career_inst_counts AS
@@ -483,12 +535,17 @@ def build_data(args: argparse.Namespace) -> dict[str, Any]:
             sp.sp1,
             sp.subfield_top2,
             sp.sp2,
+            pi.assigned_institutions,
+            pi.assigned_institution_ids,
             r.rn
         FROM ranked r
         LEFT JOIN read_parquet('{_pq(paper_text)}') t
           ON r.PaperID = t.paper_id
         LEFT JOIN read_parquet('{_pq(subfield_preds)}') sp
           ON r.PaperID = sp.paper_id
+        LEFT JOIN selected_author_paper_institutions pi
+          ON r.AuthorID = pi.AuthorID
+         AND r.PaperID = pi.PaperID
         WHERE r.rn <= 5;
     """)
 
@@ -572,6 +629,12 @@ def build_data(args: argparse.Namespace) -> dict[str, Any]:
     """).fetchall()
     oa_cols = [d[0] for d in con.description]
 
+    profile_rows = con.execute("""
+        SELECT *
+        FROM author_profiles
+    """).fetchall()
+    profile_cols = [d[0] for d in con.description]
+
     inst_rows = con.execute("""
         SELECT AuthorID, InstitutionID, institution_name, n_papers, year_first, year_last
         FROM career_inst_counts
@@ -604,6 +667,7 @@ def build_data(args: argparse.Namespace) -> dict[str, Any]:
 
     roster_items = dicts(roster_rows, roster_cols)
     oa_items = dicts(oa_rows, oa_cols)
+    profile_items = dicts(profile_rows, profile_cols)
     inst_items = dicts(inst_rows, inst_cols)
     subfield_items = dicts(subfield_rows, subfield_cols)
     recent_items = dicts(recent_rows, recent_cols)
@@ -630,6 +694,19 @@ def build_data(args: argparse.Namespace) -> dict[str, Any]:
         for item in subfield_items
     }
 
+    profile_by_author = {item["AuthorID"]: item for item in profile_items}
+
+    def enriched_profile(author_id: str | None) -> dict[str, Any] | None:
+        if not author_id:
+            return None
+        base = profile_by_author.get(author_id)
+        if not base:
+            return None
+        out = dict(base)
+        out.update(subfield_by_author.get(author_id, {}))
+        out["career_institutions"] = inst_by_author.get(author_id, [])
+        return out
+
     recent_by_dept_author: dict[tuple[str, str], list[dict[str, Any]]] = {}
     for item in recent_items:
         recent_by_dept_author.setdefault((item["dept_key"], item["AuthorID"]), []).append({
@@ -644,10 +721,21 @@ def build_data(args: argparse.Namespace) -> dict[str, Any]:
             "sp1": item["sp1"],
             "subfield_top2": item["subfield_top2"],
             "sp2": item["sp2"],
+            "assigned_institutions": item["assigned_institutions"],
+            "assigned_institution_ids": item["assigned_institution_ids"],
         })
 
     roster_by_dept: dict[str, list[dict[str, Any]]] = {}
     for item in roster_items:
+        profile = enriched_profile(item.get("matched_author_id"))
+        if profile:
+            profile = dict(profile)
+            profile["recent_publications"] = recent_by_dept_author.get(
+                (item["dept_key"], item["matched_author_id"]), []
+            )
+            item["openalex_profile"] = profile
+        else:
+            item["openalex_profile"] = None
         roster_by_dept.setdefault(item["dept_key"], []).append(item)
 
     oa_by_dept: dict[str, list[dict[str, Any]]] = {}

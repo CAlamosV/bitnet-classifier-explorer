@@ -106,10 +106,14 @@ function publicationHtml(a) {
   if (!pubs.length) return `<span class="table-sub">No classified publications found for this author.</span>`;
   const rows = pubs.map((p) => {
     const title = p.title || p.paper_id;
+    const inst = p.assigned_institutions
+      ? `<div class="table-sub">assigned institution: ${escapeHtml(p.assigned_institutions)}</div>`
+      : `<div class="table-sub">assigned institution: not available</div>`;
     return `
       <li>
         <a href="${paperUrl(p.paper_id)}" target="_blank" rel="noopener">${escapeHtml(title)}</a>
         <div class="table-sub">${escapeHtml(p.year)} - ${escapeHtml(fieldLabel(p.field_top1))} ${fmtPct(p.field_p1)}; ${escapeHtml(subfieldLabel(p.subfield_top1))} ${fmtPct(p.sp1)}</div>
+        ${inst}
       </li>
     `;
   }).join("");
@@ -121,13 +125,30 @@ function publicationHtml(a) {
   `;
 }
 
+function currentFilterParams() {
+  return {
+    minPapers: Number($("min-papers").value || 0),
+    minProb: Number($("min-prob").value || 0),
+    thresholdField: $("field-select").value,
+    statuses: new Set(selectedStatuses()),
+  };
+}
+
+function passesAuthorFilters(a, params, checkStatus = false) {
+  if (!a) return false;
+  if (checkStatus && !params.statuses.has(a.bleemer_status || "not_in_bleemer")) return false;
+  if (Number(a.n_papers || 0) < params.minPapers) return false;
+  if (fieldProb(a, params.thresholdField) < params.minProb) return false;
+  return true;
+}
+
 function currentSummary(d) {
   const rows = state.filteredOpenAlex || [];
-  const ids = new Set(rows.map((x) => x.AuthorID));
+  const params = currentFilterParams();
   const rosterRows = d.bleemer_roster || [];
   const rosterTotal = rosterRows.length;
   const rosterMatched = rosterRows.filter((r) => r.matched_author_id).length;
-  const rosterPass = rosterRows.filter((r) => r.matched_author_id && ids.has(r.matched_author_id)).length;
+  const rosterPass = rosterRows.filter((r) => passesAuthorFilters(r.openalex_profile, params)).length;
   const rosterNotPass = Math.max(0, rosterTotal - rosterPass);
   const statusCount = (status) => rows.filter((r) => (r.bleemer_status || "not_in_bleemer") === status).length;
   const inDept = statusCount("department_roster");
@@ -226,19 +247,31 @@ function sourceNoteHtml(d) {
 }
 
 function rosterTableHtml(rows) {
+  const thresholdField = $("field-select").value;
   const body = rows.map((r) => {
     const status = r.audit_status || "";
-    const found = r.matched_author_id
-      ? `<span class="status-badge status-good">OpenAlex</span>`
+    const a = r.openalex_profile;
+    const pass = passesAuthorFilters(a, currentFilterParams());
+    const found = a
+      ? `<div class="table-title"><a href="${authorUrl(a.AuthorID)}" target="_blank" rel="noopener">${escapeHtml(a.display_name || r.matched_display_name)}</a></div>
+         <div class="table-sub">${escapeHtml(a.AuthorID)}</div>
+         <span class="status-badge ${pass ? "status-good" : "status-muted"}">${pass ? "passes filters" : "does not pass filters"}</span>`
+      : r.matched_author_id
+        ? `<span class="status-badge status-warn">matched, no local profile</span><div class="table-sub">${escapeHtml(r.matched_display_name || r.matched_author_id)}</div>`
       : `<span class="status-badge status-muted">no match</span>`;
     return `
       <tr>
-        <td>${escapeHtml(r.bleemer_name)}</td>
+        <td>
+          <div class="table-title">${escapeHtml(r.bleemer_name)}</div>
+          <div class="table-sub">${r.is_research_role ? "research" : "other"}</div>
+        </td>
         <td>${escapeHtml(r.audit_position_label || "")}</td>
         <td class="dept-cell">${escapeHtml(r.cluster_departments || "")}</td>
-        <td>${r.is_research_role ? "research" : "other"}</td>
         <td>${found}</td>
-        <td>${escapeHtml(r.matched_display_name || "")}</td>
+        <td>${a ? authorFieldHtml(a, thresholdField) : ""}</td>
+        <td>${a ? authorSubfieldHtml(a) : ""}</td>
+        <td>${a ? institutionHtml(a) : ""}</td>
+        <td>${a ? publicationHtml(a) : ""}</td>
         <td>${escapeHtml(status.replaceAll("_", " "))}</td>
       </tr>`;
   }).join("");
@@ -250,7 +283,7 @@ function rosterTableHtml(rows) {
         <table class="data-table roster-table">
           <thead>
             <tr>
-              <th>Name</th><th>Position</th><th>Departments</th><th>Role</th><th>Matched?</th><th>OpenAlex name</th><th>Audit status</th>
+              <th>Roster person</th><th>Position</th><th>Departments</th><th>OpenAlex match</th><th>Field probabilities</th><th>Subfields</th><th>Career institutions</th><th>Recent publications</th><th>Audit status</th>
             </tr>
           </thead>
           <tbody>${body}</tbody>
@@ -331,17 +364,13 @@ function openAlexTableHtml() {
 function applyFilters() {
   const d = state.department;
   if (!d) return;
-  const minPapers = Number($("min-papers").value || 0);
-  const minProb = Number($("min-prob").value || 0);
-  const thresholdField = $("field-select").value;
-  const statuses = new Set(selectedStatuses());
+  const params = currentFilterParams();
+  const thresholdField = params.thresholdField;
   const sortBy = $("sort-by").value;
   const search = $("text-search").value.trim().toLowerCase();
 
   let xs = d.openalex_authors.slice().filter((a) => {
-    if (!statuses.has(a.bleemer_status || "not_in_bleemer")) return false;
-    if (Number(a.n_papers || 0) < minPapers) return false;
-    if (fieldProb(a, thresholdField) < minProb) return false;
+    if (!passesAuthorFilters(a, params, true)) return false;
     if (search) {
       const hay = [
         a.display_name, a.AuthorID, a.department_bleemer_names,
