@@ -173,23 +173,24 @@ function evidenceHtml(a) {
 function worksHtml(a) {
   const works = a.wk || [];
   if (!works.length) {
-    return `<span class="table-sub">No titled works for this university-year in the browser data.</span>`;
+    return `<span class="table-sub">No classified publications found for this author in the browser data.</span>`;
   }
   const rows = works.map((w) => {
     const title = w.t || w.p;
     const field = w.f ? `${fieldLabel(w.f)} ${fmtPct(w.fp)}` : "field unavailable";
     const subfield = w.s ? `${subfieldLabel(w.s)} ${fmtPct(w.sp)}` : "subfield unavailable";
     const evidence = Number(w.raw || 0) > 0 ? "observed affiliation" : "imputed affiliation";
+    const institutions = w.i ? `; institutions: ${w.i}` : "";
     return `
       <li>
         <a href="${workUrl(w.p)}" target="_blank" rel="noopener">${escapeHtml(title)}</a>
-        <span class="paper-meta">${fmtInt(w.y)}; ${escapeHtml(field)}; ${escapeHtml(subfield)}; ${escapeHtml(evidence)}</span>
+        <span class="paper-meta">${fmtInt(w.y)}; ${escapeHtml(field)}; ${escapeHtml(subfield)}; ${escapeHtml(evidence)}${escapeHtml(institutions)}</span>
       </li>
     `;
   }).join("");
   return `
     <details class="pub-details">
-      <summary>${works.length} works at this university-year</summary>
+      <summary>${works.length} classified publications closest to ${escapeHtml(state.payload?.year || "")}</summary>
       <ol class="mini-list work-list">${rows}</ol>
     </details>
   `;

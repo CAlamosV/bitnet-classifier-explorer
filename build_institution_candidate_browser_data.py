@@ -229,68 +229,6 @@ def build_data(args: argparse.Namespace) -> None:
         WHERE rn <= 5
         GROUP BY AuthorID;
 
-        CREATE OR REPLACE TEMP TABLE selected_work_base AS
-        SELECT
-            ay.university_key,
-            ay.university,
-            ay.institution_id,
-            ay.year,
-            ay.AuthorID,
-            i.PaperID AS paper_id,
-            MIN(i.imputed) AS min_imputed,
-            COUNT(*) FILTER (WHERE i.imputed = 0) AS raw_rows
-        FROM author_year ay
-        JOIN read_parquet('{_pq(imputed)}') i
-          ON ay.institution_id = i.InstitutionID
-         AND ay.year = CAST(i.year AS INTEGER)
-         AND ay.AuthorID = i.AuthorID
-        GROUP BY 1, 2, 3, 4, 5, 6;
-
-        CREATE OR REPLACE TEMP TABLE selected_papers AS
-        SELECT DISTINCT paper_id
-        FROM selected_work_base;
-
-        CREATE OR REPLACE TEMP TABLE selected_work_titles AS
-        SELECT p.paper_id, ANY_VALUE(t.title) AS title
-        FROM selected_papers p
-        LEFT JOIN read_parquet('{_pq(paper_text)}') t
-          ON p.paper_id = t.paper_id
-        GROUP BY p.paper_id;
-
-        CREATE OR REPLACE TEMP TABLE selected_work_fields AS
-        SELECT p.paper_id, f.field_top1, CAST(f.p1 AS DOUBLE) AS p1
-        FROM selected_papers p
-        LEFT JOIN read_parquet('{_pq(paper_fields)}') f
-          ON p.paper_id = f.paper_id;
-
-        CREATE OR REPLACE TEMP TABLE selected_work_subfields AS
-        SELECT p.paper_id, s.subfield_top1, CAST(s.sp1 AS DOUBLE) AS sp1
-        FROM selected_papers p
-        LEFT JOIN sub_preds s
-          ON p.paper_id = s.paper_id;
-
-        CREATE OR REPLACE TEMP TABLE selected_works AS
-        WITH ranked AS (
-            SELECT
-                b.*,
-                t.title,
-                f.field_top1,
-                f.p1,
-                s.subfield_top1,
-                s.sp1,
-                ROW_NUMBER() OVER (
-                    PARTITION BY b.university_key, b.year, b.AuthorID
-                    ORDER BY b.min_imputed ASC, b.paper_id
-                ) AS rn
-            FROM selected_work_base b
-            LEFT JOIN selected_work_titles t ON b.paper_id = t.paper_id
-            LEFT JOIN selected_work_fields f ON b.paper_id = f.paper_id
-            LEFT JOIN selected_work_subfields s ON b.paper_id = s.paper_id
-        )
-        SELECT *
-        FROM ranked
-        WHERE rn <= 5;
-
         CREATE OR REPLACE TEMP TABLE candidate_rows AS
         SELECT
             ay.university_key,
@@ -372,9 +310,134 @@ def build_data(args: argparse.Namespace) -> None:
 
     data_files = []
     years = set()
+    current_school_key: str | None = None
+    current_school_works: dict[tuple[int, str], list[dict[str, Any]]] = {}
+
+    def load_school_works(university_key: str) -> dict[tuple[int, str], list[dict[str, Any]]]:
+        print(f"  Loading nearest classified works for {university_key}")
+        work_rows = con.execute(f"""
+            WITH school_author_year AS (
+                SELECT DISTINCT AuthorID, year
+                FROM author_year
+                WHERE university_key = ?
+            ),
+            school_authors AS (
+                SELECT DISTINCT AuthorID
+                FROM school_author_year
+            ),
+            year_bounds AS (
+                SELECT MIN(year) - 25 AS year_min, MAX(year) + 25 AS year_max
+                FROM school_author_year
+            ),
+            candidate_author_papers AS (
+                SELECT
+                    i.AuthorID,
+                    i.PaperID AS paper_id,
+                    CAST(i.year AS INTEGER) AS paper_year,
+                    MIN(i.imputed) AS min_imputed,
+                    COUNT(*) FILTER (WHERE i.imputed = 0) AS raw_rows,
+                    STRING_AGG(
+                        DISTINCT COALESCE(t.InstitutionName, i.InstitutionID),
+                        ' | '
+                        ORDER BY COALESCE(t.InstitutionName, i.InstitutionID)
+                    ) AS institutions,
+                    ANY_VALUE(f.field_top1) AS field_top1,
+                    ANY_VALUE(CAST(f.p1 AS DOUBLE)) AS p1
+                FROM school_authors ca
+                JOIN read_parquet('{_pq(imputed)}') i
+                  ON ca.AuthorID = i.AuthorID
+                JOIN year_bounds yb
+                  ON CAST(i.year AS INTEGER) BETWEEN yb.year_min AND yb.year_max
+                JOIN read_parquet('{_pq(paper_fields)}') f
+                  ON i.PaperID = f.paper_id
+                LEFT JOIN read_parquet('{_pq(institution_types)}') t
+                  ON i.InstitutionID = t.InstitutionID
+                GROUP BY 1, 2, 3
+            ),
+            selected_papers AS (
+                SELECT DISTINCT paper_id
+                FROM candidate_author_papers
+            ),
+            selected_work_titles AS (
+                SELECT p.paper_id, ANY_VALUE(t.title) AS title
+                FROM selected_papers p
+                LEFT JOIN read_parquet('{_pq(paper_text)}') t
+                  ON p.paper_id = t.paper_id
+                GROUP BY p.paper_id
+            ),
+            ranked AS (
+                SELECT
+                    aty.year AS target_year,
+                    aty.AuthorID,
+                    b.paper_id,
+                    b.paper_year,
+                    b.institutions,
+                    b.min_imputed,
+                    b.raw_rows,
+                    title.title,
+                    b.field_top1,
+                    b.p1,
+                    s.subfield_top1,
+                    s.sp1,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY aty.AuthorID, aty.year
+                        ORDER BY
+                            ABS(b.paper_year - aty.year),
+                            b.min_imputed ASC,
+                            b.paper_year DESC,
+                            b.paper_id
+                    ) AS rn
+                FROM school_author_year aty
+                JOIN candidate_author_papers b
+                  ON aty.AuthorID = b.AuthorID
+                 AND b.paper_year BETWEEN aty.year - 25 AND aty.year + 25
+                LEFT JOIN selected_work_titles title
+                  ON b.paper_id = title.paper_id
+                LEFT JOIN sub_preds s
+                  ON b.paper_id = s.paper_id
+            )
+            SELECT
+                target_year,
+                AuthorID,
+                paper_id,
+                paper_year,
+                title,
+                institutions,
+                field_top1,
+                p1,
+                subfield_top1,
+                sp1,
+                raw_rows
+            FROM ranked
+            WHERE rn <= 5
+            ORDER BY target_year, AuthorID, rn
+        """, [university_key]).fetchall()
+        work_cols = [d[0] for d in con.description]
+        out: dict[tuple[int, str], list[dict[str, Any]]] = {}
+        for work_row in work_rows:
+            work = dict(zip(work_cols, work_row))
+            item: dict[str, Any] = {
+                "p": work["paper_id"],
+                "y": int(work["paper_year"]) if work["paper_year"] is not None else None,
+            }
+            set_if_present(item, "t", work["title"])
+            set_if_present(item, "i", work["institutions"])
+            set_if_present(item, "f", work["field_top1"])
+            set_if_present(item, "fp", work["p1"])
+            set_if_present(item, "s", work["subfield_top1"])
+            set_if_present(item, "sp", work["sp1"])
+            raw = int(work["raw_rows"] or 0)
+            if raw:
+                item["raw"] = raw
+            out.setdefault((int(work["target_year"]), work["AuthorID"]), []).append(item)
+        return out
+
     for row in counts:
         meta = dict(zip(count_cols, row))
         years.add(meta["year"])
+        if meta["university_key"] != current_school_key:
+            current_school_key = meta["university_key"]
+            current_school_works = load_school_works(current_school_key)
         file_name = f"{meta['university_key']}-{meta['year']}.json"
         print(f"Writing {file_name}: {meta['author_count']} authors")
         rows = con.execute("""
@@ -390,39 +453,11 @@ def build_data(args: argparse.Namespace) -> None:
         cols = [d[0] for d in con.description]
         prob_start = cols.index(f"field_prob_{field_codes[0]}")
 
-        work_rows = con.execute("""
-            SELECT
-                AuthorID,
-                paper_id,
-                year,
-                title,
-                field_top1,
-                p1,
-                subfield_top1,
-                sp1,
-                raw_rows
-            FROM selected_works
-            WHERE university_key = ?
-              AND year = ?
-            ORDER BY AuthorID, rn
-        """, [meta["university_key"], meta["year"]]).fetchall()
-        work_cols = [d[0] for d in con.description]
-        works_by_author: dict[str, list[dict[str, Any]]] = {}
-        for work_row in work_rows:
-            work = dict(zip(work_cols, work_row))
-            item: dict[str, Any] = {
-                "p": work["paper_id"],
-                "y": int(work["year"]) if work["year"] is not None else None,
-            }
-            set_if_present(item, "t", work["title"])
-            set_if_present(item, "f", work["field_top1"])
-            set_if_present(item, "fp", work["p1"])
-            set_if_present(item, "s", work["subfield_top1"])
-            set_if_present(item, "sp", work["sp1"])
-            raw = int(work["raw_rows"] or 0)
-            if raw:
-                item["raw"] = raw
-            works_by_author.setdefault(work["AuthorID"], []).append(item)
+        works_by_author = {
+            author_id: works
+            for (year, author_id), works in current_school_works.items()
+            if year == meta["year"]
+        }
 
         authors_out = []
         for values in rows:
