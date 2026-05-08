@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Work sample filters</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body class="home">
+<header class="home-header">
+  <h1>Work sample filters</h1>
+  <nav>
+    <a href="index.html">Paper overview</a>
+    <a href="explorer.html">Paper explorer</a>
+    <a class="active" href="work_sample.html">Work sample</a>
+    <a href="author_overview.html">Author overview</a>
+    <a href="authors.html">Author explorer</a>
+    <a href="institution_overview.html">Institution overview</a>
+    <a href="institution_candidates.html">Institution candidates</a>
+    <a href="departments.html">Department browser</a>
+  </nav>
+</header>
+
+<main class="home-main">
+  <section class="hero">
+    <p class="lede">
+      The main paper sample contains <strong>14,599,178 works</strong> from
+      1960-2000. It is designed to keep venue-published research works with a
+      usable field label and references, without imposing an English-language
+      or curated-journal restriction.
+    </p>
+  </section>
+
+  <section class="metrics">
+    <h2>Filters Applied</h2>
+    <p>
+      A work enters the main sample if it satisfies these paper-level rules:
+    </p>
+    <ul>
+      <li>publication year is between 1960 and 2000;</li>
+      <li>OpenAlex source type is <code>journal</code> or <code>conference</code>;</li>
+      <li>the work has at least one reference;</li>
+      <li>the work is not retracted;</li>
+      <li>the work is not paratext;</li>
+      <li>the work has at least one author;</li>
+      <li>the work has a non-missing OpenAlex primary topic that maps to a field.</li>
+    </ul>
+  </section>
+
+  <section class="metrics">
+    <h2>Filters Not Applied</h2>
+    <p>
+      The default sample is <strong>not</strong> English-only and is
+      <strong>not</strong> restricted to OpenAlex core sources. Among the
+      14,599,178 works, 13,633,892 are English and 11,795,499 are in core
+      sources, but neither condition is required.
+    </p>
+  </section>
+
+  <section class="how">
+    <h2>How It Is Used</h2>
+    <p>
+      The field classifier, paper explorer, distinct institution-field-year
+      outcome panel, and exposure/pre-period publication weights all use this
+      sample definition by default. Alternative builds can add an English-only
+      or source-quality restriction, but those variants are written separately
+      and are not the default website data.
+    </p>
+    <p>
+      Institution concentration charts apply additional filters on top of this:
+      institutions must clear the publication threshold in 1960-1969, and
+      displayed author counts keep only authors with at least 10 OpenAlex works.
+    </p>
+  </section>
+</main>
+
+<footer class="home-footer">
+  Cristian Alamos and Lukas Althoff. Built for the BitNet internet-and-science
+  project. Source code in the <code>bitnet</code> repository.
+</footer>
+</body>
+</html>

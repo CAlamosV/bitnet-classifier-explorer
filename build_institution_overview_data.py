@@ -17,6 +17,7 @@ OUT = ROOT / "tools" / "classifier_explorer" / "institution_overview_1980.json"
 CANDIDATES = ROOT / "tools" / "classifier_explorer" / "institution_candidates.json"
 EXPOSURE = ROOT / "data" / "intermediate" / "exposure" / "bitnet" / "institution_field_year_exposure.parquet"
 EXPOSURE_MANIFEST = EXPOSURE.with_suffix(EXPOSURE.suffix + ".manifest.json")
+PAPERS_WITH_SCISCINET = ROOT / "data" / "intermediate" / "derived" / "papers_with_sciscinet.parquet"
 
 
 def _pq(path: Path | str) -> str:
@@ -30,7 +31,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--candidate-metadata", type=Path, default=CANDIDATES)
     parser.add_argument("--exposure-frame", type=Path, default=EXPOSURE)
     parser.add_argument("--exposure-manifest", type=Path, default=EXPOSURE_MANIFEST)
+    parser.add_argument("--papers-with-sciscinet", type=Path, default=PAPERS_WITH_SCISCINET)
     parser.add_argument("--year", type=int, default=1980)
+    parser.add_argument("--pre-start", type=int, default=1960)
+    parser.add_argument("--pre-end", type=int, default=1969)
+    parser.add_argument("--min-institution-pubs", type=int, default=2000)
     parser.add_argument("--min-author-works", type=int, default=10)
     parser.add_argument("--threads", type=int, default=4)
     parser.add_argument("--memory", default="8GB")
@@ -52,12 +57,10 @@ def main() -> None:
         / "sciscinet"
         / "sciscinet_author_details.parquet"
     )
-    manifest = json.loads(args.exposure_manifest.read_text())
-    diagnostics = manifest.get("diagnostics", {})
-    min_pubs = int(diagnostics.get("min_pubs", 2000))
-    pre_start = int(diagnostics.get("pre_start", 1970))
-    pre_end = int(diagnostics.get("pre_end", 1979))
-    network = str(diagnostics.get("network", "bitnet"))
+    min_pubs = int(args.min_institution_pubs)
+    pre_start = int(args.pre_start)
+    pre_end = int(args.pre_end)
+    network = "bitnet"
 
     con = duckdb.connect()
     con.execute(f"SET threads={args.threads}")
@@ -65,33 +68,27 @@ def main() -> None:
     con.execute("SET preserve_insertion_order=false")
     con.execute(f"""
         CREATE OR REPLACE TEMP TABLE selected_institutions AS
-        WITH frame_fields AS (
-            SELECT DISTINCT
-                institution_id,
-                field,
-                w_if_pre,
-                connect_year
-            FROM read_parquet('{_pq(args.exposure_frame)}')
-        ),
-        frame AS (
+        WITH frame AS (
             SELECT
-                institution_id,
-                SUM(COALESCE(w_if_pre, 0))::BIGINT AS pre_period_papers,
-                MIN(connect_year) FILTER (WHERE connect_year IS NOT NULL) AS connect_year
-            FROM frame_fields
-            GROUP BY institution_id
+                i.InstitutionID AS institution_id,
+                COUNT(DISTINCT i.PaperID)::BIGINT AS pre_period_papers
+            FROM read_parquet('{_pq(imputed)}') i
+            JOIN read_parquet('{_pq(args.papers_with_sciscinet)}') p
+              ON i.PaperID = p.paper_id
+            WHERE i.InstitutionID IS NOT NULL
+              AND p.year BETWEEN {pre_start} AND {pre_end}
+            GROUP BY i.InstitutionID
+            HAVING COUNT(DISTINCT i.PaperID) >= {min_pubs}
         )
         SELECT
             f.institution_id AS university_key,
             COALESCE(t.InstitutionName, f.institution_id) AS display_name,
             f.institution_id,
             f.pre_period_papers,
-            f.connect_year
+            NULL::INTEGER AS connect_year
         FROM frame f
         LEFT JOIN read_parquet('{_pq(institution_types)}') t
           ON f.institution_id = t.InstitutionID;
-        DELETE FROM selected_institutions
-        WHERE pre_period_papers < {min_pubs};
 
         CREATE OR REPLACE TEMP TABLE eligible_affiliations AS
         SELECT
@@ -271,7 +268,7 @@ def main() -> None:
             "pre_start": pre_start,
             "pre_end": pre_end,
             "min_author_works": args.min_author_works,
-            "source": str(args.exposure_frame.relative_to(ROOT)),
+            "source": str(args.papers_with_sciscinet.relative_to(ROOT)),
             "definition": (
                 f"institutions with at least {min_pubs:,} distinct pre-period "
                 f"papers in {pre_start}-{pre_end}; author counts include only "
