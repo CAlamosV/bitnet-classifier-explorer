@@ -191,6 +191,24 @@ function currentSummary(d) {
   };
 }
 
+function filterSentence(d) {
+  const params = currentFilterParams();
+  const selected = fieldLabel(params.thresholdField);
+  const target = fieldLabel(d.target_field);
+  const warning = params.thresholdField !== d.target_field
+    ? `<span class="filter-warning">This department defaults to ${escapeHtml(target)}, but the current filter is ${escapeHtml(selected)}.</span>`
+    : "";
+  return `
+    <p class="active-filter">
+      Current OpenAlex filter:
+      <strong>${escapeHtml(selected)} >= ${fmtPct(params.minProb)}</strong>,
+      <strong>${fmtInt(params.minPapers)}+ sample publications</strong>,
+      and <strong>${fmtInt(params.minRosterYears)}+ roster year${params.minRosterYears === 1 ? "" : "s"}</strong>.
+      ${warning}
+    </p>
+  `;
+}
+
 function selectedStatuses() {
   return Array.from(document.querySelectorAll(".status-filter:checked")).map((x) => x.value);
 }
@@ -236,27 +254,42 @@ async function setDepartment(key) {
 
 function summaryHtml(d) {
   const s = currentSummary(d);
+  const rosterMatchPct = fmtPct(s.rosterMatched / Math.max(1, s.rosterCurrentTotal));
+  const openAlexRosterPct = fmtPct(s.inDept / Math.max(1, s.rows.length));
+  const rosterPassPct = fmtPct(s.rosterPass / Math.max(1, s.rosterCurrentTotal));
   return `
     <section class="dept-summary">
       <div>
         <h2>${escapeHtml(d.university)} - ${escapeHtml(d.department)}, ${d.audit_year}</h2>
         <p>
-          Faculty roster: ${fmtInt(s.rosterTotal)} people; ${fmtInt(s.rosterMatched)} have an OpenAlex match in the manual audit.
-          The counts below update with the current filters, including the minimum-years roster filter.
+          Faculty roster: ${fmtInt(s.rosterTotal)} people. The percentages below use the current filters.
         </p>
+        ${filterSentence(d)}
       </div>
-      <div class="summary-grid">
-        <div><strong>${fmtInt(s.rosterCurrentTotal)}</strong><span>roster people after min-years filter</span></div>
-        <div><strong>${fmtInt(s.rosterExcludedYears)}</strong><span>roster people excluded by min-years filter</span></div>
-        <div><strong>${fmtInt(s.rosterPass)}</strong><span>roster people passing OpenAlex filters (${fmtPct(s.rosterPass / Math.max(1, s.rosterCurrentTotal))})</span></div>
-        <div><strong>${fmtInt(s.rosterNotPass)}</strong><span>roster people not passing filters or unmatched</span></div>
-        <div><strong>${fmtInt(s.rows.length)}</strong><span>OpenAlex authors passing filters</span></div>
-        <div><strong>${fmtInt(s.inDept)}</strong><span>also in this department roster (${fmtPct(s.inDept / Math.max(1, s.rows.length))})</span></div>
-        <div><strong>${fmtInt(s.sameDeptOtherYear)}</strong><span>same department in other roster years</span></div>
-        <div><strong>${fmtInt(s.extraNotInCurrentRoster)}</strong><span>extra OpenAlex authors not in this roster (${fmtPct(s.extraNotInCurrentRoster / Math.max(1, s.rows.length))})</span></div>
-        <div><strong>${fmtInt(s.otherRoster)}</strong><span>in another faculty roster in ${d.audit_year}</span></div>
-        <div><strong>${fmtInt(s.noRoster)}</strong><span>not found in faculty rosters</span></div>
+      <div class="summary-grid summary-grid-compact">
+        <div class="summary-primary">
+          <strong>${rosterMatchPct}</strong>
+          <span>faculty roster matched to OpenAlex (${fmtInt(s.rosterMatched)} of ${fmtInt(s.rosterCurrentTotal)})</span>
+        </div>
+        <div class="summary-primary">
+          <strong>${openAlexRosterPct}</strong>
+          <span>displayed OpenAlex authors in this roster (${fmtInt(s.inDept)} of ${fmtInt(s.rows.length)})</span>
+        </div>
+        <div>
+          <strong>${rosterPassPct}</strong>
+          <span>faculty roster passing current OpenAlex filters (${fmtInt(s.rosterPass)} of ${fmtInt(s.rosterCurrentTotal)})</span>
+        </div>
+        <div>
+          <strong>${fmtInt(s.extraNotInCurrentRoster)}</strong>
+          <span>displayed OpenAlex authors not in this roster</span>
+        </div>
       </div>
+      <p class="summary-footnote">
+        Additional displayed OpenAlex authors: ${fmtInt(s.sameDeptOtherYear)} in the same department in other roster years,
+        ${fmtInt(s.otherRoster)} in another faculty roster in ${d.audit_year},
+        and ${fmtInt(s.noRoster)} not found in faculty rosters.
+        The minimum-years filter excludes ${fmtInt(s.rosterExcludedYears)} of ${fmtInt(s.rosterTotal)} roster people.
+      </p>
     </section>
   `;
 }

@@ -282,6 +282,32 @@ body.home {
   color: var(--muted);
   font-size: 12px;
 }
+.summary-grid-compact {
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
+}
+.summary-grid .summary-primary {
+  background: #eef5fc;
+  border-color: #cfe0f0;
+}
+.summary-grid .summary-primary strong {
+  color: var(--accent);
+  font-size: 1.3rem;
+}
+.active-filter {
+  margin-top: 0.35rem;
+  color: #333;
+}
+.filter-warning {
+  display: block;
+  color: #8a6500;
+  font-weight: 600;
+  margin-top: 0.2rem;
+}
+.summary-footnote {
+  margin-top: 0.75rem;
+  color: var(--muted);
+  font-size: 12px;
+}
 .browser-grid {
   display: grid;
   grid-template-columns: 1fr;
