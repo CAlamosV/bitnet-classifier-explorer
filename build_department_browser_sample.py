@@ -382,9 +382,9 @@ def build_data(args: argparse.Namespace) -> dict[str, Any]:
 
     return {
         "built_from": {
-            "imputed_affiliations": str(imputed),
-            "author_fields": str(fields),
-            "bleemer_audit": str(audit_status),
+            "imputed_affiliations": "paper_author_edu_imputed_1940_2000.parquet",
+            "author_fields": "author_field_career.parquet",
+            "bleemer_audit": "department_audit_research_person_status.csv",
         },
         "defaults": {
             "min_papers": 5,
