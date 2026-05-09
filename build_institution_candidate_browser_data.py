@@ -117,6 +117,7 @@ def build_data(args: argparse.Namespace) -> None:
     fields = ROOT / "data" / "intermediate" / "scinet" / "author_preds" / "author_field_career.parquet"
     institution_types = args.openalex_root / "data" / "institution_types.parquet"
     paper_text = args.oafc_root / "data" / "intermediate" / "scinet" / "oafc_text_full.parquet"
+    paper_text_fallback = args.openalex_root / "data" / "paper_text.parquet"
     paper_fields = args.oafc_root / "data" / "intermediate" / "scinet" / "preds_e5_v1v2" / "preds_*.parquet"
     paper_subfields = args.oafc_root / "data" / "intermediate" / "scinet" / "preds_subfield_v1" / "preds_*.parquet"
 
@@ -435,10 +436,14 @@ def build_data(args: argparse.Namespace) -> None:
                 FROM candidate_author_papers
             ),
             selected_work_titles AS (
-                SELECT p.paper_id, ANY_VALUE(t.title) AS title
+                SELECT
+                    p.paper_id,
+                    COALESCE(ANY_VALUE(t.title), ANY_VALUE(tf.Title)) AS title
                 FROM selected_papers p
                 LEFT JOIN read_parquet('{_pq(paper_text)}') t
                   ON p.paper_id = t.paper_id
+                LEFT JOIN read_parquet('{_pq(paper_text_fallback)}') tf
+                  ON p.paper_id = tf.PaperID
                 GROUP BY p.paper_id
             ),
             ranked AS (
@@ -611,7 +616,7 @@ def build_data(args: argparse.Namespace) -> None:
             "author_fields": "author_field_career.parquet",
             "paper_fields": "preds_e5_v1v2/preds_*.parquet",
             "paper_subfields": "preds_subfield_v1/preds_*.parquet",
-            "paper_titles": "oafc_text_full.parquet",
+            "paper_titles": "oafc_text_full.parquet with paper_text.parquet fallback",
         },
         "defaults": {
             "university_key": "stanford",

@@ -15,6 +15,11 @@ const state = {
 
 const $ = (id) => document.getElementById(id);
 
+function setText(id, value) {
+  const el = $(id);
+  if (el) el.textContent = value;
+}
+
 function escapeHtml(s) {
   if (s == null) return "";
   return String(s).replace(/[&<>"]/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"})[c]);
@@ -270,11 +275,11 @@ async function loadSelectedYear() {
     state.payload = null;
     state.rows = [];
     state.filtered = [];
-    $("count-badge").textContent = "no exported candidate file";
+    setText("count-badge", "no exported candidate file");
     $("results").innerHTML = noDataHtml(inst, year);
     return;
   }
-  $("count-badge").textContent = "loading candidates...";
+  setText("count-badge", "loading candidates...");
   $("results").innerHTML = `<div class="loader">Loading ${escapeHtml(meta.university)} ${meta.year}...</div>`;
   const payload = await fetch(meta.data_file).then((r) => {
     if (!r.ok) throw new Error(`Failed to load ${meta.data_file}: ${r.status}`);
@@ -437,7 +442,7 @@ function applyFilters() {
     xs.sort((a, b) => String(a.n || "").localeCompare(String(b.n || "")));
   }
   state.filtered = xs;
-  $("count-badge").textContent = `${fmtInt(xs.length)} OpenAlex authors displayed`;
+  setText("count-badge", `${fmtInt(xs.length)} OpenAlex authors displayed`);
   render();
 }
 
@@ -453,7 +458,9 @@ function attachEvents() {
   ["field-input", "min-works", "min-prob", "evidence-select", "sort-by", "text-search"].forEach((id) => {
     $(id).addEventListener("input", applyFilters);
   });
-  $("reset-btn").onclick = (e) => {
+  const resetBtn = $("reset-btn");
+  if (!resetBtn) return;
+  resetBtn.onclick = (e) => {
     e.preventDefault();
     const defaults = state.meta.defaults;
     const defaultInst = institutionOptions().find((u) =>
