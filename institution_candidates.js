@@ -180,7 +180,7 @@ function evidenceHtml(a) {
 function worksHtml(a) {
   const works = a.wk || [];
   if (!works.length) {
-    return `<span class="table-sub">No classified publications found for this author in the browser data.</span>`;
+    return `<span class="table-sub">No classified papers near ${escapeHtml(state.payload?.year || "")} found for this author in the browser data.</span>`;
   }
   const rows = works.map((w) => {
     const title = w.t || w.p;
@@ -197,7 +197,7 @@ function worksHtml(a) {
   }).join("");
   return `
     <details class="pub-details">
-      <summary>${works.length} classified publications closest to ${escapeHtml(state.payload?.year || "")}</summary>
+      <summary>${works.length} papers closest to ${escapeHtml(state.payload?.year || "")} (any institution)</summary>
       <ol class="mini-list work-list">${rows}</ol>
     </details>
   `;
@@ -380,12 +380,13 @@ function tableHtml() {
       <p class="panel-note">
         These rows are a direct OpenAlex/SciSciNet candidate list for the selected institution-year and field.
         The evidence column separates same-year raw paper evidence, same-year imputed paper evidence, and gap-filled panel years.
+        The papers column shows up to five classified papers closest to the selected year, regardless of institution.
       </p>
       <div class="table-wrap">
         <table class="data-table candidate-table">
           <thead>
             <tr>
-              <th>OpenAlex author</th><th>Works/citations</th><th>Field probabilities</th><th>Subfield probabilities</th><th>Institution-year evidence</th><th>Works</th><th>Classifier span</th>
+              <th>OpenAlex author</th><th>Works/citations</th><th>Field probabilities</th><th>Subfield probabilities</th><th>Institution-year evidence</th><th>5 papers closest to year</th><th>Classifier span</th>
             </tr>
           </thead>
           <tbody id="candidate-rows"></tbody>
