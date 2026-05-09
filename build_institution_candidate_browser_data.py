@@ -19,6 +19,8 @@ OAFC_ROOT = (
 )
 OUT = ROOT / "tools" / "classifier_explorer" / "institution_candidates.json"
 TAXONOMY = ROOT / "tools" / "classifier_explorer" / "taxonomy.json"
+MIN_EXPORT_WORKS = 10
+EXPORT_YEAR_STEP = 5
 
 SCHOOLS = [
     {"key": "stanford", "name": "Stanford", "institution_id": "I97018004"},
@@ -57,6 +59,18 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output", type=Path, default=OUT)
     parser.add_argument("--threads", type=int, default=4)
     parser.add_argument("--memory", default="8GB")
+    parser.add_argument(
+        "--min-export-works",
+        type=int,
+        default=MIN_EXPORT_WORKS,
+        help="Only export authors with at least this many OpenAlex works.",
+    )
+    parser.add_argument(
+        "--year-step",
+        type=int,
+        default=EXPORT_YEAR_STEP,
+        help="Export every Nth panel year starting in 1940.",
+    )
     return parser.parse_args()
 
 
@@ -288,7 +302,7 @@ def build_data(args: argparse.Namespace) -> None:
             ),
             years AS (
                 SELECT CAST(range AS INTEGER) AS year
-                FROM range(1940, 2001)
+                FROM range(1940, 2001, {args.year_step})
             )
             SELECT
                 sp.university_key,
@@ -358,7 +372,8 @@ def build_data(args: argparse.Namespace) -> None:
             LEFT JOIN read_parquet('{_pq(fields)}') f
               ON ay.AuthorID = f.AuthorID
             LEFT JOIN author_subfields sf
-              ON ay.AuthorID = sf.AuthorID;
+              ON ay.AuthorID = sf.AuthorID
+            WHERE COALESCE(ad.works_count, 0) >= {args.min_export_works};
         """)
         rows = con.execute("""
             SELECT
@@ -603,8 +618,13 @@ def build_data(args: argparse.Namespace) -> None:
             "institution_id": "I97018004",
             "year": 1985,
             "field": "ECON",
-            "min_works": 5,
+            "min_works": args.min_export_works,
             "min_field_probability": 0.5,
+        },
+        "export_filters": {
+            "min_openalex_works": args.min_export_works,
+            "year_step": args.year_step,
+            "year_note": "Five-year snapshots from 1940 through 2000.",
         },
         "universities": SCHOOLS,
         "institutions": institutions,

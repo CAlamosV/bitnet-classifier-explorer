@@ -257,7 +257,7 @@ function noDataHtml(inst, year) {
     <div class="empty">
       No precomputed candidate file for ${escapeHtml(label)} in ${escapeHtml(year)}.
       <br>
-      The institution is searchable in the imputed affiliation index, but this static site only loads exported candidate slices.
+      This static site only loads exported five-year panel snapshots for the selected institutions.
     </div>
   `;
 }
@@ -288,9 +288,10 @@ async function loadSelectedYear() {
 }
 
 function currentParams() {
+  const minExportWorks = Number(state.meta?.export_filters?.min_openalex_works || state.meta?.defaults?.min_works || 0);
   return {
     field: selectedField(),
-    minWorks: Number($("min-works").value || 0),
+    minWorks: Math.max(minExportWorks, Number($("min-works").value || 0)),
     minProb: Number($("min-prob").value || 0),
     evidence: $("evidence-select").value,
     sortBy: $("sort-by").value,
@@ -321,6 +322,7 @@ function summaryHtml() {
       <p>
         OpenAlex-only view: authors are included when the author-institution-year panel attaches them to this university in this year.
         Years between an author's evidence years at the same institution are shown even when the author has no paper at that institution in the selected year.
+        This online export keeps five-year snapshots and authors with at least ${fmtInt(state.meta?.export_filters?.min_openalex_works || state.meta?.defaults?.min_works || 0)} OpenAlex works.
         Faculty roster data are not used here.
       </p>
       <p class="active-filter">
