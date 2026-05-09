@@ -1,0 +1,1740 @@
+{
+  "T0_same_doi": [
+    {
+      "cluster_id": "W125103739",
+      "size": 27,
+      "members": [
+        {
+          "paperid": "W45865008",
+          "is_canonical": true,
+          "title": "Maintenance therapy in childhood acute myeloid leukemia.",
+          "doi": "https://doi.org/10.1007/s00277-004-0850-2",
+          "doctype": "article",
+          "cited_by_count": 44,
+          "year": 2004
+        },
+        {
+          "paperid": "W36881043",
+          "is_canonical": false,
+          "title": "Valproic acid: an old drug newly discovered as inhibitor of histone deacetylases.",
+          "doi": "https://doi.org/10.1007/s00277-004-0850-2",
+          "doctype": "review",
+          "cited_by_count": 178,
+          "year": 2004
+        },
+        {
+          "paperid": "W148443711",
+          "is_canonical": false,
+          "title": null,
+          "doi": "https://doi.org/10.1007/s00277-004-0850-2",
+          "doctype": "article",
+          "cited_by_count": 64,
+          "year": 2004
+        },
+        {
+          "paperid": "W1953554483",
+          "is_canonical": false,
+          "title": null,
+          "doi": "https://doi.org/10.1007/s00277-004-0850-2",
+          "doctype": "article",
+          "cited_by_count": 47,
+          "year": 2004
+        },
+        {
+          "paperid": "W2414080829",
+          "is_canonical": false,
+          "title": null,
+          "doi": "https://doi.org/10.1007/s00277-004-0850-2",
+          "doctype": "article",
+          "cited_by_count": 44,
+          "year": 2004
+        },
+        {
+          "paperid": "W2417085353",
+          "is_canonical": false,
+          "title": null,
+          "doi": "https://doi.org/10.1007/s00277-004-0850-2",
+          "doctype": "review",
+          "cited_by_count": 30,
+          "year": 2004
+        }
+      ]
+    },
+    {
+      "cluster_id": "W1495217053",
+      "size": 22,
+      "members": [
+        {
+          "paperid": "W1863440278",
+          "is_canonical": true,
+          "title": "Diethylstilbestrol is a potent inhibitor of store-operated channels and capacitative Ca(2+) influx.",
+          "doi": "https://doi.org/10.1124/mol.66.3",
+          "doctype": "article",
+          "cited_by_count": 253,
+          "year": 2004
+        },
+        {
+          "paperid": "W2123907068",
+          "is_canonical": false,
+          "title": null,
+          "doi": "https://doi.org/10.1124/mol.66.3",
+          "doctype": "article",
+          "cited_by_count": 312,
+          "year": 2004
+        },
+        {
+          "paperid": "W2159739675",
+          "is_canonical": false,
+          "title": null,
+          "doi": "https://doi.org/10.1124/mol.66.3",
+          "doctype": "article",
+          "cited_by_count": 176,
+          "year": 2004
+        },
+        {
+          "paperid": "W2243902904",
+          "is_canonical": false,
+          "title": null,
+          "doi": "https://doi.org/10.1124/mol.66.3",
+          "doctype": "article",
+          "cited_by_count": 81,
+          "year": 2004
+        },
+        {
+          "paperid": "W2346679923",
+          "is_canonical": false,
+          "title": null,
+          "doi": "https://doi.org/10.1124/mol.66.3",
+          "doctype": "article",
+          "cited_by_count": 58,
+          "year": 2004
+        },
+        {
+          "paperid": "W1957599758",
+          "is_canonical": false,
+          "title": "Activation and inhibition of neuronal G protein-gated inwardly rectifying K(+) channels by P2Y nucleotide receptors.",
+          "doi": "https://doi.org/10.1124/mol.66.3",
+          "doctype": "article",
+          "cited_by_count": 49,
+          "year": 2004
+        }
+      ]
+    },
+    {
+      "cluster_id": "W1530184520",
+      "size": 25,
+      "members": [
+        {
+          "paperid": "W967373311",
+          "is_canonical": true,
+          "title": "[Scientific evidence about the role of yogurt and other fermented milks in the healthy diet for the Spanish population].",
+          "doi": "https://doi.org/10.3305/nutr",
+          "doctype": "article",
+          "cited_by_count": 275,
+          "year": 2013
+        },
+        {
+          "paperid": "W2135479788",
+          "is_canonical": false,
+          "title": "Effects of milk supplementation with conjugated linoleic acid on weight control and body composition in healthy overweight people.",
+          "doi": "https://doi.org/10.3305/nutr",
+          "doctype": "article",
+          "cited_by_count": 29,
+          "year": 2013
+        },
+        {
+          "paperid": "W2153525929",
+          "is_canonical": false,
+          "title": "Effects of a low-fat diet with antioxidant supplementation on biochemical markers of multiple sclerosis long-term care residents.",
+          "doi": "https://doi.org/10.3305/nutr",
+          "doctype": "article",
+          "cited_by_count": 23,
+          "year": 2013
+        },
+        {
+          "paperid": "W2156551299",
+          "is_canonical": false,
+          "title": "Obesity among adolescents in five Arab countries; relative to gender and age.",
+          "doi": "https://doi.org/10.3305/nutr",
+          "doctype": "article",
+          "cited_by_count": 22,
+          "year": 2013
+        },
+        {
+          "paperid": "W192123279",
+          "is_canonical": false,
+          "title": "[Nutritional status, metabolic syndrome and insulin resistance in children from Santiago (Chile)].",
+          "doi": "https://doi.org/10.3305/nutr",
+          "doctype": "article",
+          "cited_by_count": 21,
+          "year": 2013
+        },
+        {
+          "paperid": "W3023247779",
+          "is_canonical": false,
+          "title": "[Reference curves for assessing the physical growth of male Wistar rats].",
+          "doi": "https://doi.org/10.3305/nutr",
+          "doctype": "article",
+          "cited_by_count": 21,
+          "year": 2013
+        }
+      ]
+    },
+    {
+      "cluster_id": "W1965432356",
+      "size": 57,
+      "members": [
+        {
+          "paperid": "W2068647890",
+          "is_canonical": true,
+          "title": "International Association for Dental Research",
+          "doi": "https://doi.org/10.1177/00220345410200020701",
+          "doctype": "article",
+          "cited_by_count": 8,
+          "year": 1941
+        },
+        {
+          "paperid": "W3214124294",
+          "is_canonical": false,
+          "title": "International Association for Dental Research",
+          "doi": "https://doi.org/10.1177/00220345470260020901",
+          "doctype": "article",
+          "cited_by_count": 5,
+          "year": 1947
+        },
+        {
+          "paperid": "W4212932964",
+          "is_canonical": false,
+          "title": "International Association for Dental Research",
+          "doi": "https://doi.org/10.1177/00220345420210021301",
+          "doctype": "article",
+          "cited_by_count": 5,
+          "year": 1942
+        },
+        {
+          "paperid": "W4297939041",
+          "is_canonical": false,
+          "title": "International Association for Dental Research",
+          "doi": "https://doi.org/10.1177/00220345510300040901",
+          "doctype": "article",
+          "cited_by_count": 5,
+          "year": 1951
+        },
+        {
+          "paperid": "W2048401975",
+          "is_canonical": false,
+          "title": "International Association for Dental Research",
+          "doi": "https://doi.org/10.1177/00220345480270060901",
+          "doctype": "article",
+          "cited_by_count": 4,
+          "year": 1948
+        },
+        {
+          "paperid": "W2030015134",
+          "is_canonical": false,
+          "title": "International Association for Dental Research",
+          "doi": "https://doi.org/10.1177/00220345550340050801",
+          "doctype": "article",
+          "cited_by_count": 3,
+          "year": 1955
+        }
+      ]
+    }
+  ],
+  "T1_same_pmid": [
+    {
+      "cluster_id": "W2030658224",
+      "size": 2,
+      "members": [
+        {
+          "paperid": "W2030658224",
+          "is_canonical": true,
+          "title": "A half blooded knot for wound closure",
+          "doi": "https://doi.org/10.1308/rcsann.2012.94.4.275",
+          "doctype": "article",
+          "cited_by_count": 0,
+          "year": 2012
+        },
+        {
+          "paperid": "W3141483174",
+          "is_canonical": false,
+          "title": "A half blooded knot for wound closure",
+          "doi": "https://doi.org/10.1308/003588412x13171221591259e",
+          "doctype": "article",
+          "cited_by_count": 0,
+          "year": 2012
+        }
+      ]
+    },
+    {
+      "cluster_id": "W2041076215",
+      "size": 3,
+      "members": [
+        {
+          "paperid": "W3216128682",
+          "is_canonical": true,
+          "title": "Is Schizophrenia Linked to Chromosome 1q?",
+          "doi": "https://doi.org/10.1126/science.1076508",
+          "doctype": "article",
+          "cited_by_count": 10,
+          "year": 2002
+        },
+        {
+          "paperid": "W2041076215",
+          "is_canonical": false,
+          "title": "Is Schizophrenia Linked to Chromosome 1q?",
+          "doi": "https://doi.org/10.1126/science.1075331",
+          "doctype": "article",
+          "cited_by_count": 9,
+          "year": 2002
+        },
+        {
+          "paperid": "W4243272734",
+          "is_canonical": false,
+          "title": "Is Schizophrenia Linked to Chromosome 1q?",
+          "doi": "https://doi.org/10.1126/science.298.5602.2279o",
+          "doctype": "article",
+          "cited_by_count": 0,
+          "year": 2002
+        }
+      ]
+    },
+    {
+      "cluster_id": "W2081099528",
+      "size": 2,
+      "members": [
+        {
+          "paperid": "W3000168737",
+          "is_canonical": true,
+          "title": "Series Introduction: Autoimmune diseases: are markers ready for prediction?",
+          "doi": "https://doi.org/10.1172/jci200114234",
+          "doctype": "article",
+          "cited_by_count": 63,
+          "year": 2001
+        },
+        {
+          "paperid": "W2081099528",
+          "is_canonical": false,
+          "title": "Series Introduction: Autoimmune diseases: are markers ready for prediction?",
+          "doi": "https://doi.org/10.1172/jci14234",
+          "doctype": "review",
+          "cited_by_count": 39,
+          "year": 2001
+        }
+      ]
+    },
+    {
+      "cluster_id": "W2764431531",
+      "size": 2,
+      "members": [
+        {
+          "paperid": "W2764517945",
+          "is_canonical": true,
+          "title": "Plant sterol and stanol margarines and health",
+          "doi": "https://doi.org/10.1136/bmj.320.7238.861",
+          "doctype": "review",
+          "cited_by_count": 736,
+          "year": 2000
+        },
+        {
+          "paperid": "W2764431531",
+          "is_canonical": false,
+          "title": "Plant sterol and stanol margarines and health",
+          "doi": "https://doi.org/10.1136/ewjm.173.1.43",
+          "doctype": "review",
+          "cited_by_count": 113,
+          "year": 2000
+        }
+      ]
+    }
+  ],
+  "T2_same_pmcid": [
+    {
+      "cluster_id": "W189256358",
+      "size": 10,
+      "members": [
+        {
+          "paperid": "W1979519564",
+          "is_canonical": true,
+          "title": "Pathology Quiz Case 1",
+          "doi": "https://doi.org/10.1001/archoto.2009.227-a",
+          "doctype": "article",
+          "cited_by_count": 2,
+          "year": 2010
+        },
+        {
+          "paperid": "W189256358",
+          "is_canonical": false,
+          "title": "Pathology Quiz Case 1",
+          "doi": "https://doi.org/10.1001/archoto.2010.8-a",
+          "doctype": "article",
+          "cited_by_count": 1,
+          "year": 2010
+        },
+        {
+          "paperid": "W2125456713",
+          "is_canonical": false,
+          "title": "Pathology Quiz Case 1",
+          "doi": "https://doi.org/10.1001/archoto.2010.137-a",
+          "doctype": "article",
+          "cited_by_count": 1,
+          "year": 2010
+        },
+        {
+          "paperid": "W1964310062",
+          "is_canonical": false,
+          "title": "Pathology Quiz Case 1",
+          "doi": "https://doi.org/10.1001/archoto.2010.163-a",
+          "doctype": "article",
+          "cited_by_count": 0,
+          "year": 2010
+        },
+        {
+          "paperid": "W2395786861",
+          "is_canonical": false,
+          "title": "Pathology Quiz Case 1",
+          "doi": "https://doi.org/10.1001/archoto.2010.85-a",
+          "doctype": "article",
+          "cited_by_count": 0,
+          "year": 2010
+        },
+        {
+          "paperid": "W2397438237",
+          "is_canonical": false,
+          "title": "Pathology Quiz Case 1",
+          "doi": "https://doi.org/10.1001/archoto.2010.45-a",
+          "doctype": "article",
+          "cited_by_count": 0,
+          "year": 2010
+        }
+      ]
+    },
+    {
+      "cluster_id": "W1972228886",
+      "size": 7,
+      "members": [
+        {
+          "paperid": "W1972228886",
+          "is_canonical": true,
+          "title": "Clinical and Chemical Studies in Human Lactation.--VII",
+          "doi": "https://doi.org/10.1136/bmj.1.4876.1410",
+          "doctype": "article",
+          "cited_by_count": 139,
+          "year": 1954
+        },
+        {
+          "paperid": "W2266864723",
+          "is_canonical": false,
+          "title": "Clinical and Chemical Studies in Human Lactation.--I, II, and III",
+          "doi": "https://doi.org/10.1136/bmj.1.4855.175",
+          "doctype": "article",
+          "cited_by_count": 118,
+          "year": 1954
+        },
+        {
+          "paperid": "W2738553288",
+          "is_canonical": false,
+          "title": "Clinical and Chemical Studies in Human Lactation--VI",
+          "doi": "https://doi.org/10.1136/bmj.1.4867.912",
+          "doctype": "article",
+          "cited_by_count": 42,
+          "year": 1954
+        },
+        {
+          "paperid": "W2068519818",
+          "is_canonical": false,
+          "title": "Clinical and Chemical Studies in Human Lactation--IV and V",
+          "doi": "https://doi.org/10.1136/bmj.1.4856.249",
+          "doctype": "article",
+          "cited_by_count": 41,
+          "year": 1954
+        },
+        {
+          "paperid": "W2626263877",
+          "is_canonical": false,
+          "title": "Clinical and Chemical Studies in Human Lactation.\u2014VIII",
+          "doi": "https://doi.org/10.1136/bmj.2.4892.844",
+          "doctype": "article",
+          "cited_by_count": 27,
+          "year": 1954
+        },
+        {
+          "paperid": "W2255553556",
+          "is_canonical": false,
+          "title": "Clinical and Chemical Studies in Human Lactation.\u2014IX",
+          "doi": "https://doi.org/10.1136/bmj.2.4902.1447",
+          "doctype": "article",
+          "cited_by_count": 22,
+          "year": 1954
+        }
+      ]
+    },
+    {
+      "cluster_id": "W1994143301",
+      "size": 5,
+      "members": [
+        {
+          "paperid": "W2052542781",
+          "is_canonical": true,
+          "title": "Chemotherapy of Bronchitis",
+          "doi": "https://doi.org/10.1136/bmj.2.5707.481-a",
+          "doctype": "article",
+          "cited_by_count": 11,
+          "year": 1970
+        },
+        {
+          "paperid": "W4252283072",
+          "is_canonical": false,
+          "title": "Chemotherapy of bronchitis.",
+          "doi": "https://doi.org/10.1136/bmj.1.5689.125",
+          "doctype": "article",
+          "cited_by_count": 9,
+          "year": 1970
+        },
+        {
+          "paperid": "W2067440357",
+          "is_canonical": false,
+          "title": "Chemotherapy of Bronchitis",
+          "doi": "https://doi.org/10.1136/bmj.2.5707.481-b",
+          "doctype": "article",
+          "cited_by_count": 3,
+          "year": 1970
+        },
+        {
+          "paperid": "W1994143301",
+          "is_canonical": false,
+          "title": "Chemotherapy of bronchitis.",
+          "doi": "https://doi.org/10.1136/bmj.2.5701.112",
+          "doctype": "article",
+          "cited_by_count": 2,
+          "year": 1970
+        },
+        {
+          "paperid": "W2056251741",
+          "is_canonical": false,
+          "title": "Chemotherapy of bronchitis.",
+          "doi": "https://doi.org/10.1136/bmj.1.5698.760-c",
+          "doctype": "article",
+          "cited_by_count": 1,
+          "year": 1970
+        }
+      ]
+    },
+    {
+      "cluster_id": "W2547102891",
+      "size": 3,
+      "members": [
+        {
+          "paperid": "W2547102891",
+          "is_canonical": true,
+          "title": "Acupuncture for neck disorders",
+          "doi": "https://doi.org/10.1016/s0415-6412(16)30120-5",
+          "doctype": "article",
+          "cited_by_count": 9,
+          "year": 2016
+        },
+        {
+          "paperid": "W3023194200",
+          "is_canonical": false,
+          "title": "Acupuncture for neck disorders",
+          "doi": "https://doi.org/10.1002/14651858.cd004870.pub4",
+          "doctype": "review",
+          "cited_by_count": 188,
+          "year": 2016
+        },
+        {
+          "paperid": "W2567223402",
+          "is_canonical": false,
+          "title": "Acupuncture for neck disorders",
+          "doi": "https://doi.org/10.1002/14651858.cd004870.pub5",
+          "doctype": "review",
+          "cited_by_count": 10,
+          "year": 2016
+        }
+      ]
+    }
+  ],
+  "T4_same_title": [
+    {
+      "cluster_id": "W1963857697",
+      "size": 117,
+      "members": [
+        {
+          "paperid": "W4252028607",
+          "is_canonical": true,
+          "title": "Other Books and Pamphlets on Journalistic Subjects",
+          "doi": "https://doi.org/10.1177/107769907905600229",
+          "doctype": "article",
+          "cited_by_count": 7,
+          "year": 1979
+        },
+        {
+          "paperid": "W1963857697",
+          "is_canonical": false,
+          "title": "Other Books and Pamphlets on Journalistic Subjects",
+          "doi": "https://doi.org/10.1177/107769906304000118",
+          "doctype": "article",
+          "cited_by_count": 1,
+          "year": 1963
+        },
+        {
+          "paperid": "W4253734969",
+          "is_canonical": false,
+          "title": "Other Books and Pamphlets on Journalistic Subjects",
+          "doi": "https://doi.org/10.1177/107769907405100427",
+          "doctype": "article",
+          "cited_by_count": 1,
+          "year": 1974
+        },
+        {
+          "paperid": "W1978335168",
+          "is_canonical": false,
+          "title": "Other Books and Pamphlets, on Journalistic Subject",
+          "doi": "https://doi.org/10.1177/107769905903600331",
+          "doctype": "article",
+          "cited_by_count": 0,
+          "year": 1959
+        },
+        {
+          "paperid": "W2056495763",
+          "is_canonical": false,
+          "title": "Other Books and Pamphlets on Journalistic Subjects",
+          "doi": "https://doi.org/10.1177/107769907505200227",
+          "doctype": "article",
+          "cited_by_count": 0,
+          "year": 1975
+        },
+        {
+          "paperid": "W2144161265",
+          "is_canonical": false,
+          "title": "Other Books and Pamphlets on Journalistic Subjects",
+          "doi": "https://doi.org/10.1177/107769908005700226",
+          "doctype": "article",
+          "cited_by_count": 0,
+          "year": 1980
+        }
+      ]
+    },
+    {
+      "cluster_id": "W2069886764",
+      "size": 263,
+      "members": [
+        {
+          "paperid": "W2069886764",
+          "is_canonical": true,
+          "title": "Legal Developments in Marketing",
+          "doi": "https://doi.org/10.1177/002224296703100119",
+          "doctype": "article",
+          "cited_by_count": 13,
+          "year": 1967
+        },
+        {
+          "paperid": "W4251832558",
+          "is_canonical": false,
+          "title": "Legal Developments in Marketing",
+          "doi": "https://doi.org/10.2307/1250120",
+          "doctype": "article",
+          "cited_by_count": 7,
+          "year": 1975
+        },
+        {
+          "paperid": "W4251025826",
+          "is_canonical": false,
+          "title": "Legal Developments in Marketing",
+          "doi": "https://doi.org/10.1177/002224297503900214",
+          "doctype": "article",
+          "cited_by_count": 3,
+          "year": 1975
+        },
+        {
+          "paperid": "W4238925790",
+          "is_canonical": false,
+          "title": "Legal Developments in Marketing",
+          "doi": "https://doi.org/10.2307/1251046",
+          "doctype": "article",
+          "cited_by_count": 2,
+          "year": 1972
+        },
+        {
+          "paperid": "W4243398102",
+          "is_canonical": false,
+          "title": "Legal Developments in Marketing",
+          "doi": "https://doi.org/10.1177/002224297003400316",
+          "doctype": "article",
+          "cited_by_count": 2,
+          "year": 1970
+        },
+        {
+          "paperid": "W4248885390",
+          "is_canonical": false,
+          "title": "Legal Developments in Marketing",
+          "doi": "https://doi.org/10.1177/002224299105500207",
+          "doctype": "article",
+          "cited_by_count": 2,
+          "year": 1991
+        }
+      ]
+    },
+    {
+      "cluster_id": "W4205131671",
+      "size": 389,
+      "members": [
+        {
+          "paperid": "W4248323571",
+          "is_canonical": true,
+          "title": "EIW volume 21 issue 12 Cover and Front matter",
+          "doi": "https://doi.org/10.1017/s008425590003672x",
+          "doctype": "article",
+          "cited_by_count": 2,
+          "year": 1978
+        },
+        {
+          "paperid": "W4205187361",
+          "is_canonical": false,
+          "title": "CHH volume 65 issue 4 Cover and Front matter",
+          "doi": "https://doi.org/10.1017/s0009640700118785",
+          "doctype": "article",
+          "cited_by_count": 1,
+          "year": 1996
+        },
+        {
+          "paperid": "W4205583686",
+          "is_canonical": false,
+          "title": "CHH volume 66 issue 4 Cover and Front matter",
+          "doi": "https://doi.org/10.1017/s0009640700108042",
+          "doctype": "article",
+          "cited_by_count": 1,
+          "year": 1997
+        },
+        {
+          "paperid": "W4205851354",
+          "is_canonical": false,
+          "title": "ROP volume 49 issue 4 Cover and Front matter",
+          "doi": "https://doi.org/10.1017/s0034670500035403",
+          "doctype": "article",
+          "cited_by_count": 1,
+          "year": 1987
+        },
+        {
+          "paperid": "W4206462018",
+          "is_canonical": false,
+          "title": "BAZ volume 18 issue 3 Cover and Front matter",
+          "doi": "https://doi.org/10.1017/s0004972700008170",
+          "doctype": "article",
+          "cited_by_count": 1,
+          "year": 1978
+        },
+        {
+          "paperid": "W4206511343",
+          "is_canonical": false,
+          "title": "BAZ volume 30 issue 3 Cover and Front matter",
+          "doi": "https://doi.org/10.1017/s0004972700002033",
+          "doctype": "article",
+          "cited_by_count": 1,
+          "year": 1984
+        }
+      ]
+    },
+    {
+      "cluster_id": "W4205155804",
+      "size": 176,
+      "members": [
+        {
+          "paperid": "W4238859739",
+          "is_canonical": true,
+          "title": "AGS volume 62 issue 2 Cover and Front matter",
+          "doi": "https://doi.org/10.1017/s0021859600060743",
+          "doctype": "article",
+          "cited_by_count": 2,
+          "year": 1964
+        },
+        {
+          "paperid": "W4205390081",
+          "is_canonical": false,
+          "title": "AGS volume 33 issue 2 Front matter",
+          "doi": "https://doi.org/10.1017/s0021859600010613",
+          "doctype": "article",
+          "cited_by_count": 1,
+          "year": 1943
+        },
+        {
+          "paperid": "W4205868743",
+          "is_canonical": false,
+          "title": "EAG volume 2 issue 1 Cover and Front matter",
+          "doi": "https://doi.org/10.1017/s0014479700003914",
+          "doctype": "article",
+          "cited_by_count": 1,
+          "year": 1966
+        },
+        {
+          "paperid": "W4213151120",
+          "is_canonical": false,
+          "title": "AGS volume 62 issue 3 Cover and Front matter",
+          "doi": "https://doi.org/10.1017/s0021859600042349",
+          "doctype": "article",
+          "cited_by_count": 1,
+          "year": 1964
+        },
+        {
+          "paperid": "W4213295758",
+          "is_canonical": false,
+          "title": "EAG volume 4 issue 1 Cover and Front matter",
+          "doi": "https://doi.org/10.1017/s0014479700022286",
+          "doctype": "article",
+          "cited_by_count": 1,
+          "year": 1968
+        },
+        {
+          "paperid": "W4214766467",
+          "is_canonical": false,
+          "title": "HYG volume 54 issue 2 Cover and Front matter",
+          "doi": "https://doi.org/10.1017/s0022172400044405",
+          "doctype": "article",
+          "cited_by_count": 1,
+          "year": 1956
+        }
+      ]
+    }
+  ],
+  "T5_shared_author_fuzzy_title": [
+    {
+      "cluster_id": "W2750367985",
+      "size": 2190,
+      "members": [
+        {
+          "paperid": "W2750367985",
+          "is_canonical": true,
+          "title": "CCDC 133856: Experimental Crystal Structure Determination",
+          "doi": "https://doi.org/10.5517/cc4h8yt",
+          "doctype": "dataset",
+          "cited_by_count": 0,
+          "year": 2000
+        },
+        {
+          "paperid": "W2768241390",
+          "is_canonical": false,
+          "title": "CCDC 145976: Experimental Crystal Structure Determination",
+          "doi": "https://doi.org/10.5517/cc4wwxs",
+          "doctype": "dataset",
+          "cited_by_count": 0,
+          "year": 2000
+        },
+        {
+          "paperid": "W2769045635",
+          "is_canonical": false,
+          "title": "CCDC 146089: Experimental Crystal Structure Determination",
+          "doi": "https://doi.org/10.5517/cc4x0kl",
+          "doctype": "dataset",
+          "cited_by_count": 0,
+          "year": 2000
+        },
+        {
+          "paperid": "W2769609819",
+          "is_canonical": false,
+          "title": "CCDC 145741: Experimental Crystal Structure Determination",
+          "doi": "https://doi.org/10.5517/cc4wnbz",
+          "doctype": "dataset",
+          "cited_by_count": 0,
+          "year": 2000
+        },
+        {
+          "paperid": "W2769770835",
+          "is_canonical": false,
+          "title": "CCDC 146572: Experimental Crystal Structure Determination",
+          "doi": "https://doi.org/10.5517/cc4xj4p",
+          "doctype": "dataset",
+          "cited_by_count": 0,
+          "year": 2000
+        },
+        {
+          "paperid": "W2769857710",
+          "is_canonical": false,
+          "title": "CCDC 141483: Experimental Crystal Structure Determination",
+          "doi": "https://doi.org/10.5517/cc4r6z1",
+          "doctype": "dataset",
+          "cited_by_count": 0,
+          "year": 2000
+        }
+      ]
+    },
+    {
+      "cluster_id": "W2892730667",
+      "size": 153,
+      "members": [
+        {
+          "paperid": "W2892730667",
+          "is_canonical": true,
+          "title": "CCDC 114163: Experimental Crystal Structure Determination",
+          "doi": "https://doi.org/10.5517/cc3tspc",
+          "doctype": "dataset",
+          "cited_by_count": 0,
+          "year": 1999
+        },
+        {
+          "paperid": "W2892816078",
+          "is_canonical": false,
+          "title": "CCDC 111764: Experimental Crystal Structure Determination",
+          "doi": "https://doi.org/10.5517/cc3r99f",
+          "doctype": "dataset",
+          "cited_by_count": 0,
+          "year": 1999
+        },
+        {
+          "paperid": "W4397051386",
+          "is_canonical": false,
+          "title": "CCDC 108293: Experimental Crystal Structure Determination",
+          "doi": "https://doi.org/10.5517/cc3mpbq",
+          "doctype": "dataset",
+          "cited_by_count": 0,
+          "year": 1999
+        },
+        {
+          "paperid": "W4397051458",
+          "is_canonical": false,
+          "title": "CCDC 113234: Experimental Crystal Structure Determination",
+          "doi": "https://doi.org/10.5517/cc3stqd",
+          "doctype": "dataset",
+          "cited_by_count": 0,
+          "year": 1999
+        },
+        {
+          "paperid": "W4397052627",
+          "is_canonical": false,
+          "title": "CCDC 114162: Experimental Crystal Structure Determination",
+          "doi": "https://doi.org/10.5517/cc3tsnb",
+          "doctype": "dataset",
+          "cited_by_count": 0,
+          "year": 1999
+        },
+        {
+          "paperid": "W4397053170",
+          "is_canonical": false,
+          "title": "CCDC 122121: Experimental Crystal Structure Determination",
+          "doi": "https://doi.org/10.5517/cc432dp",
+          "doctype": "dataset",
+          "cited_by_count": 0,
+          "year": 1999
+        }
+      ]
+    },
+    {
+      "cluster_id": "W2893714626",
+      "size": 170,
+      "members": [
+        {
+          "paperid": "W4397070444",
+          "is_canonical": true,
+          "title": "CCDC 112954: Experimental Crystal Structure Determination",
+          "doi": "https://doi.org/10.5517/cc3sjp2",
+          "doctype": "dataset",
+          "cited_by_count": 1,
+          "year": 1999
+        },
+        {
+          "paperid": "W2893714626",
+          "is_canonical": false,
+          "title": "CCDC 131737: Experimental Crystal Structure Determination",
+          "doi": "https://doi.org/10.5517/cc4f2l6",
+          "doctype": "dataset",
+          "cited_by_count": 0,
+          "year": 1999
+        },
+        {
+          "paperid": "W4397051940",
+          "is_canonical": false,
+          "title": "CCDC 102315: Experimental Crystal Structure Determination",
+          "doi": "https://doi.org/10.5517/cc3fghg",
+          "doctype": "dataset",
+          "cited_by_count": 0,
+          "year": 1999
+        },
+        {
+          "paperid": "W4397057420",
+          "is_canonical": false,
+          "title": "CCDC 129922: Experimental Crystal Structure Determination",
+          "doi": "https://doi.org/10.5517/cc4c61q",
+          "doctype": "dataset",
+          "cited_by_count": 0,
+          "year": 1999
+        },
+        {
+          "paperid": "W4397061923",
+          "is_canonical": false,
+          "title": "CCDC 134554: Experimental Crystal Structure Determination",
+          "doi": "https://doi.org/10.5517/cc4j0g3",
+          "doctype": "dataset",
+          "cited_by_count": 0,
+          "year": 1999
+        },
+        {
+          "paperid": "W4397064521",
+          "is_canonical": false,
+          "title": "CCDC 115479: Experimental Crystal Structure Determination",
+          "doi": "https://doi.org/10.5517/cc3w548",
+          "doctype": "dataset",
+          "cited_by_count": 0,
+          "year": 1999
+        }
+      ]
+    },
+    {
+      "cluster_id": "W4205550842",
+      "size": 255,
+      "members": [
+        {
+          "paperid": "W4250403677",
+          "is_canonical": true,
+          "title": "RCE volume 21 issue 223 Cover and Front matter",
+          "doi": "https://doi.org/10.1017/s0020860400067619",
+          "doctype": "article",
+          "cited_by_count": 1,
+          "year": 1981
+        },
+        {
+          "paperid": "W4233359272",
+          "is_canonical": false,
+          "title": "IRC volume 62 issue 723 Cover and Front matter",
+          "doi": "https://doi.org/10.1017/s0035336100170546",
+          "doctype": "article",
+          "cited_by_count": 1,
+          "year": 1980
+        },
+        {
+          "paperid": "W4235680434",
+          "is_canonical": false,
+          "title": "IRC volume 54 issue 642 Cover and Front matter",
+          "doi": "https://doi.org/10.1017/s0035336100109281",
+          "doctype": "article",
+          "cited_by_count": 1,
+          "year": 1972
+        },
+        {
+          "paperid": "W4236252343",
+          "is_canonical": false,
+          "title": "RCE volume 24 issue 241 Cover and Front matter",
+          "doi": "https://doi.org/10.1017/s0020860400076269",
+          "doctype": "article",
+          "cited_by_count": 1,
+          "year": 1984
+        },
+        {
+          "paperid": "W4242596101",
+          "is_canonical": false,
+          "title": "IRC volume 54 issue 641 Cover and Front matter",
+          "doi": "https://doi.org/10.1017/s003533610011216x",
+          "doctype": "article",
+          "cited_by_count": 1,
+          "year": 1972
+        },
+        {
+          "paperid": "W4245132501",
+          "is_canonical": false,
+          "title": "RCE volume 3 issue 30 Cover and Front matter",
+          "doi": "https://doi.org/10.1017/s0020860400014145",
+          "doctype": "article",
+          "cited_by_count": 1,
+          "year": 1963
+        }
+      ]
+    }
+  ],
+  "T6_doi_suffix_variant": [
+    {
+      "cluster_id": "W1965355745",
+      "size": 23,
+      "members": [
+        {
+          "paperid": "W2017596712",
+          "is_canonical": true,
+          "title": "Dinucleotide repeat polymorphism at the D6S89 locus",
+          "doi": "https://doi.org/10.1093/nar/18.14.4301",
+          "doctype": "article",
+          "cited_by_count": 63,
+          "year": 1990
+        },
+        {
+          "paperid": "W2060933371",
+          "is_canonical": false,
+          "title": "Dinucleotide repeat polymorphism at the D14S43 locus",
+          "doi": "https://doi.org/10.1093/nar/19.7.1722",
+          "doctype": "article",
+          "cited_by_count": 25,
+          "year": 1991
+        },
+        {
+          "paperid": "W2006844597",
+          "is_canonical": false,
+          "title": "Dinucleotide repeat polymorphism at the D11S35 locus",
+          "doi": "https://doi.org/10.1093/nar/18.19.5921-a",
+          "doctype": "article",
+          "cited_by_count": 23,
+          "year": 1990
+        },
+        {
+          "paperid": "W2004207239",
+          "is_canonical": false,
+          "title": "Dinucleotide repeat polymorphism at the DXYS1X locus",
+          "doi": "https://doi.org/10.1093/nar/19.7.1721",
+          "doctype": "article",
+          "cited_by_count": 21,
+          "year": 1991
+        },
+        {
+          "paperid": "W2043569921",
+          "is_canonical": false,
+          "title": "Dinucleotide repeat polymorphism at the D11S527 locus",
+          "doi": "https://doi.org/10.1093/nar/19.17.4790-a",
+          "doctype": "article",
+          "cited_by_count": 18,
+          "year": 1991
+        },
+        {
+          "paperid": "W2021945722",
+          "is_canonical": false,
+          "title": "Dinucleotide repeat polymorphism at the DXS538 locus",
+          "doi": "https://doi.org/10.1093/nar/19.5.1161-a",
+          "doctype": "article",
+          "cited_by_count": 16,
+          "year": 1991
+        }
+      ]
+    },
+    {
+      "cluster_id": "W2054072921",
+      "size": 15,
+      "members": [
+        {
+          "paperid": "W2079724107",
+          "is_canonical": true,
+          "title": "NOTICES OF RECENT PUBLICATIONS",
+          "doi": "https://doi.org/10.1093/brain/84.1.131",
+          "doctype": "article",
+          "cited_by_count": 1,
+          "year": 1961
+        },
+        {
+          "paperid": "W2091813660",
+          "is_canonical": false,
+          "title": "NOTICES OF RECENT PUBLICATIONS",
+          "doi": "https://doi.org/10.1093/brain/85.1.166-a",
+          "doctype": "article",
+          "cited_by_count": 1,
+          "year": 1962
+        },
+        {
+          "paperid": "W4248302053",
+          "is_canonical": false,
+          "title": "NOTICES OF RECENT PUBLICATIONS",
+          "doi": "https://doi.org/10.1093/brain/85.1.171",
+          "doctype": "article",
+          "cited_by_count": 1,
+          "year": 1962
+        },
+        {
+          "paperid": "W2054072921",
+          "is_canonical": false,
+          "title": "NOTICES OF RECENT PUBLICATIONS",
+          "doi": "https://doi.org/10.1093/brain/84.4.710",
+          "doctype": "article",
+          "cited_by_count": 0,
+          "year": 1961
+        },
+        {
+          "paperid": "W2077395089",
+          "is_canonical": false,
+          "title": "NOTICES OF RECENT PUBLICATIONS",
+          "doi": "https://doi.org/10.1093/brain/85.1.168-b",
+          "doctype": "article",
+          "cited_by_count": 0,
+          "year": 1962
+        },
+        {
+          "paperid": "W2758569030",
+          "is_canonical": false,
+          "title": "NOTICES OF RECENT PUBLICATINS",
+          "doi": "https://doi.org/10.1093/brain/85.2.406-b",
+          "doctype": "article",
+          "cited_by_count": 0,
+          "year": 1962
+        }
+      ]
+    },
+    {
+      "cluster_id": "W2480899568",
+      "size": 20,
+      "members": [
+        {
+          "paperid": "W4230444789",
+          "is_canonical": true,
+          "title": "Case 104A - European Communities - Regime for the Importation, Sale and Distribution of Bananas",
+          "doi": "https://doi.org/10.1163/2211-4386_rwwtogatt_wtogatt_cs104a",
+          "doctype": "dataset",
+          "cited_by_count": 2,
+          "year": 2014
+        },
+        {
+          "paperid": "W4244021127",
+          "is_canonical": false,
+          "title": "Case 104F - European Communities - Import Regime for the Importation, Sale and Distribution of Bananas",
+          "doi": "https://doi.org/10.1163/2211-4386_rwwtogatt_wtogatt_cs104f",
+          "doctype": "dataset",
+          "cited_by_count": 2,
+          "year": 2014
+        },
+        {
+          "paperid": "W2485201740",
+          "is_canonical": false,
+          "title": "Case 104A - European Communities - Regime for the Importation, Sale and Distribution of Bananas",
+          "doi": "https://doi.org/10.1163/wtogatt-cs104a",
+          "doctype": "book-chapter",
+          "cited_by_count": 1,
+          "year": 2014
+        },
+        {
+          "paperid": "W4238640498",
+          "is_canonical": false,
+          "title": "Case 104D - European Communities - Regime for the Importation, Sale and Distribution of Bananas - Recourse to DSU Article 21.5 by Ecuador",
+          "doi": "https://doi.org/10.1163/2211-4386_rwwtogatt_wtogatt_cs104d",
+          "doctype": "dataset",
+          "cited_by_count": 1,
+          "year": 2014
+        },
+        {
+          "paperid": "W2480899568",
+          "is_canonical": false,
+          "title": "Case 104I - European Communities - Regime for the Importation, Sale and Distribution of Bananas - Second Recourse to Article 21.5 of the DSU by Ecuador and Recourse to Article 21.5 of the DSU by the United States",
+          "doi": "https://doi.org/10.1163/wtogatt-cs104i",
+          "doctype": "book-chapter",
+          "cited_by_count": 0,
+          "year": 2014
+        },
+        {
+          "paperid": "W2485717756",
+          "is_canonical": false,
+          "title": "Case 104G - European Communities - Regime for the Importation, Sale and Distribution of Bananas - Second Recourse to Article 21.5 of the DSU by Ecuador",
+          "doi": "https://doi.org/10.1163/wtogatt-cs104g",
+          "doctype": "book-chapter",
+          "cited_by_count": 0,
+          "year": 2014
+        }
+      ]
+    },
+    {
+      "cluster_id": "W4232450908",
+      "size": 15,
+      "members": [
+        {
+          "paperid": "W4232702940",
+          "is_canonical": true,
+          "title": "Reply from the Author",
+          "doi": "https://doi.org/10.1212/wnl.41.7.1165-a",
+          "doctype": "article",
+          "cited_by_count": 2,
+          "year": 1991
+        },
+        {
+          "paperid": "W4232450908",
+          "is_canonical": false,
+          "title": "Reply from the Author",
+          "doi": "https://doi.org/10.1212/wnl.41.4.611-c",
+          "doctype": "article",
+          "cited_by_count": 0,
+          "year": 1991
+        },
+        {
+          "paperid": "W4235643117",
+          "is_canonical": false,
+          "title": "Reply from the Authors",
+          "doi": "https://doi.org/10.1212/wnl.41.6.955-b",
+          "doctype": "article",
+          "cited_by_count": 0,
+          "year": 1991
+        },
+        {
+          "paperid": "W4235813948",
+          "is_canonical": false,
+          "title": "Reply from the Authors",
+          "doi": "https://doi.org/10.1212/wnl.41.7.1166",
+          "doctype": "article",
+          "cited_by_count": 0,
+          "year": 1991
+        },
+        {
+          "paperid": "W4238990505",
+          "is_canonical": false,
+          "title": "Reply from the Authors",
+          "doi": "https://doi.org/10.1212/wnl.41.6.954-a",
+          "doctype": "article",
+          "cited_by_count": 0,
+          "year": 1991
+        },
+        {
+          "paperid": "W4240257541",
+          "is_canonical": false,
+          "title": "Reply from the Authors",
+          "doi": "https://doi.org/10.1212/wnl.41.4.610-a",
+          "doctype": "article",
+          "cited_by_count": 0,
+          "year": 1991
+        }
+      ]
+    }
+  ],
+  "T7_cross_year_same_doi": [
+    {
+      "cluster_id": "W130661782",
+      "size": 5,
+      "members": [
+        {
+          "paperid": "W248727501",
+          "is_canonical": true,
+          "title": "Prim\u00e4rer Hyperparathyreoidismus",
+          "doi": "https://doi.org/10.1007/s00104-009-1717-9",
+          "doctype": "article",
+          "cited_by_count": 3,
+          "year": 2010
+        },
+        {
+          "paperid": "W4255141070",
+          "is_canonical": false,
+          "title": "Prim\u00e4rer Hyperparathyreoidismus",
+          "doi": "https://doi.org/10.1055/s-0030-1267477",
+          "doctype": "review",
+          "cited_by_count": 2,
+          "year": 2010
+        },
+        {
+          "paperid": "W3189680386",
+          "is_canonical": false,
+          "title": null,
+          "doi": "https://doi.org/10.1007/s00104-009-1717-9",
+          "doctype": "article",
+          "cited_by_count": 1,
+          "year": 2009
+        },
+        {
+          "paperid": "W130661782",
+          "is_canonical": false,
+          "title": "Prim\u00e4rer Hyperparathyreoidismus",
+          "doi": "https://doi.org/10.1016/b978-3-437-24680-7.10034-0",
+          "doctype": "book-chapter",
+          "cited_by_count": 0,
+          "year": 2010
+        },
+        {
+          "paperid": "W4237476571",
+          "is_canonical": false,
+          "title": "Prim\u00e4rer Hyperparathyreoidismus",
+          "doi": "https://doi.org/10.1016/b978-3-437-42501-1.50222-2",
+          "doctype": "book-chapter",
+          "cited_by_count": 0,
+          "year": 2010
+        }
+      ]
+    },
+    {
+      "cluster_id": "W2331921856",
+      "size": 6,
+      "members": [
+        {
+          "paperid": "W2331921856",
+          "is_canonical": true,
+          "title": "Do No Harm",
+          "doi": "https://doi.org/10.1213/ane.0b013e3181937b9b",
+          "doctype": "article",
+          "cited_by_count": 7,
+          "year": 2009
+        },
+        {
+          "paperid": "W4242045518",
+          "is_canonical": false,
+          "title": "Do No Harm",
+          "doi": "https://doi.org/10.1787/9789264046245-en",
+          "doctype": "book",
+          "cited_by_count": 8,
+          "year": 2009
+        },
+        {
+          "paperid": "W2775984115",
+          "is_canonical": false,
+          "title": "Do no harm",
+          "doi": null,
+          "doctype": "article",
+          "cited_by_count": 0,
+          "year": 2009
+        },
+        {
+          "paperid": "W4239435307",
+          "is_canonical": false,
+          "title": "Do no harm",
+          "doi": "https://doi.org/10.1097/01.orn.0000343886.01423.6b",
+          "doctype": "article",
+          "cited_by_count": 0,
+          "year": 2009
+        },
+        {
+          "paperid": "W4241142318",
+          "is_canonical": false,
+          "title": null,
+          "doi": "https://doi.org/10.1213/ane.0b013e3181937b9b",
+          "doctype": "article",
+          "cited_by_count": 0,
+          "year": 2008
+        },
+        {
+          "paperid": "W85172396",
+          "is_canonical": false,
+          "title": "Do No Harm",
+          "doi": null,
+          "doctype": "article",
+          "cited_by_count": 0,
+          "year": 2009
+        }
+      ]
+    },
+    {
+      "cluster_id": "W2399210485",
+      "size": 4,
+      "members": [
+        {
+          "paperid": "W2399210485",
+          "is_canonical": true,
+          "title": "Gastro\ufffdsophageale Refluxkrankheit",
+          "doi": "https://doi.org/10.1007/s00104-004-0955-0",
+          "doctype": "review",
+          "cited_by_count": 2,
+          "year": 2005
+        },
+        {
+          "paperid": "W3193164779",
+          "is_canonical": false,
+          "title": null,
+          "doi": "https://doi.org/10.1007/s00104-004-0955-0",
+          "doctype": "article",
+          "cited_by_count": 3,
+          "year": 2004
+        },
+        {
+          "paperid": "W2440542041",
+          "is_canonical": false,
+          "title": "Gastro\u00f6sophageale Refluxkrankheit",
+          "doi": "https://doi.org/10.1024/0369-8394.94.48.1899",
+          "doctype": "review",
+          "cited_by_count": 0,
+          "year": 2005
+        },
+        {
+          "paperid": "W4255163517",
+          "is_canonical": false,
+          "title": "Gastro\u00f6sophageale Refluxkrankheit",
+          "doi": "https://doi.org/10.1007/3-540-26660-7_1",
+          "doctype": "book-chapter",
+          "cited_by_count": 0,
+          "year": 2005
+        }
+      ]
+    },
+    {
+      "cluster_id": "W3174313610",
+      "size": 10,
+      "members": [
+        {
+          "paperid": "W4285713823",
+          "is_canonical": true,
+          "title": "The eROSITA Final Equatorial Depth Survey (eFEDS)",
+          "doi": "https://doi.org/10.1051/0004-6361/202141266",
+          "doctype": "article",
+          "cited_by_count": 221,
+          "year": 2022
+        },
+        {
+          "paperid": "W3176140341",
+          "is_canonical": false,
+          "title": "The eROSITA Final Equatorial-Depth Survey (eFEDS)",
+          "doi": "https://doi.org/10.1051/0004-6361/202141631",
+          "doctype": "article",
+          "cited_by_count": 75,
+          "year": 2022
+        },
+        {
+          "paperid": "W4221019817",
+          "is_canonical": false,
+          "title": "The eROSITA Final Equatorial-Depth Survey (eFEDS)",
+          "doi": "https://doi.org/10.1051/0004-6361/202141643",
+          "doctype": "article",
+          "cited_by_count": 58,
+          "year": 2022
+        },
+        {
+          "paperid": "W3207008373",
+          "is_canonical": false,
+          "title": "The eROSITA Final Equatorial-Depth Survey (eFEDS)",
+          "doi": "https://doi.org/10.1051/0004-6361/202142460",
+          "doctype": "article",
+          "cited_by_count": 39,
+          "year": 2022
+        },
+        {
+          "paperid": "W3205943598",
+          "is_canonical": false,
+          "title": "The eROSITA Final Equatorial-Depth Survey (eFEDS)",
+          "doi": "https://doi.org/10.1051/0004-6361/202142462",
+          "doctype": "article",
+          "cited_by_count": 36,
+          "year": 2022
+        },
+        {
+          "paperid": "W4292136310",
+          "is_canonical": false,
+          "title": "The eROSITA Final Equatorial Depth Survey (eFEDS)",
+          "doi": "https://doi.org/10.1051/0004-6361/202243101",
+          "doctype": "article",
+          "cited_by_count": 35,
+          "year": 2022
+        }
+      ]
+    }
+  ],
+  "T9_cross_year_shared_author": [
+    {
+      "cluster_id": "W1991753542",
+      "size": 15,
+      "members": [
+        {
+          "paperid": "W2025148972",
+          "is_canonical": true,
+          "title": "Anniversaries in 1969 of Interest to Physicists",
+          "doi": "https://doi.org/10.1119/1.1975400",
+          "doctype": "article",
+          "cited_by_count": 3,
+          "year": 1969
+        },
+        {
+          "paperid": "W2053165317",
+          "is_canonical": false,
+          "title": "Anniversaries in 1965 of Interest to Physicists",
+          "doi": "https://doi.org/10.1119/1.1971328",
+          "doctype": "article",
+          "cited_by_count": 3,
+          "year": 1965
+        },
+        {
+          "paperid": "W1991753542",
+          "is_canonical": false,
+          "title": "Anniversaries in 1968 of Interest to Physicists",
+          "doi": "https://doi.org/10.1119/1.1974407",
+          "doctype": "article",
+          "cited_by_count": 1,
+          "year": 1968
+        },
+        {
+          "paperid": "W1999975552",
+          "is_canonical": false,
+          "title": "Anniversaries in 1962 of Interest to Physicists",
+          "doi": "https://doi.org/10.1119/1.1942019",
+          "doctype": "article",
+          "cited_by_count": 1,
+          "year": 1962
+        },
+        {
+          "paperid": "W2022106645",
+          "is_canonical": false,
+          "title": "Anniversaries in 1966 of Interest to Physicists",
+          "doi": "https://doi.org/10.1119/1.1972740",
+          "doctype": "article",
+          "cited_by_count": 1,
+          "year": 1966
+        },
+        {
+          "paperid": "W2023251791",
+          "is_canonical": false,
+          "title": "Anniversaries in 1967 of Interest to Physicists",
+          "doi": "https://doi.org/10.1119/1.1974070",
+          "doctype": "article",
+          "cited_by_count": 1,
+          "year": 1967
+        }
+      ]
+    },
+    {
+      "cluster_id": "W2610469832",
+      "size": 20,
+      "members": [
+        {
+          "paperid": "W2610469832",
+          "is_canonical": true,
+          "title": "NORWEGIAN STUDIES: LANGUAGE AND EARLY LITERATURE",
+          "doi": "https://doi.org/10.1163/22224297-90002295",
+          "doctype": "article",
+          "cited_by_count": 0,
+          "year": 1979
+        },
+        {
+          "paperid": "W4232496552",
+          "is_canonical": false,
+          "title": "NORWEGIAN STUDIES: LANGUAGE AND EARLY LITERATURE",
+          "doi": "https://doi.org/10.1163/22224297-90003657",
+          "doctype": "article",
+          "cited_by_count": 0,
+          "year": 1982
+        },
+        {
+          "paperid": "W4232806729",
+          "is_canonical": false,
+          "title": "NORWEGIAN STUDIES: LANGUAGE AND EARLY LITERATURE",
+          "doi": "https://doi.org/10.1163/22224297-90002987",
+          "doctype": "article",
+          "cited_by_count": 0,
+          "year": 1989
+        },
+        {
+          "paperid": "W4232889806",
+          "is_canonical": false,
+          "title": "NORWEGIAN STUDIES: LANGUAGE AND EARLY LITERATURE",
+          "doi": "https://doi.org/10.1163/22224297-90003210",
+          "doctype": "article",
+          "cited_by_count": 0,
+          "year": 1992
+        },
+        {
+          "paperid": "W4235191188",
+          "is_canonical": false,
+          "title": "NORWEGIAN STUDIES: LANGUAGE AND EARLY LITERATURE",
+          "doi": "https://doi.org/10.1163/22224297-90003286",
+          "doctype": "article",
+          "cited_by_count": 0,
+          "year": 1993
+        },
+        {
+          "paperid": "W4235217568",
+          "is_canonical": false,
+          "title": "NORWEGIAN STUDIES: LANGUAGE AND EARLY LITERATURE",
+          "doi": "https://doi.org/10.1163/22224297-90002759",
+          "doctype": "article",
+          "cited_by_count": 0,
+          "year": 1986
+        }
+      ]
+    },
+    {
+      "cluster_id": "W2611069766",
+      "size": 16,
+      "members": [
+        {
+          "paperid": "W2611069766",
+          "is_canonical": true,
+          "title": "LATIN-AMERICAN STUDIES: SPANISH-AMERICAN LITERATURE THE COLONIAL PERIOD",
+          "doi": "https://doi.org/10.1163/22224297-90002193",
+          "doctype": "article",
+          "cited_by_count": 0,
+          "year": 1978
+        },
+        {
+          "paperid": "W4229621565",
+          "is_canonical": false,
+          "title": "LATIN-AMERICAN STUDIES: SPANISH-AMERICAN LITERATURE THE COLONIAL PERIOD",
+          "doi": "https://doi.org/10.1163/22224297-90002117",
+          "doctype": "article",
+          "cited_by_count": 0,
+          "year": 1977
+        },
+        {
+          "paperid": "W4233091465",
+          "is_canonical": false,
+          "title": "LATIN-AMERICAN STUDIES: SPANISH-AMERICAN LITERATURE: THE COLONIAL PERIOD",
+          "doi": "https://doi.org/10.1163/22224297-90002500",
+          "doctype": "article",
+          "cited_by_count": 0,
+          "year": 1983
+        },
+        {
+          "paperid": "W4233596755",
+          "is_canonical": false,
+          "title": "LATIN-AMERICAN STUDIES: SPANISH-AMERICAN LITERATURE THE COLONIAL PERIOD",
+          "doi": "https://doi.org/10.1163/22224297-90002423",
+          "doctype": "article",
+          "cited_by_count": 0,
+          "year": 1981
+        },
+        {
+          "paperid": "W4233739767",
+          "is_canonical": false,
+          "title": "LATIN-AMERICAN STUDIES: SPANISH-AMERICAN LITERATURE THE COLONIAL PERIOD",
+          "doi": "https://doi.org/10.1163/22224297-90002266",
+          "doctype": "article",
+          "cited_by_count": 0,
+          "year": 1979
+        },
+        {
+          "paperid": "W4241347803",
+          "is_canonical": false,
+          "title": "LATIN-AMERICAN STUDIES: SPANISH-AMERICAN LITERATURE THE COLONIAL PERIOD",
+          "doi": "https://doi.org/10.1163/22224297-90001824",
+          "doctype": "article",
+          "cited_by_count": 0,
+          "year": 1973
+        }
+      ]
+    },
+    {
+      "cluster_id": "W4232450449",
+      "size": 18,
+      "members": [
+        {
+          "paperid": "W4232450449",
+          "is_canonical": true,
+          "title": "FRENCH STUDIES: THE ROMANTIC ERA",
+          "doi": "https://doi.org/10.1163/22224297-90001812",
+          "doctype": "article",
+          "cited_by_count": 0,
+          "year": 1973
+        },
+        {
+          "paperid": "W4233352792",
+          "is_canonical": false,
+          "title": "FRENCH STUDIES: THE ROMANTIC ERA",
+          "doi": "https://doi.org/10.1163/22224297-90001548",
+          "doctype": "article",
+          "cited_by_count": 0,
+          "year": 1969
+        },
+        {
+          "paperid": "W4233750944",
+          "is_canonical": false,
+          "title": "FRENCH STUDIES: THE ROMANTIC ERA",
+          "doi": "https://doi.org/10.1163/22224297-90003608",
+          "doctype": "article",
+          "cited_by_count": 0,
+          "year": 1982
+        },
+        {
+          "paperid": "W4234384267",
+          "is_canonical": false,
+          "title": "FRENCH STUDIES: THE ROMANTIC ERA",
+          "doi": "https://doi.org/10.1163/22224297-90002480",
+          "doctype": "article",
+          "cited_by_count": 0,
+          "year": 1983
+        },
+        {
+          "paperid": "W4237690317",
+          "is_canonical": false,
+          "title": "FRENCH STUDIES: THE ROMANTIC ERA",
+          "doi": "https://doi.org/10.1163/22224297-90001877",
+          "doctype": "article",
+          "cited_by_count": 0,
+          "year": 1974
+        },
+        {
+          "paperid": "W4238225543",
+          "is_canonical": false,
+          "title": "FRENCH STUDIES: THE ROMANTIC ERA",
+          "doi": "https://doi.org/10.1163/22224297-90001492",
+          "doctype": "article",
+          "cited_by_count": 0,
+          "year": 1968
+        }
+      ]
+    }
+  ]
+}

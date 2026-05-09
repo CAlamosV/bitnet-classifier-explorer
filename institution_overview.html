@@ -18,8 +18,10 @@
     <a class="active" href="institution_overview.html">Institution overview</a>
     <a href="institution_candidates.html">Institution candidates</a>
     <a href="departments.html">Department browser</a>
-    <a href="duplicates_overview.html">Duplicate overview</a>
-    <a href="duplicates.html">Duplicate explorer</a>
+    <a href="duplicates_overview.html">Author dup. overview</a>
+    <a href="duplicates.html">Author dup. explorer</a>
+    <a href="work_duplicates_overview.html">Work dup. overview</a>
+    <a href="work_duplicates.html">Work dup. explorer</a>
 </nav>
 </header>
 
@@ -49,8 +51,8 @@
         <div class="bars">
           <div class="bar-row">
             <span class="bar-label">Correct school</span>
-            <span class="bar"><span class="fill ours" style="width: 89.0%"></span></span>
-            <span class="bar-val">89%</span>
+            <span class="bar"><span class="fill ours" style="width: 91.1%"></span></span>
+            <span class="bar-val">91%</span>
           </div>
           <div class="bar-row">
             <span class="bar-label">Other school</span>
@@ -59,8 +61,9 @@
           </div>
         </div>
         <p class="chart-note">
-          This is the original imputed affiliation file. We tested broader
-          home-institution rules, but keep this more conservative version for now.
+          The current imputed affiliation file uses a window-based modal vote
+          that can override individual raw rows when an author's surrounding
+          publication history is strongly concentrated at a different school.
         </p>
       </div>
       <div class="chart-card">
@@ -69,12 +72,12 @@
         <div class="bars">
           <div class="bar-row">
             <span class="bar-label">Correct school</span>
-            <span class="bar"><span class="fill ours" style="width: 71.7%"></span></span>
-            <span class="bar-val">72%</span>
+            <span class="bar"><span class="fill ours" style="width: 75.4%"></span></span>
+            <span class="bar-val">75%</span>
           </div>
           <div class="bar-row">
             <span class="bar-label">Coauthor school</span>
-            <span class="bar"><span class="fill baseline" style="width: 12.7%"></span></span>
+            <span class="bar"><span class="fill baseline" style="width: 12.8%"></span></span>
             <span class="bar-val">13%</span>
           </div>
         </div>
@@ -128,18 +131,26 @@
       complete employer-history file.
     </p>
     <p>
-      For each <code>PaperID, AuthorID</code> slot, if the raw data lists
-      multiple education institutions, we keep the one that appears most often
-      in that author's publication history. This produces at most one education
-      institution per author on a paper.
+      For each <code>PaperID, AuthorID</code> slot we collect the author's
+      education-affiliation observations in a &plusmn;3-year window around the
+      publication year. The most-common institution in that window (the
+      &ldquo;modal&rdquo; institution) is the candidate. If it accounts for at
+      least 75&percnt; of the window observations and shows up on at least 4
+      papers, we assign it &mdash; even if a single raw row on the paper says
+      something different. This is what catches obvious coauthor-leak rows
+      where a visiting Stanford coauthor's affiliation gets propagated to
+      every author on the paper.
     </p>
     <p>
-      Missing paper-author affiliations are filled conservatively. First, we
-      look one year before and one year after the publication year and fill only
-      when the nearest observations on both sides agree. Remaining gaps are
-      filled only when the same institution appears before and after the gap in
-      the author's observed career. We do not use the wider ten-year home-institution
-      rule for the main website data.
+      If the strong-window rule does not fire, we fall back to the raw
+      paper-author-institution row. Slots that have no raw row at all get
+      filled by the same window vote at a more permissive threshold
+      (50&percnt; of observations, at least 2 papers). Slots with neither raw
+      nor window evidence get filled only when the author's nearest pre- and
+      post-gap years agree on a single institution. Roughly a third of the
+      file is from raw rows, a third is window-filled, and a small share is
+      long-distance-interpolated; less than 1&percnt; is window-strong
+      override.
     </p>
   </section>
 

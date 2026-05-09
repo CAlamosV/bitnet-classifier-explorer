@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Work-deduplication explorer</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<header>
+  <div class="header-titles">
+    <h1>Work-deduplication classifier &mdash; browse clusters</h1>
+    <nav>
+      <a href="index.html">Paper overview</a>
+      <a href="explorer.html">Paper explorer</a>
+      <a href="work_sample.html">Work sample</a>
+      <a href="author_overview.html">Author overview</a>
+      <a href="authors.html">Author explorer</a>
+      <a href="institution_overview.html">Institution overview</a>
+      <a href="institution_candidates.html">Institution candidates</a>
+      <a href="departments.html">Department browser</a>
+      <a href="duplicates_overview.html">Author dup. overview</a>
+      <a href="duplicates.html">Author dup. explorer</a>
+      <a href="work_duplicates_overview.html">Work dup. overview</a>
+      <a class="active" href="work_duplicates.html">Work dup. explorer</a>
+    </nav>
+  </div>
+  <p class="meta">
+    <span id="count-badge">loading&hellip;</span>
+    &nbsp;|&nbsp;
+    <a href="#" id="random-btn">randomize</a>
+    &nbsp;|&nbsp;
+    <a href="#" id="reset-btn">reset filters</a>
+  </p>
+</header>
+
+<aside class="filters">
+  <h2>Filters</h2>
+
+  <fieldset>
+    <legend>Acceptance tier (cluster's strongest)</legend>
+    <select id="filter-tier">
+      <option value="">&mdash; any &mdash;</option>
+    </select>
+  </fieldset>
+
+  <fieldset>
+    <legend>Cluster size</legend>
+    <select id="filter-size">
+      <option value="">&mdash; any &mdash;</option>
+      <option value="2">2 members</option>
+      <option value="3">3 members</option>
+      <option value="4-5">4&ndash;5 members</option>
+      <option value="6-10">6&ndash;10 members</option>
+      <option value="11+">11+ members</option>
+    </select>
+  </fieldset>
+
+  <fieldset>
+    <legend>Canonical year</legend>
+    <select id="filter-year">
+      <option value="">&mdash; any &mdash;</option>
+      <option value="pre-1950">pre-1950</option>
+      <option value="1950-1979">1950&ndash;1979</option>
+      <option value="1980-1999">1980&ndash;1999</option>
+      <option value="2000-2009">2000&ndash;2009</option>
+      <option value="2010-">2010+</option>
+    </select>
+  </fieldset>
+
+  <fieldset>
+    <legend>Cross-year cluster?</legend>
+    <select id="filter-crossyear">
+      <option value="">&mdash; any &mdash;</option>
+      <option value="yes">spans &gt;1 year</option>
+      <option value="no">single-year only</option>
+    </select>
+  </fieldset>
+
+  <fieldset>
+    <legend>Sort</legend>
+    <select id="sort-by">
+      <option value="random">Random</option>
+      <option value="size_desc">Largest cluster first</option>
+      <option value="size_asc">Smallest cluster first</option>
+      <option value="cites_desc">Most-cited member first</option>
+      <option value="cites_asc">Least-cited member first</option>
+    </select>
+  </fieldset>
+
+  <fieldset>
+    <legend>Search</legend>
+    <input type="text" id="text-search" placeholder="title / DOI / paperid" />
+  </fieldset>
+</aside>
+
+<main id="results">
+  <div class="loader">Loading duplicate clusters&hellip;</div>
+</main>
+
+<footer>
+  <p>Built from <code>work_duplicates.json</code> (sample of ~1500 clusters,
+  stratified by acceptance tier). Each row is a duplicate cluster: every
+  PaperID listed is judged to refer to the same publication. The first
+  member is the canonical PaperID. Click a PaperID to open its OpenAlex
+  API record. See the
+  <a href="work_duplicates_overview.html">overview</a> for the methodology.</p>
+</footer>
+
+<script src="work_duplicates.js"></script>
+</body>
+</html>

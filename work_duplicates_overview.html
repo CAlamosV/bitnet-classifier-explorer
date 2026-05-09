@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Work deduplication — overview</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body class="home">
+<header class="home-header">
+  <h1>Deduplicating OpenAlex paper IDs</h1>
+  <nav>
+    <a href="index.html">Paper overview</a>
+    <a href="explorer.html">Paper explorer</a>
+    <a href="work_sample.html">Work sample</a>
+    <a href="author_overview.html">Author overview</a>
+    <a href="authors.html">Author explorer</a>
+    <a href="institution_overview.html">Institution overview</a>
+    <a href="institution_candidates.html">Institution candidates</a>
+    <a href="departments.html">Department browser</a>
+    <a href="duplicates_overview.html">Author dup. overview</a>
+    <a href="duplicates.html">Author dup. explorer</a>
+    <a class="active" href="work_duplicates_overview.html">Work dup. overview</a>
+    <a href="work_duplicates.html">Work dup. explorer</a>
+  </nav>
+</header>
+
+<main class="home-main">
+  <section class="hero">
+    <p class="lede">
+      OpenAlex assigns each paper a single PaperID, but the same real
+      publication often appears under <strong>multiple PaperIDs</strong> —
+      the journal version vs. an indexed preprint, two near-identical
+      crossref records, MAG/PubMed double-coverage, or a year-typo on a
+      reissue. We built a multi-tier duplicate-detection pipeline that
+      collapses
+      <strong id="stat-member-ids">…</strong> conflicting OpenAlex PaperIDs
+      into <strong id="stat-clusters">…</strong> deduplicated clusters
+      across the full <strong>1900–2024</strong> publication record,
+      removing <strong id="stat-excess">…</strong> excess IDs.
+    </p>
+  </section>
+
+  <section class="metrics">
+    <h2>Headline numbers</h2>
+    <p>
+      The pipeline runs as 125 independent per-year sub-pipelines plus
+      a single global stitcher. Per-year clusters that share a paperid
+      (because adjacent-year title slices were unioned in to catch
+      year-drift duplicates) are merged at the stitch step.
+    </p>
+    <div id="headline-grid" class="charts">loading…</div>
+  </section>
+
+  <section class="how">
+    <h2>How candidate pairs are generated</h2>
+    <p>
+      A duplicate pair must first be a <em>candidate</em>. We use seven
+      blocking signals; the same pair may fire under multiple. All
+      blocking is restricted to ``block_size &le; 200`` to keep memory
+      tractable on modern years where stub titles like
+      <code>"powered by nict"</code> (34,815 papers in 2017 alone)
+      otherwise blow up.
+    </p>
+    <ul>
+      <li><strong>T0 same DOI</strong> — same normalized DOI in the same year.
+        Strongest signal; near-perfect precision.</li>
+      <li><strong>T1 same PMID</strong>, <strong>T2 same PMCID</strong>,
+        <strong>T3 same MAG&nbsp;ID</strong> — three identifier-equality
+        signals in the same year. T1 / T2 / T3 are tiny in practice; OpenAlex
+        already merges them at ingest, but the block catches the residual
+        slipthrough.</li>
+      <li><strong>T4 same title-key</strong> — same Unicode-normalised,
+        whitespace-collapsed, lowercase title with token count
+        <code>&ge; 3</code> and length <code>&gt; 5</code>, in the same year.
+        Title-key blocks of size <code>&le; 3</code> become <strong>T4a</strong>
+        (high precision); <code>4 &ndash; 10</code> become <strong>T4b</strong>
+        (allowed iff neither title is in the 84-key frontmatter blocklist).</li>
+      <li><strong>T5 shared author + fuzzy title</strong> — within the same
+        year, two papers share at least one OpenAlex AuthorID and have
+        <code>token_set_ratio &ge; 95</code> on titles, plus length-ratio
+        and token-count guards.</li>
+      <li><strong>T6 DOI suffix variant</strong> — DOIs are equal except
+        for a trailing single-letter or punctuation+letter suffix
+        (e.g. <code>10.1000/abc</code> vs <code>10.1000/abc-a</code>);
+        common Crossref publishing pattern.</li>
+      <li><strong>T7 cross-year same DOI</strong> — same normalized DOI
+        in adjacent years; catches reissue / preprint year-drift.</li>
+      <li><strong>T9 cross-year shared author + fuzzy title</strong> —
+        shared author + <code>token_set_ratio &ge; 95</code> across
+        adjacent years (window <code>&plusmn;1</code>); catches the
+        same paper indexed once as preprint, once as published version,
+        with different paperids.</li>
+    </ul>
+  </section>
+
+  <section class="how">
+    <h2>The acceptance tiers</h2>
+    <p>
+      Pairs are evaluated in priority order; the first tier that fires
+      becomes the pair&rsquo;s <code>accepted_tier</code>. Lower number
+      means stronger evidence. A cluster&rsquo;s
+      <em>best</em> tier is the lowest-priority tier among its pairs.
+    </p>
+    <table class="tier-table">
+      <thead>
+        <tr>
+          <th>Priority</th>
+          <th>Tier</th>
+          <th>Rule (key conditions)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>0</td><td><code>T0_same_doi</code></td>
+            <td>Same normalized DOI, same year &mdash; the strongest evidence
+                we have.</td></tr>
+        <tr><td>1</td><td><code>T1_same_pmid</code></td>
+            <td>Same PubMed ID, same year. Tiny in practice (OpenAlex
+                already merges these at ingest); tier exists to catch
+                residual slipthrough.</td></tr>
+        <tr><td>2</td><td><code>T2_same_pmcid</code></td>
+            <td>Same PubMed Central ID, same year. Same caveat as T1.</td></tr>
+        <tr><td>3</td><td><code>T3_same_mag</code></td>
+            <td>Same Microsoft Academic Graph ID, same year. Almost never
+                fires (MAG IDs are mostly null in OpenAlex).</td></tr>
+        <tr><td>4</td><td><code>T7_cross_year_same_doi</code></td>
+            <td>Same normalized DOI across &plusmn;1 year. Catches reissue
+                and preprint-vs-published year drift.</td></tr>
+        <tr><td>5</td><td><code>T6_doi_suffix_variant</code></td>
+            <td>DOIs equal except for trailing single-letter / punct
+                suffix; Crossref publishing pattern.</td></tr>
+        <tr><td>6</td><td><code>T4_same_title</code></td>
+            <td>Same Unicode-normalised title key, same year, length
+                <code>&gt; 5</code>, token count <code>&ge; 3</code>,
+                <em>not</em> in 84-key frontmatter blocklist.<br/>
+                Step 07 internally splits this on per-pair block size:
+                <code>T4a_same_title_small_block</code> (block size
+                <code>&le; 3</code>) vs <code>T4b_same_title_medium_block</code>
+                (block size <code>4&ndash;10</code>). The cluster
+                explorer collapses both into the one <code>T4</code>
+                class because per-pair block_size is not preserved in
+                the global crosswalk.</td></tr>
+        <tr><td>7</td><td><code>T5_shared_author_fuzzy_title</code></td>
+            <td>Same year + <code>&ge; 1</code> shared OpenAlex AuthorID +
+                <code>token_set_ratio &ge; 95</code> on titles + token /
+                length guards.</td></tr>
+        <tr><td>8</td><td><code>T9_cross_year_shared_author</code></td>
+            <td>Same as T5, but spanning adjacent years
+                (window <code>&plusmn;1</code>) with stricter
+                <code>tsr &ge; 95</code> and length-ratio guards.</td></tr>
+      </tbody>
+    </table>
+    <p>
+      Connected components on the accepted-pair graph form clusters
+      (DuckDB label-propagation, ~10 min on 16.7M nodes / 16.8M edges).
+      Each cluster&rsquo;s canonical PaperID is the member with the
+      richest metadata (non-null title &gt; non-null DOI &gt; doctype
+      <code>article|journal-article</code> &gt; highest cite count &gt;
+      most references &gt; lowest paperid).
+    </p>
+  </section>
+
+  <section class="how">
+    <h2>Pipeline structure</h2>
+    <p>
+      Implementation lives at <code>build/work_cleaning/</code>; each
+      step is one numbered Python script.
+    </p>
+    <ol>
+      <li><strong>01_attach_titles.py</strong> &mdash; per-year
+        scan of the 114 GB <code>papers.parquet</code> +
+        <code>paper_text.parquet</code> &rarr;
+        <code>year_{Y}/papers_with_titles.parquet</code> (paper-level
+        metadata + normalized title key).</li>
+      <li><strong>02_candidates_t0_t4.py</strong> &mdash; T0 / T1 / T2 /
+        T3 / T4 same-year blocking. <code>--block-size-cap 200</code>
+        prevents stub-title runaway (an early version segfaulted at
+        710M same-title pairs in year 2017 from 7 stub-title blocks
+        alone).</li>
+      <li><strong>03_features.py</strong> &mdash; per-pair feature
+        engineering: shared authors, shared institutions, title
+        similarity, DOI prefix match, year gap, doctype agreement,
+        cite-count overlap.</li>
+      <li><strong>04_candidates_t5_t6.py</strong> &mdash; T5 (shared
+        author + fuzzy title same year) and T6 (DOI suffix variant)
+        candidates, deduplicated against the T0/T4 pool.</li>
+      <li><strong>05_candidates_t7.py</strong> &mdash; T7 cross-year
+        same-DOI pairs. Reads adjacent-year title files when present.</li>
+      <li><strong>06_candidates_t9.py</strong> &mdash; T9 cross-year
+        shared-author + fuzzy-title pairs. Anchored on the focal year;
+        skips with an empty-schema parquet when the year is outside
+        the 1940-2000 imputed-edges coverage.</li>
+      <li><strong>07_tier_rules.py</strong> &mdash; applies tier
+        acceptance rules + 84-key frontmatter blocklist; runs DuckDB
+        label-propagation per year; picks canonical paperid; writes
+        <code>year_{Y}/crosswalk.parquet</code> and
+        <code>canonical_papers.parquet</code>.</li>
+      <li><strong>08_stitch_years.py</strong> &mdash; concatenates
+        the 125 per-year crosswalks, runs label-propagation a second
+        time on the union graph (paperids that appear in adjacent-year
+        slices because of the T7/T9 cross-year window), re-picks
+        canonical against unified metadata, writes
+        <code>global/crosswalk.parquet</code> and
+        <code>global/canonical_papers.parquet</code>.</li>
+    </ol>
+    <p>
+      The whole pipeline runs as a SLURM array on Sherlock: one task
+      per year (steps 02&ndash;07), then one final stitcher job.
+      Total wall time on 1900&ndash;2024: ~3 hours of array compute +
+      ~10 min stitch.
+    </p>
+  </section>
+
+  <section class="how">
+    <h2>What kinds of clusters each tier catches</h2>
+    <p>
+      Below are real example clusters from the 1900&ndash;2024 run, one
+      block per tier in priority order. The
+      <a href="work_duplicates.html">work-dup explorer</a> has many more.
+    </p>
+    <div id="tier-examples" class="tier-examples">loading&hellip;</div>
+  </section>
+
+  <section class="how">
+    <h2>Stats by tier</h2>
+    <p>
+      How accepted pairs and clusters break down by tier. A
+      cluster&rsquo;s tier is its strongest edge (lowest-priority tier
+      among its pairs).
+    </p>
+    <div id="tier-stats">loading&hellip;</div>
+  </section>
+
+  <section class="how" id="explore">
+    <h2>Browse the clusters</h2>
+    <p>
+      The <a href="work_duplicates.html">work-dup explorer</a> shows
+      ~1500 clusters stratified by best tier so you can see the kind of
+      merges each rule produces. For each cluster you get every member
+      PaperID, its title, DOI, doctype, year, cite count, and which
+      paperid was picked as canonical.
+    </p>
+    <p style="text-align: center; margin: 2rem 0 1rem;">
+      <a class="cta" href="work_duplicates.html">Open work-dup explorer</a>
+    </p>
+  </section>
+</main>
+
+<footer class="home-footer">
+  <p>Cristian&nbsp;&Aacute;lamos and Lukas&nbsp;Althoff. Built for the
+     BitNet internet-and-science project. Source code in the
+     <code>bitnet</code> repository under
+     <code>build/work_cleaning/</code>.</p>
+</footer>
+
+<script>
+const fmt = n => (n == null) ? "" : n.toLocaleString();
+
+fetch("work_duplicates_stats.json").then(r => r.json()).then(s => {
+  document.getElementById("stat-member-ids").textContent = fmt(s.n_member_ids);
+  document.getElementById("stat-clusters").textContent   = fmt(s.n_clusters);
+  document.getElementById("stat-excess").textContent     = fmt(s.excess_ids_collapsed);
+
+  const grid = document.getElementById("headline-grid");
+  const card = (label, val, sub) =>
+    `<div class="chart-card"><h3>${val}</h3><p class="chart-sub">${label}</p>`
+    + (sub ? `<p class="chart-note">${sub}</p>` : "")
+    + `</div>`;
+  let html = "";
+  html += card("Year coverage", "1900&ndash;2024",
+               "125 per-year sub-pipelines stitched into one global crosswalk.");
+  html += card("PaperIDs in clusters", fmt(s.n_member_ids),
+               `From a 248&nbsp;M-paper universe.`);
+  html += card("Clusters formed", fmt(s.n_clusters), null);
+  html += card("Duplicates removed", fmt(s.excess_ids_collapsed),
+               "Excess paperids that would be collapsed to a canonical paperid.");
+  html += card("Tier-tagged pair edges", fmt(s.n_pairs),
+               "Candidate pairs whose endpoints land in the same global cluster, summed across all tier sources (T0/T1/T2/T3/T4/T5/T6/T7/T9).");
+  grid.innerHTML = html;
+
+  const ts = document.getElementById("tier-stats");
+  const totalPairs = Object.values(s.by_tier_pairs).reduce((a,b)=>a+b,0);
+  const totalClusters = Object.values(s.by_tier_clusters).reduce((a,b)=>a+b,0);
+  let thtml = '<table class="tier-table"><thead><tr><th>Tier</th>'
+            + '<th>Accepted pairs</th><th>Share</th>'
+            + '<th>Cluster best-tier</th><th>Share</th></tr></thead><tbody>';
+  const tiers = Array.from(new Set([...Object.keys(s.by_tier_pairs),
+                                    ...Object.keys(s.by_tier_clusters)]));
+  tiers.sort((a,b) => (s.by_tier_pairs[b]||0) - (s.by_tier_pairs[a]||0));
+  for (const t of tiers) {
+    const p = s.by_tier_pairs[t]||0;
+    const c = s.by_tier_clusters[t]||0;
+    thtml += `<tr><td><code>${t}</code></td>`
+          + `<td>${fmt(p)}</td><td>${(100*p/totalPairs).toFixed(1)}%</td>`
+          + `<td>${fmt(c)}</td><td>${(100*c/totalClusters).toFixed(1)}%</td>`
+          + `</tr>`;
+  }
+  thtml += `<tr><td><strong>Total</strong></td>`
+        + `<td><strong>${fmt(totalPairs)}</strong></td><td></td>`
+        + `<td><strong>${fmt(totalClusters)}</strong></td><td></td></tr>`;
+  thtml += "</tbody></table>";
+  ts.innerHTML = thtml;
+});
+
+fetch("work_duplicates_tier_examples.json").then(r => r.json()).then(ex => {
+  const root = document.getElementById("tier-examples");
+  const tierOrder = [
+    "T0_same_doi","T1_same_pmid","T2_same_pmcid","T3_same_mag",
+    "T7_cross_year_same_doi","T6_doi_suffix_variant",
+    "T4_same_title",
+    "T5_shared_author_fuzzy_title","T9_cross_year_shared_author",
+  ];
+  let html = "";
+  for (const t of tierOrder) {
+    if (!ex[t] || !ex[t].length) continue;
+    html += `<h4 class="tier-h"><code>${t}</code></h4>`;
+    for (const c of ex[t]) {
+      html += `<div class="dup-cluster small">`;
+      html += `<div class="dup-meta">cluster ${c.cluster_id} · ${c.size} members</div>`;
+      html += `<table class="dup-mem"><thead><tr><th>PaperID</th><th>Title</th>`
+           +  `<th>DOI</th><th>Doctype</th><th>Year</th><th>Cites</th></tr></thead><tbody>`;
+      for (const m of c.members) {
+        const cls = m.is_canonical ? "canon" : "";
+        const ti = m.title ? m.title.slice(0, 90) : "";
+        const doi = m.doi ? `<a target="_blank" href="https://doi.org/${m.doi}">${m.doi}</a>` : "";
+        html += `<tr class="${cls}">`
+             + `<td><a target="_blank" href="https://api.openalex.org/works/${m.paperid}">${m.paperid}</a></td>`
+             + `<td>${ti}</td>`
+             + `<td>${doi}</td>`
+             + `<td>${m.doctype||""}</td>`
+             + `<td>${m.year==null?"":m.year}</td>`
+             + `<td>${m.cited_by_count==null?"":fmt(m.cited_by_count)}</td>`
+             + `</tr>`;
+      }
+      html += "</tbody></table></div>";
+    }
+  }
+  root.innerHTML = html || "<p>(no example clusters available)</p>";
+});
+</script>
+</body>
+</html>
