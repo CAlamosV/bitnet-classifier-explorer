@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Author deduplication — overview</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body class="home">
+<header class="home-header">
+  <h1>Deduplicating OpenAlex author IDs</h1>
+  <nav>
+    <a href="index.html">Paper overview</a>
+    <a href="explorer.html">Paper explorer</a>
+    <a href="work_sample.html">Work sample</a>
+    <a href="author_overview.html">Author overview</a>
+    <a href="authors.html">Author explorer</a>
+    <a href="institution_overview.html">Institution overview</a>
+    <a href="institution_candidates.html">Institution candidates</a>
+    <a href="departments.html">Department browser</a>
+    <a class="active" href="duplicates_overview.html">Duplicate overview</a>
+    <a href="duplicates.html">Duplicate explorer</a>
+</nav>
+</header>
+
+<main class="home-main">
+  <section class="hero">
+    <p class="lede">
+      OpenAlex assigns each author a single AuthorID, but the same real
+      person often appears under <strong>multiple AuthorIDs</strong> —
+      especially when their published name varies (initials vs. full name,
+      capitalisation, accents) or when a recent stub paper gets a fresh
+      identifier. We built a duplicate-detection classifier that reduced
+      <strong id="stat-member-ids">…</strong> conflicting author IDs into
+      <strong id="stat-clusters">…</strong> deduplicated clusters,
+      collapsing <strong id="stat-excess">…</strong> excess IDs.
+    </p>
+  </section>
+
+  <section class="metrics">
+    <h2>How well does it work?</h2>
+    <p>
+      We hand-labelled 51 same-person duplicate pairs by sampling random
+      OpenAlex authors with at least 10 works (1970s + 1980s) and reading
+      OpenAlex's name-search results. The classifier catches <strong>46 of
+      51 (90.2%)</strong> of those positives.
+    </p>
+
+    <div class="charts">
+      <div class="chart-card">
+        <h3>Pair-level recall</h3>
+        <p class="chart-sub">On the 51-pair manual baseline.</p>
+        <div class="bars">
+          <div class="bar-row">
+            <span class="bar-label">Old "safe" rule (one focal year)</span>
+            <span class="bar"><span class="fill baseline" style="width: 23.5%"></span></span>
+            <span class="bar-val">24%</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">Global classifier (this work)</span>
+            <span class="bar"><span class="fill ours-strong" style="width: 90.2%"></span></span>
+            <span class="bar-val">90%</span>
+          </div>
+        </div>
+        <p class="chart-note">
+          The previous version restricted candidate generation to authors
+          active in a single focal year; 0 of 51 manual-baseline positives had
+          both authors in that slice. We broadened the universe to every
+          OpenAlex author whose Unicode-normalised name matches a name active
+          in 1940-2000.
+        </p>
+      </div>
+
+      <div class="chart-card">
+        <h3>Pair-level precision</h3>
+        <p class="chart-sub">Stratified 508-pair OpenAlex API spot-check.</p>
+        <div class="bars">
+          <div class="bar-row">
+            <span class="bar-label">Strong tiers (T0–T4)</span>
+            <span class="bar"><span class="fill ours-strong" style="width: 99%"></span></span>
+            <span class="bar-val">~99%</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">Name-shape tiers (T5–T7)</span>
+            <span class="bar"><span class="fill ours" style="width: 90%"></span></span>
+            <span class="bar-val">~90%</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">Volume-weighted overall</span>
+            <span class="bar"><span class="fill ours" style="width: 93.6%"></span></span>
+            <span class="bar-val">~94%</span>
+          </div>
+        </div>
+        <p class="chart-note">
+          Confirmed false-positive rate is ~3.7% in the per-pair sample,
+          ~6.4% volume-weighted (T6 dominates volume and has the lowest
+          precision). Most residual FPs are different-era same-name pairs
+          where neither author shared a paper, coauthor, or institution.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="how">
+    <h2>How candidate pairs are generated</h2>
+    <p>
+      A duplicate pair must first be a <em>candidate</em>. Candidate generation
+      finds pairs of OpenAlex AuthorIDs that share the same Unicode-normalised
+      display name (lowercase, accents stripped, punctuation collapsed to spaces;
+      Cyrillic and CJK preserved). Two profiles for "Toshio Tomimura" and
+      "Toshio TOMIMURA" land in the same name bucket; "Smith J." and "John Smith"
+      do not.
+    </p>
+    <p>
+      The universe is every OpenAlex author with a non-empty display name whose
+      normalised name also appears in our 1940-2000 imputed-author file.
+      That covers about <strong>14.9 million authors</strong>; pair enumeration
+      among same-name buckets up to size 30 yields <strong>31.2 million
+      candidate pairs</strong>.
+    </p>
+  </section>
+
+  <section class="how">
+    <h2>Per-pair features</h2>
+    <p>
+      For each candidate pair we attach features that distinguish real
+      duplicates from mere homonyms:
+    </p>
+    <ul>
+      <li><strong>shared_papers</strong> — number of OpenAlex PaperIDs that
+        both AuthorIDs appear on. (Two homonyms almost never co-author a real
+        paper; OpenAlex sometimes splits one person across two AuthorIDs on the
+        same paper, which is exactly what we want to merge.)</li>
+      <li><strong>shared_coauthors</strong> — number of distinct OpenAlex
+        coauthor IDs in both authors' coauthor sets.</li>
+      <li><strong>shared_institutions</strong> — number of institutions each
+        author has ever been affiliated with that the other has too.</li>
+      <li><strong>same / conflicting ORCID</strong> — decisive when present
+        (rare in 1940-2000).</li>
+      <li><strong>middle_conflict</strong> — true when both middle-token
+        strings exist, are non-equal, and aren't initial-vs-full compatible.</li>
+      <li><strong>career year ranges</strong> — both from the imputed file
+        (1940-2000 only) and from the full-OpenAlex paper-author×year join
+        (8.28M authors covered).</li>
+    </ul>
+  </section>
+
+  <section class="how">
+    <h2>The acceptance tiers</h2>
+    <p>
+      Pairs are evaluated against tiered rules in priority order; the first
+      match becomes the pair's <code>merge_tier</code>. ORCID conflict overrides
+      everything (1.31M rejected). Each tier corresponds to a different precision
+      / recall trade-off: T0–T4 are evidence-based and near-perfect precision;
+      T5–T7 fall back to name-shape with safeguards.
+    </p>
+    <table class="tier-table">
+      <thead>
+        <tr>
+          <th>Tier</th><th>Rule (key conditions)</th><th>Precision (sample)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><code>T0_same_orcid</code></td>
+            <td>Same non-empty ORCID.</td><td>~100%</td></tr>
+        <tr><td><code>T1_shared_paper</code></td>
+            <td>≥1 paper they both appear on.</td><td>~100%</td></tr>
+        <tr><td><code>T2_shared_coauthor</code></td>
+            <td>≥1 shared coauthor + ≥2 name tokens + non-common surname.</td><td>~100%</td></tr>
+        <tr><td><code>T2b</code></td>
+            <td>≥2 shared coauthors (common surnames OK).</td><td>~100%</td></tr>
+        <tr><td><code>T3_two_shared_institutions</code></td>
+            <td>≥2 shared institutions + ≥2 tokens + non-common surname.</td><td>~100%</td></tr>
+        <tr><td><code>T3_shared_institution_small_bucket</code></td>
+            <td>1 shared institution + ≥2 tokens + bucket ≤7.</td><td>~98%</td></tr>
+        <tr><td><code>T4_non_latin_small_bucket</code></td>
+            <td>Both display_names non-Latin (Cyrillic / CJK) + bucket ≤5.</td><td>~88%</td></tr>
+        <tr><td><code>T5_singleton_pair_rare_name</code></td>
+            <td>bucket = 2 + ≥2 tokens + non-common surname + minw ≤50.</td><td>~90%</td></tr>
+        <tr><td><code>T6_tiny_stub_absorption</code></td>
+            <td>min_works ≤2 + ≥2 tokens + non-common surname + bucket ≤15.</td><td>~85%</td></tr>
+        <tr><td><code>T7a_three_token_small_bucket</code></td>
+            <td>name_token_count ≥3 + bucket ≤7.</td><td>~94%</td></tr>
+        <tr><td><code>T7b_two_token_tiny_bucket</code></td>
+            <td>name_token_count = 2 + bucket ≤4.</td><td>~90%</td></tr>
+      </tbody>
+    </table>
+    <p>
+      Connected components on the accepted-pair graph form clusters. Each
+      cluster's canonical AuthorID is the member with the most papers. The
+      <a href="duplicates.html">duplicate explorer</a> lets you browse clusters
+      stratified by tier and size.
+    </p>
+  </section>
+
+  <section class="how">
+    <h2>What kinds of pairs each tier catches</h2>
+    <p>
+      Below are real example clusters from the run, one row per tier. (The
+      <a href="duplicates.html">explorer</a> has many more.)
+    </p>
+    <div id="tier-examples" class="tier-examples">loading…</div>
+  </section>
+
+  <section class="how">
+    <h2>Stats by tier</h2>
+    <p>How accepted pairs and clusters break down by the tier that triggered
+       the merge (priority order — a cluster's tier is its strongest edge):</p>
+    <div id="tier-stats">loading…</div>
+  </section>
+
+  <section class="how" id="explore">
+    <h2>Browse the predictions</h2>
+    <p>
+      The <a href="duplicates.html">duplicate explorer</a> shows ~1500
+      clusters stratified by tier so you can see the kind of merges each rule
+      makes. For each cluster you get every member AuthorID, their display
+      name, works count, year range from imputed and from full OpenAlex, and
+      last-known institution.
+    </p>
+    <p style="text-align: center; margin: 2rem 0 1rem;">
+      <a class="cta" href="duplicates.html">Open duplicate explorer</a>
+    </p>
+  </section>
+</main>
+
+<footer class="home-footer">
+  <p>Cristian&nbsp;Álamos and Lukas&nbsp;Althoff. Built for the BitNet
+     internet-and-science project. Source code in the <code>bitnet</code>
+     repository under <code>build/author_cleaning/</code>.</p>
+</footer>
+
+<script>
+fetch("duplicates_stats.json").then(r => r.json()).then(s => {
+  const fmt = n => n.toLocaleString();
+  document.getElementById("stat-member-ids").textContent = fmt(s.n_member_ids);
+  document.getElementById("stat-clusters").textContent = fmt(s.n_clusters);
+  document.getElementById("stat-excess").textContent = fmt(s.excess_ids_collapsed);
+
+  const ts = document.getElementById("tier-stats");
+  const totalPairs = Object.values(s.by_tier_pairs).reduce((a,b)=>a+b,0);
+  const totalClusters = Object.values(s.by_tier_clusters).reduce((a,b)=>a+b,0);
+  let html = '<table class="tier-table"><thead><tr><th>Tier</th>'
+           + '<th>Accepted pairs</th><th>Share</th>'
+           + '<th>Cluster best-tier</th><th>Share</th></tr></thead><tbody>';
+  const tiers = Array.from(new Set([...Object.keys(s.by_tier_pairs),
+                                    ...Object.keys(s.by_tier_clusters)]));
+  tiers.sort((a,b) => (s.by_tier_pairs[b]||0) - (s.by_tier_pairs[a]||0));
+  for (const t of tiers) {
+    const p = s.by_tier_pairs[t]||0;
+    const c = s.by_tier_clusters[t]||0;
+    html += `<tr><td><code>${t}</code></td>`
+         + `<td>${fmt(p)}</td><td>${(100*p/totalPairs).toFixed(1)}%</td>`
+         + `<td>${fmt(c)}</td><td>${(100*c/totalClusters).toFixed(1)}%</td>`
+         + `</tr>`;
+  }
+  html += `<tr><td><strong>Total</strong></td>`
+       + `<td><strong>${fmt(totalPairs)}</strong></td><td></td>`
+       + `<td><strong>${fmt(totalClusters)}</strong></td><td></td></tr>`;
+  html += "</tbody></table>";
+  ts.innerHTML = html;
+});
+
+fetch("duplicates_tier_examples.json").then(r => r.json()).then(ex => {
+  const root = document.getElementById("tier-examples");
+  let html = "";
+  const tierOrder = [
+    "T0_same_orcid","T1_shared_paper",
+    "T2_shared_coauthor","T2b_two_shared_coauthors_common_surname_ok",
+    "T3_two_shared_institutions","T3_shared_institution_small_bucket",
+    "T4_non_latin_small_bucket",
+    "T5_singleton_pair_rare_name",
+    "T7a_three_token_small_bucket","T7b_two_token_tiny_bucket",
+    "T6_tiny_stub_absorption",
+  ];
+  for (const t of tierOrder) {
+    if (!ex[t] || !ex[t].length) continue;
+    html += `<h4 class="tier-h"><code>${t}</code></h4>`;
+    for (const c of ex[t]) {
+      html += `<div class="dup-cluster small">`;
+      html += `<div class="dup-meta">cluster ${c.cluster_id} · ${c.size} members</div>`;
+      html += `<table class="dup-mem"><thead><tr><th>AuthorID</th><th>Name</th><th>Works</th><th>Years</th><th>Institution</th></tr></thead><tbody>`;
+      for (const m of c.members) {
+        const yr = (m.oa_year_first && m.oa_year_last)
+          ? `${m.oa_year_first}–${m.oa_year_last}`
+          : (m.imp_year_first ? `${m.imp_year_first}–${m.imp_year_last}` : "—");
+        html += `<tr>`
+             + `<td><a target="_blank" href="https://api.openalex.org/authors/${m.authorid}">${m.authorid}</a></td>`
+             + `<td>${m.display_name||""}</td>`
+             + `<td>${m.works_count!=null?m.works_count:""}</td>`
+             + `<td>${yr}</td>`
+             + `<td>${m.last_known_institution||""}</td>`
+             + `</tr>`;
+      }
+      html += "</tbody></table></div>";
+    }
+  }
+  root.innerHTML = html;
+});
+</script>
+</body>
+</html>

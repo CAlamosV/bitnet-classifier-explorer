@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Duplicate-author explorer</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<header>
+  <div class="header-titles">
+    <h1>Duplicate-author classifier — browse clusters</h1>
+    <nav>
+      <a href="index.html">Paper overview</a>
+      <a href="explorer.html">Paper explorer</a>
+      <a href="work_sample.html">Work sample</a>
+      <a href="author_overview.html">Author overview</a>
+      <a href="authors.html">Author explorer</a>
+      <a href="institution_overview.html">Institution overview</a>
+      <a href="institution_candidates.html">Institution candidates</a>
+      <a href="departments.html">Department browser</a>
+      <a href="duplicates_overview.html">Duplicate overview</a>
+      <a class="active" href="duplicates.html">Duplicate explorer</a>
+</nav>
+  </div>
+  <p class="meta">
+    <span id="count-badge">loading…</span>
+    &nbsp;|&nbsp;
+    <a href="#" id="random-btn">randomize</a>
+    &nbsp;|&nbsp;
+    <a href="#" id="reset-btn">reset filters</a>
+  </p>
+</header>
+
+<aside class="filters">
+  <h2>Filters</h2>
+
+  <fieldset>
+    <legend>Acceptance tier (cluster's strongest)</legend>
+    <select id="filter-tier">
+      <option value="">— any —</option>
+    </select>
+  </fieldset>
+
+  <fieldset>
+    <legend>Cluster size</legend>
+    <select id="filter-size">
+      <option value="">— any —</option>
+      <option value="2">2 members</option>
+      <option value="3">3 members</option>
+      <option value="4-5">4–5 members</option>
+      <option value="6-10">6–10 members</option>
+      <option value="11+">11+ members</option>
+    </select>
+  </fieldset>
+
+  <fieldset>
+    <legend>Largest member's works</legend>
+    <select id="filter-bigworks">
+      <option value="">— any —</option>
+      <option value="1">1</option>
+      <option value="2-10">2–10</option>
+      <option value="11-50">11–50</option>
+      <option value="51-200">51–200</option>
+      <option value="201+">201+</option>
+    </select>
+  </fieldset>
+
+  <fieldset>
+    <legend>Sort</legend>
+    <select id="sort-by">
+      <option value="random">Random</option>
+      <option value="size_desc">Largest cluster first</option>
+      <option value="size_asc">Smallest cluster first</option>
+      <option value="bigworks_desc">Most-productive member first</option>
+      <option value="bigworks_asc">Least-productive member first</option>
+    </select>
+  </fieldset>
+
+  <fieldset>
+    <legend>Search</legend>
+    <input type="text" id="text-search" placeholder="display name / authorid" />
+  </fieldset>
+</aside>
+
+<main id="results">
+  <div class="loader">Loading duplicate clusters…</div>
+</main>
+
+<footer>
+  <p>Built from <code>duplicates.json</code> (sample of ~1500 clusters,
+  stratified by acceptance tier). Each row is a duplicate cluster: every
+  AuthorID listed is judged to refer to the same real person. The first member
+  in each cluster (most papers) is the canonical ID. Click an AuthorID to
+  open its OpenAlex API record. See the
+  <a href="duplicates_overview.html">overview</a> for methodology.</p>
+</footer>
+
+<script src="duplicates.js"></script>
+</body>
+</html>

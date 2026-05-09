@@ -1,0 +1,1864 @@
+{
+  "T5_singleton_pair_rare_name": [
+    {
+      "cluster_id": "A5026588570",
+      "size": 2,
+      "members": [
+        {
+          "authorid": "A5026588570",
+          "display_name": "P.A. Samolchev",
+          "works_count": 5,
+          "oa_year_first": 1999,
+          "oa_year_last": 2000,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5055978116",
+          "display_name": "P.A. Samolchev",
+          "works_count": 1,
+          "oa_year_first": 2002,
+          "oa_year_last": 2002,
+          "last_known_institution": null
+        }
+      ]
+    },
+    {
+      "cluster_id": "A5040239901",
+      "size": 2,
+      "members": [
+        {
+          "authorid": "A5040239901",
+          "display_name": "Loredana Moro",
+          "works_count": 67,
+          "oa_year_first": 2000,
+          "oa_year_last": 2000,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5103367325",
+          "display_name": "Loredana Moro",
+          "works_count": 4,
+          "oa_year_first": 2001,
+          "oa_year_last": 2014,
+          "last_known_institution": null
+        }
+      ]
+    },
+    {
+      "cluster_id": "A5017660475",
+      "size": 2,
+      "members": [
+        {
+          "authorid": "A5017660475",
+          "display_name": "Takashi Iizumi",
+          "works_count": 100,
+          "oa_year_first": 1992,
+          "oa_year_last": 1992,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5048292187",
+          "display_name": "Takashi Iizumi",
+          "works_count": 9,
+          "oa_year_first": 2009,
+          "oa_year_last": 2023,
+          "last_known_institution": null
+        }
+      ]
+    },
+    {
+      "cluster_id": "A5087143854",
+      "size": 2,
+      "members": [
+        {
+          "authorid": "A5110438196",
+          "display_name": "J. Schondelmaier",
+          "works_count": 32,
+          "oa_year_first": 1991,
+          "oa_year_last": 1998,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5087143854",
+          "display_name": "J Schondelmaier",
+          "works_count": 1,
+          "oa_year_first": 2006,
+          "oa_year_last": 2006,
+          "last_known_institution": null
+        }
+      ]
+    }
+  ],
+  "T6_tiny_stub_absorption": [
+    {
+      "cluster_id": "A5010542962",
+      "size": 15,
+      "members": [
+        {
+          "authorid": "A5056914554",
+          "display_name": "C. Otten",
+          "works_count": 6,
+          "oa_year_first": 1997,
+          "oa_year_last": 2000,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5056688972",
+          "display_name": "C. Otten",
+          "works_count": 2,
+          "oa_year_first": 2005,
+          "oa_year_last": 2005,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5035745654",
+          "display_name": "C. Otten",
+          "works_count": 1,
+          "oa_year_first": 2008,
+          "oa_year_last": 2008,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5080373317",
+          "display_name": "C. Otten",
+          "works_count": 1,
+          "oa_year_first": 2005,
+          "oa_year_last": 2005,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5034945286",
+          "display_name": "C. Otten",
+          "works_count": 1,
+          "oa_year_first": 1965,
+          "oa_year_last": 1965,
+          "last_known_institution": null
+        }
+      ]
+    },
+    {
+      "cluster_id": "A5009708715",
+      "size": 15,
+      "members": [
+        {
+          "authorid": "A5085836101",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5078151286",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5110098412",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5059227206",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5060858126",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        }
+      ]
+    },
+    {
+      "cluster_id": "A5007385183",
+      "size": 15,
+      "members": [
+        {
+          "authorid": "A5028880409",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5034673187",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5040758045",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5039885742",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5007385183",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        }
+      ]
+    },
+    {
+      "cluster_id": "A5001965540",
+      "size": 15,
+      "members": [
+        {
+          "authorid": "A5095032019",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5030103367",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5112898610",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5001965540",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5095047770",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        }
+      ]
+    }
+  ],
+  "T7b_two_token_tiny_bucket": [
+    {
+      "cluster_id": "A5057222701",
+      "size": 4,
+      "members": [
+        {
+          "authorid": "A5057222701",
+          "display_name": "Etienne Barthel",
+          "works_count": 32,
+          "oa_year_first": 1993,
+          "oa_year_last": 1993,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5081692545",
+          "display_name": "Etienne Barthel",
+          "works_count": 8,
+          "oa_year_first": 2004,
+          "oa_year_last": 2025,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5108757677",
+          "display_name": "Etienne Barthel",
+          "works_count": 2,
+          "oa_year_first": 2000,
+          "oa_year_last": 2018,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5109193597",
+          "display_name": "Etienne Barthel",
+          "works_count": 1,
+          "oa_year_first": 2008,
+          "oa_year_last": 2008,
+          "last_known_institution": null
+        }
+      ]
+    },
+    {
+      "cluster_id": "A5001889474",
+      "size": 4,
+      "members": [
+        {
+          "authorid": "A5001889474",
+          "display_name": "Esther Feldman",
+          "works_count": 21,
+          "oa_year_first": 1984,
+          "oa_year_last": 1999,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5110167868",
+          "display_name": "Esther Feldman",
+          "works_count": 9,
+          "oa_year_first": 1987,
+          "oa_year_last": 1993,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5074213272",
+          "display_name": "Esther Feldman",
+          "works_count": 2,
+          "oa_year_first": 1972,
+          "oa_year_last": 2016,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5002351112",
+          "display_name": "Esther Feldman",
+          "works_count": 2,
+          "oa_year_first": 2014,
+          "oa_year_last": 2015,
+          "last_known_institution": null
+        }
+      ]
+    },
+    {
+      "cluster_id": "A5052435916",
+      "size": 4,
+      "members": [
+        {
+          "authorid": "A5086274597",
+          "display_name": "Uwe Sch\u00fctz",
+          "works_count": 64,
+          "oa_year_first": 1990,
+          "oa_year_last": 2024,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5052435916",
+          "display_name": "Uwe Sch\u00fctz",
+          "works_count": 19,
+          "oa_year_first": 1993,
+          "oa_year_last": 1999,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5111397476",
+          "display_name": "Uwe Sch\u00fctz",
+          "works_count": 1,
+          "oa_year_first": 2024,
+          "oa_year_last": 2024,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5107076966",
+          "display_name": "Uwe Sch\u00fctz",
+          "works_count": 1,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        }
+      ]
+    },
+    {
+      "cluster_id": "A5023383999",
+      "size": 4,
+      "members": [
+        {
+          "authorid": "A5102992607",
+          "display_name": "John Tam",
+          "works_count": 25,
+          "oa_year_first": 1977,
+          "oa_year_last": 1994,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5103459283",
+          "display_name": "John Tam",
+          "works_count": 15,
+          "oa_year_first": 2002,
+          "oa_year_last": 2012,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5023383999",
+          "display_name": "John Tam",
+          "works_count": 5,
+          "oa_year_first": 2014,
+          "oa_year_last": 2024,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5091693297",
+          "display_name": "John Tam",
+          "works_count": 2,
+          "oa_year_first": 2021,
+          "oa_year_last": 2021,
+          "last_known_institution": null
+        }
+      ]
+    }
+  ],
+  "T2_shared_coauthor": [
+    {
+      "cluster_id": "A5001723771",
+      "size": 29,
+      "members": [
+        {
+          "authorid": "A5030502981",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5031741243",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5055920924",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5051109981",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5089892527",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        }
+      ]
+    },
+    {
+      "cluster_id": "A5023270823",
+      "size": 24,
+      "members": [
+        {
+          "authorid": "A5023270823",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5061056456",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5108132824",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5108134278",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5106470479",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        }
+      ]
+    },
+    {
+      "cluster_id": "A5001325750",
+      "size": 23,
+      "members": [
+        {
+          "authorid": "A5005128394",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5023707038",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5025017225",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5068912879",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5065391153",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        }
+      ]
+    },
+    {
+      "cluster_id": "A5050309071",
+      "size": 19,
+      "members": [
+        {
+          "authorid": "A5105343752",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5105775546",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5109062600",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5109804634",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5106747884",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        }
+      ]
+    }
+  ],
+  "T7a_three_token_small_bucket": [
+    {
+      "cluster_id": "A5012565092",
+      "size": 7,
+      "members": [
+        {
+          "authorid": "A5075620973",
+          "display_name": "M.J. Reynolds",
+          "works_count": 8,
+          "oa_year_first": 1971,
+          "oa_year_last": 2025,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5012565092",
+          "display_name": "M. J. Reynolds",
+          "works_count": 3,
+          "oa_year_first": 1987,
+          "oa_year_last": 1987,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5065532503",
+          "display_name": "M. J. Reynolds",
+          "works_count": 3,
+          "oa_year_first": 1935,
+          "oa_year_last": 2017,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5015486739",
+          "display_name": "M. J. Reynolds",
+          "works_count": 2,
+          "oa_year_first": 1943,
+          "oa_year_last": 2016,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5103609559",
+          "display_name": "M.J. Reynolds",
+          "works_count": 1,
+          "oa_year_first": 1970,
+          "oa_year_last": 1970,
+          "last_known_institution": null
+        }
+      ]
+    },
+    {
+      "cluster_id": "A5004071373",
+      "size": 7,
+      "members": [
+        {
+          "authorid": "A5004071373",
+          "display_name": "F.W. Bauer",
+          "works_count": 68,
+          "oa_year_first": 1972,
+          "oa_year_last": 1994,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5063168687",
+          "display_name": "F.W. Bauer",
+          "works_count": 3,
+          "oa_year_first": 1976,
+          "oa_year_last": 1987,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5044373166",
+          "display_name": "F. W. Bauer",
+          "works_count": 1,
+          "oa_year_first": 1969,
+          "oa_year_last": 1969,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5062413399",
+          "display_name": "F W Bauer",
+          "works_count": 1,
+          "oa_year_first": 1968,
+          "oa_year_last": 1968,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5033105546",
+          "display_name": "F.W. Bauer",
+          "works_count": 1,
+          "oa_year_first": 1972,
+          "oa_year_last": 1972,
+          "last_known_institution": null
+        }
+      ]
+    },
+    {
+      "cluster_id": "A5007236826",
+      "size": 7,
+      "members": [
+        {
+          "authorid": "A5081043642",
+          "display_name": "J.F. Bierhuizen",
+          "works_count": 52,
+          "oa_year_first": 1971,
+          "oa_year_last": 1981,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5013371563",
+          "display_name": "J.F. Bierhuizen",
+          "works_count": 4,
+          "oa_year_first": 1958,
+          "oa_year_last": 1981,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5007236826",
+          "display_name": "J.F. Bierhuizen",
+          "works_count": 1,
+          "oa_year_first": 1981,
+          "oa_year_last": 1981,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5019579887",
+          "display_name": "J.F. Bierhuizen",
+          "works_count": 1,
+          "oa_year_first": 1966,
+          "oa_year_last": 1966,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5008863691",
+          "display_name": "J.F. Bierhuizen",
+          "works_count": 1,
+          "oa_year_first": 1969,
+          "oa_year_last": 1969,
+          "last_known_institution": null
+        }
+      ]
+    },
+    {
+      "cluster_id": "A5005830850",
+      "size": 7,
+      "members": [
+        {
+          "authorid": "A5103663481",
+          "display_name": "LI Dong-fang",
+          "works_count": 10,
+          "oa_year_first": 2002,
+          "oa_year_last": 2023,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5103673543",
+          "display_name": "LI Dong-fang",
+          "works_count": 8,
+          "oa_year_first": 1997,
+          "oa_year_last": 1997,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5073139922",
+          "display_name": "LI Dong-fang",
+          "works_count": 3,
+          "oa_year_first": 2005,
+          "oa_year_last": 2006,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5104306354",
+          "display_name": "LI Dong-fang",
+          "works_count": 2,
+          "oa_year_first": 2011,
+          "oa_year_last": 2023,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5056242102",
+          "display_name": "LI Dong-fang",
+          "works_count": 2,
+          "oa_year_first": 2010,
+          "oa_year_last": 2010,
+          "last_known_institution": null
+        }
+      ]
+    }
+  ],
+  "T3_shared_institution_small_bucket": [
+    {
+      "cluster_id": "A5002672514",
+      "size": 7,
+      "members": [
+        {
+          "authorid": "A5041291305",
+          "display_name": "C. Gonin",
+          "works_count": 8,
+          "oa_year_first": 1966,
+          "oa_year_last": 2012,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5002672514",
+          "display_name": "C. Gonin",
+          "works_count": 3,
+          "oa_year_first": 2000,
+          "oa_year_last": 2023,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5032130512",
+          "display_name": "C. Gonin",
+          "works_count": 2,
+          "oa_year_first": 2000,
+          "oa_year_last": 2001,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5113680184",
+          "display_name": "C. Gonin",
+          "works_count": 1,
+          "oa_year_first": 1998,
+          "oa_year_last": 1998,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5106934300",
+          "display_name": "C. Gonin",
+          "works_count": 1,
+          "oa_year_first": 2024,
+          "oa_year_last": 2024,
+          "last_known_institution": null
+        }
+      ]
+    },
+    {
+      "cluster_id": "A5018291951",
+      "size": 7,
+      "members": [
+        {
+          "authorid": "A5109954707",
+          "display_name": "K. Hinrichsen",
+          "works_count": 87,
+          "oa_year_first": 1955,
+          "oa_year_last": 1994,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5061320852",
+          "display_name": "K. Hinrichsen",
+          "works_count": 4,
+          "oa_year_first": 1952,
+          "oa_year_last": 1952,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5041674689",
+          "display_name": "K. Hinrichsen",
+          "works_count": 2,
+          "oa_year_first": 1980,
+          "oa_year_last": 1982,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5018291951",
+          "display_name": "K. Hinrichsen",
+          "works_count": 1,
+          "oa_year_first": 1979,
+          "oa_year_last": 1979,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5048684290",
+          "display_name": "K. Hinrichsen",
+          "works_count": 1,
+          "oa_year_first": 1961,
+          "oa_year_last": 1961,
+          "last_known_institution": null
+        }
+      ]
+    },
+    {
+      "cluster_id": "A5014413370",
+      "size": 7,
+      "members": [
+        {
+          "authorid": "A5094886508",
+          "display_name": "P Mildner",
+          "works_count": 4,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5040155717",
+          "display_name": "P. Mildner",
+          "works_count": 2,
+          "oa_year_first": 1980,
+          "oa_year_last": 1980,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5014413370",
+          "display_name": "P. Mildner",
+          "works_count": 2,
+          "oa_year_first": 1994,
+          "oa_year_last": 1994,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5055989634",
+          "display_name": "P. MILDNER",
+          "works_count": 2,
+          "oa_year_first": 1994,
+          "oa_year_last": 1994,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5039542298",
+          "display_name": "P Mildner",
+          "works_count": 1,
+          "oa_year_first": 2014,
+          "oa_year_last": 2014,
+          "last_known_institution": null
+        }
+      ]
+    },
+    {
+      "cluster_id": "A5009025961",
+      "size": 7,
+      "members": [
+        {
+          "authorid": "A5028370791",
+          "display_name": "WY Lau",
+          "works_count": 5,
+          "oa_year_first": 2014,
+          "oa_year_last": 2015,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5045167785",
+          "display_name": "WY Lau",
+          "works_count": 3,
+          "oa_year_first": 2016,
+          "oa_year_last": 2021,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5110204536",
+          "display_name": "WY Lau",
+          "works_count": 2,
+          "oa_year_first": 1997,
+          "oa_year_last": 1997,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5080875448",
+          "display_name": "WY Lau",
+          "works_count": 2,
+          "oa_year_first": 2012,
+          "oa_year_last": 2013,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5046131700",
+          "display_name": "WY Lau",
+          "works_count": 2,
+          "oa_year_first": 2000,
+          "oa_year_last": 2000,
+          "last_known_institution": null
+        }
+      ]
+    }
+  ],
+  "T2b_two_shared_coauthors_common_surname_ok": [
+    {
+      "cluster_id": "A5038598335",
+      "size": 14,
+      "members": [
+        {
+          "authorid": "A5110402165",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5113522604",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5110125161",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5054235677",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5039872132",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        }
+      ]
+    },
+    {
+      "cluster_id": "A5025204867",
+      "size": 13,
+      "members": [
+        {
+          "authorid": "A5101083859",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5103510156",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5109047235",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5109110037",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5025204867",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        }
+      ]
+    },
+    {
+      "cluster_id": "A5000947801",
+      "size": 13,
+      "members": [
+        {
+          "authorid": "A5074498442",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5050230216",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5027298643",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5076475506",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5110002002",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        }
+      ]
+    },
+    {
+      "cluster_id": "A5000242174",
+      "size": 12,
+      "members": [
+        {
+          "authorid": "A5010285523",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5000242174",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5084374863",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5019564795",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5037590084",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        }
+      ]
+    }
+  ],
+  "T4_non_latin_small_bucket": [
+    {
+      "cluster_id": "A5022198138",
+      "size": 5,
+      "members": [
+        {
+          "authorid": "A5022198138",
+          "display_name": "\u5ddd\u5408 \u4fdd\u6cbb",
+          "works_count": 7,
+          "oa_year_first": 1977,
+          "oa_year_last": 1977,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5098745921",
+          "display_name": "\u5ddd\u5408 \u4fdd\u6cbb",
+          "works_count": 2,
+          "oa_year_first": 1968,
+          "oa_year_last": 1970,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5098759933",
+          "display_name": "\u5ddd\u5408 \u4fdd\u6cbb",
+          "works_count": 2,
+          "oa_year_first": 1976,
+          "oa_year_last": 1978,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5098742911",
+          "display_name": "\u5ddd\u5408 \u4fdd\u6cbb",
+          "works_count": 2,
+          "oa_year_first": 1971,
+          "oa_year_last": 1973,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5098738433",
+          "display_name": "\u5ddd\u5408 \u4fdd\u6cbb",
+          "works_count": 1,
+          "oa_year_first": 1969,
+          "oa_year_last": 1969,
+          "last_known_institution": null
+        }
+      ]
+    },
+    {
+      "cluster_id": "A5025086623",
+      "size": 5,
+      "members": [
+        {
+          "authorid": "A5025086623",
+          "display_name": "\u5553\u4ecb \u5c0f\u897f",
+          "works_count": 12,
+          "oa_year_first": 1991,
+          "oa_year_last": 2019,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5051498733",
+          "display_name": "\u5553\u4ecb \u5c0f\u897f",
+          "works_count": 2,
+          "oa_year_first": 1995,
+          "oa_year_last": 1995,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5091593288",
+          "display_name": "\u5553\u4ecb \u5c0f\u897f",
+          "works_count": 2,
+          "oa_year_first": 2002,
+          "oa_year_last": 2006,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5027506984",
+          "display_name": "\u5553\u4ecb \u5c0f\u897f",
+          "works_count": 2,
+          "oa_year_first": 1997,
+          "oa_year_last": 2005,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5056218975",
+          "display_name": "\u5553\u4ecb \u5c0f\u897f",
+          "works_count": 2,
+          "oa_year_first": 2011,
+          "oa_year_last": 2012,
+          "last_known_institution": null
+        }
+      ]
+    },
+    {
+      "cluster_id": "A5017340458",
+      "size": 5,
+      "members": [
+        {
+          "authorid": "A5074995506",
+          "display_name": "\u0414. \u0410. \u0428\u0430\u043f\u0438\u0440\u043e",
+          "works_count": 308,
+          "oa_year_first": 1984,
+          "oa_year_last": 2000,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5089489043",
+          "display_name": "\u0414.\u0410. \u0428\u0430\u043f\u0438\u0440\u043e",
+          "works_count": 2,
+          "oa_year_first": 2018,
+          "oa_year_last": 2020,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5056347530",
+          "display_name": "\u0414. \u0410. \u0428\u0430\u043f\u0438\u0440\u043e",
+          "works_count": 2,
+          "oa_year_first": 2018,
+          "oa_year_last": 2024,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5043348552",
+          "display_name": "\u0414.\u0410. \u0428\u0430\u043f\u0438\u0440\u043e",
+          "works_count": 1,
+          "oa_year_first": 2020,
+          "oa_year_last": 2020,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5017340458",
+          "display_name": "\u0414.\u0410 \u0428\u0430\u043f\u0438\u0440\u043e",
+          "works_count": 1,
+          "oa_year_first": 2018,
+          "oa_year_last": 2018,
+          "last_known_institution": null
+        }
+      ]
+    },
+    {
+      "cluster_id": "A5031086561",
+      "size": 5,
+      "members": [
+        {
+          "authorid": "A5090687079",
+          "display_name": "\u0422. \u0411. \u0421\u0430\u0433\u0430\u043b\u043e\u0432\u0430",
+          "works_count": 23,
+          "oa_year_first": 1997,
+          "oa_year_last": 1997,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5072421524",
+          "display_name": "\u0422. \u0411. \u0421\u0430\u0433\u0430\u043b\u043e\u0432\u0430",
+          "works_count": 3,
+          "oa_year_first": 1995,
+          "oa_year_last": 1995,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5031086561",
+          "display_name": "\u0422. \u0411. \u0421\u0430\u0433\u0430\u043b\u043e\u0432\u0430",
+          "works_count": 1,
+          "oa_year_first": 2014,
+          "oa_year_last": 2014,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5074621975",
+          "display_name": "\u0422.\u0411. \u0421\u0430\u0433\u0430\u043b\u043e\u0432\u0430",
+          "works_count": 1,
+          "oa_year_first": 2013,
+          "oa_year_last": 2013,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5070837578",
+          "display_name": "\u0422.\u0411. \u0421\u0430\u0433\u0430\u043b\u043e\u0432\u0430",
+          "works_count": 1,
+          "oa_year_first": 1995,
+          "oa_year_last": 1995,
+          "last_known_institution": null
+        }
+      ]
+    }
+  ],
+  "T3_two_shared_institutions": [
+    {
+      "cluster_id": "A5006205767",
+      "size": 15,
+      "members": [
+        {
+          "authorid": "A5112641804",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5108556299",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5099220763",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5006205767",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5061793573",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        }
+      ]
+    },
+    {
+      "cluster_id": "A5014912318",
+      "size": 15,
+      "members": [
+        {
+          "authorid": "A5046254063",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5086471189",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5082471311",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5014912318",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5030722048",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        }
+      ]
+    },
+    {
+      "cluster_id": "A5013047788",
+      "size": 15,
+      "members": [
+        {
+          "authorid": "A5052067982",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5035189355",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5044196311",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5013047788",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5016902469",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        }
+      ]
+    },
+    {
+      "cluster_id": "A5012076696",
+      "size": 15,
+      "members": [
+        {
+          "authorid": "A5104820807",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5012076696",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5099663743",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5104783828",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5106911265",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        }
+      ]
+    }
+  ],
+  "T1_shared_paper": [
+    {
+      "cluster_id": "A5016278945",
+      "size": 15,
+      "members": [
+        {
+          "authorid": "A5101788822",
+          "display_name": "Fr\u00e9d\u00e9ric Mercier",
+          "works_count": 79,
+          "oa_year_first": 2000,
+          "oa_year_last": 2000,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5102967277",
+          "display_name": "Fr\u00e9d\u00e9ric Mercier",
+          "works_count": 23,
+          "oa_year_first": 1998,
+          "oa_year_last": 2000,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5109593521",
+          "display_name": "Fr\u00e9d\u00e9ric Mercier",
+          "works_count": 21,
+          "oa_year_first": 2011,
+          "oa_year_last": 2025,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5089168308",
+          "display_name": "Fr\u00e9d\u00e9ric Mercier",
+          "works_count": 4,
+          "oa_year_first": 2008,
+          "oa_year_last": 2008,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5101029005",
+          "display_name": "Fr\u00e9d\u00e9ric Mercier",
+          "works_count": 3,
+          "oa_year_first": 1994,
+          "oa_year_last": 2008,
+          "last_known_institution": null
+        }
+      ]
+    },
+    {
+      "cluster_id": "A5008754930",
+      "size": 15,
+      "members": [
+        {
+          "authorid": "A5053572872",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5050595870",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5081439264",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5063304045",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5051736634",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        }
+      ]
+    },
+    {
+      "cluster_id": "A5001734809",
+      "size": 15,
+      "members": [
+        {
+          "authorid": "A5009036649",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5049940785",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5013210201",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5052953792",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5054109774",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        }
+      ]
+    },
+    {
+      "cluster_id": "A5001391796",
+      "size": 15,
+      "members": [
+        {
+          "authorid": "A5031986301",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5006417083",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5031936718",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5041187248",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5066432241",
+          "display_name": null,
+          "works_count": null,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        }
+      ]
+    }
+  ],
+  "T0_same_orcid": [
+    {
+      "cluster_id": "A5000081943",
+      "size": 5,
+      "members": [
+        {
+          "authorid": "A5000081943",
+          "display_name": "Sang Hoon Na",
+          "works_count": 34,
+          "oa_year_first": 2000,
+          "oa_year_last": 2000,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5068869643",
+          "display_name": "Sang-Hoon Na",
+          "works_count": 2,
+          "oa_year_first": 2006,
+          "oa_year_last": 2010,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5109502419",
+          "display_name": "Sang-Hoon Na",
+          "works_count": 1,
+          "oa_year_first": 2021,
+          "oa_year_last": 2021,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5081143175",
+          "display_name": "Sang Hoon Na",
+          "works_count": 1,
+          "oa_year_first": 2021,
+          "oa_year_last": 2021,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5093145388",
+          "display_name": "Sang-Hoon Na",
+          "works_count": 0,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        }
+      ]
+    },
+    {
+      "cluster_id": "A5088753722",
+      "size": 3,
+      "members": [
+        {
+          "authorid": "A5088753722",
+          "display_name": "Maja Borowska",
+          "works_count": 4,
+          "oa_year_first": 2000,
+          "oa_year_last": 2000,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5102978139",
+          "display_name": "Maja Borowska",
+          "works_count": 4,
+          "oa_year_first": 2023,
+          "oa_year_last": 2025,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5093150159",
+          "display_name": "Maja Borowska",
+          "works_count": 0,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        }
+      ]
+    },
+    {
+      "cluster_id": "A5115673721",
+      "size": 3,
+      "members": [
+        {
+          "authorid": "A5115673724",
+          "display_name": "Prabhjyot Kaur",
+          "works_count": 0,
+          "oa_year_first": 2024,
+          "oa_year_last": 2024,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5115673725",
+          "display_name": "Prabhjyot Kaur",
+          "works_count": 0,
+          "oa_year_first": 2024,
+          "oa_year_last": 2024,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5115673721",
+          "display_name": "Prabhjyot Kaur",
+          "works_count": 0,
+          "oa_year_first": 2024,
+          "oa_year_last": 2024,
+          "last_known_institution": null
+        }
+      ]
+    },
+    {
+      "cluster_id": "A5093151336",
+      "size": 2,
+      "members": [
+        {
+          "authorid": "A5102976044",
+          "display_name": "Luciano Rosati",
+          "works_count": 122,
+          "oa_year_first": 1992,
+          "oa_year_last": 2000,
+          "last_known_institution": null
+        },
+        {
+          "authorid": "A5093151336",
+          "display_name": "Luciano Rosati",
+          "works_count": 0,
+          "oa_year_first": null,
+          "oa_year_last": null,
+          "last_known_institution": null
+        }
+      ]
+    }
+  ]
+}
