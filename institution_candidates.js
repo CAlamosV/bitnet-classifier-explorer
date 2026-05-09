@@ -162,11 +162,18 @@ function metricsHtml(a) {
 
 function evidenceHtml(a) {
   const raw = Number(a.raw || 0);
-  const label = raw > 0 ? "observed raw affiliation" : "imputed affiliation";
-  const cls = raw > 0 ? "status-good" : "status-muted";
+  const sameYearPapers = Number(a.yp || 0);
+  const label = raw > 0
+    ? "same-year raw evidence"
+    : sameYearPapers > 0
+      ? "same-year imputed evidence"
+      : "panel gap-filled year";
+  const cls = raw > 0 ? "status-good" : sameYearPapers > 0 ? "status-muted" : "status-info";
+  const span = a.ps || a.pe ? `${fmtInt(a.ps)}-${fmtInt(a.pe)}` : "";
   return `
     <span class="status-badge ${cls}">${label}</span>
-    <div class="table-sub">${fmtInt(a.yp)} papers at selected university-year${raw > 0 ? `; ${fmtInt(raw)} raw rows` : ""}</div>
+    <div class="table-sub">${fmtInt(a.ip)} evidence papers at selected institution${span ? `; panel span ${escapeHtml(span)}` : ""}</div>
+    <div class="table-sub">${fmtInt(sameYearPapers)} same-year papers${raw > 0 ? `; ${fmtInt(raw)} raw rows` : ""}</div>
   `;
 }
 
@@ -242,7 +249,6 @@ function buildDropdowns() {
   $("field-input").value = fieldLabel(defaults.field);
   $("min-works").value = defaults.min_works;
   $("min-prob").value = Number(defaults.min_field_probability).toFixed(2);
-  $("min-school-papers").value = defaults.min_school_papers;
 }
 
 function noDataHtml(inst, year) {
@@ -286,7 +292,6 @@ function currentParams() {
     field: selectedField(),
     minWorks: Number($("min-works").value || 0),
     minProb: Number($("min-prob").value || 0),
-    minSchoolPapers: Number($("min-school-papers").value || 1),
     evidence: $("evidence-select").value,
     sortBy: $("sort-by").value,
     search: $("text-search").value.trim().toLowerCase(),
@@ -295,7 +300,6 @@ function currentParams() {
 
 function passes(a, params) {
   if (authorWorks(a) < params.minWorks) return false;
-  if (Number(a.yp || 0) < params.minSchoolPapers) return false;
   if (fieldProb(a, params.field) < params.minProb) return false;
   if (params.evidence === "raw" && Number(a.raw || 0) <= 0) return false;
   if (params.evidence === "imputed" && Number(a.raw || 0) > 0) return false;
@@ -315,14 +319,14 @@ function summaryHtml() {
     <section class="dept-summary">
       <h2>${escapeHtml(p.university)}, ${p.year} - ${escapeHtml(fieldLabel(params.field))}</h2>
       <p>
-        OpenAlex-only view: authors are included when the imputed paper-author affiliation file attaches them to this university in this year.
+        OpenAlex-only view: authors are included when the author-institution-year panel attaches them to this university in this year.
+        Years between an author's evidence years at the same institution are shown even when the author has no paper at that institution in the selected year.
         Faculty roster data are not used here.
       </p>
       <p class="active-filter">
         Current filter:
         <strong>${escapeHtml(fieldLabel(params.field))} >= ${fmtPct(params.minProb)}</strong>,
-        <strong>${fmtInt(params.minWorks)}+ OpenAlex works</strong>,
-        and <strong>${fmtInt(params.minSchoolPapers)}+ selected-university papers</strong>.
+        and <strong>${fmtInt(params.minWorks)}+ OpenAlex works</strong>.
       </p>
       <div class="summary-grid summary-grid-compact">
         <div class="summary-primary">
@@ -331,7 +335,7 @@ function summaryHtml() {
         </div>
         <div>
           <strong>${fmtInt(state.rows.length)}</strong>
-          <span>authors attached to ${escapeHtml(p.university)} in ${p.year}</span>
+          <span>author-institution panel rows at ${escapeHtml(p.university)} in ${p.year}</span>
         </div>
         <div>
           <strong>${fmtInt(rawTotal)}</strong>
@@ -373,7 +377,7 @@ function tableHtml() {
       <h3>OpenAlex candidates for ${escapeHtml(p.university)} in ${p.year}</h3>
       <p class="panel-note">
         These rows are a direct OpenAlex/SciSciNet candidate list for the selected institution-year and field.
-        "Observed raw affiliation" means at least one underlying paper-author-institution row directly listed the university; otherwise the row enters through the conservative imputation file.
+        The evidence column separates same-year raw paper evidence, same-year imputed paper evidence, and gap-filled panel years.
       </p>
       <div class="table-wrap">
         <table class="data-table candidate-table">
@@ -425,7 +429,7 @@ function applyFilters() {
   } else if (params.sortBy === "works_desc") {
     xs.sort((a, b) => authorWorks(b) - authorWorks(a));
   } else if (params.sortBy === "school_papers_desc") {
-    xs.sort((a, b) => Number(b.yp || 0) - Number(a.yp || 0) || fieldProb(b, params.field) - fieldProb(a, params.field));
+    xs.sort((a, b) => Number(b.ip || 0) - Number(a.ip || 0) || fieldProb(b, params.field) - fieldProb(a, params.field));
   } else if (params.sortBy === "name") {
     xs.sort((a, b) => String(a.n || "").localeCompare(String(b.n || "")));
   }
@@ -443,7 +447,7 @@ function attachEvents() {
   $("university-input").addEventListener("change", loadSelectedYear);
   $("year-input").addEventListener("input", debounceLoad);
   $("year-input").addEventListener("change", loadSelectedYear);
-  ["field-input", "min-works", "min-prob", "min-school-papers", "evidence-select", "sort-by", "text-search"].forEach((id) => {
+  ["field-input", "min-works", "min-prob", "evidence-select", "sort-by", "text-search"].forEach((id) => {
     $(id).addEventListener("input", applyFilters);
   });
   $("reset-btn").onclick = (e) => {
@@ -457,7 +461,6 @@ function attachEvents() {
     $("field-input").value = fieldLabel(defaults.field);
     $("min-works").value = defaults.min_works;
     $("min-prob").value = Number(defaults.min_field_probability).toFixed(2);
-    $("min-school-papers").value = defaults.min_school_papers;
     $("evidence-select").value = "all";
     $("sort-by").value = "field_desc";
     $("text-search").value = "";

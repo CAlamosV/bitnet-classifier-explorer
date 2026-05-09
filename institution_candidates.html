@@ -48,7 +48,6 @@
     <legend>OpenAlex filters</legend>
     <label>min OpenAlex works <input type="number" min="0" step="1" id="min-works" value="5" /></label>
     <label>min field probability <input type="number" min="0" max="1" step="0.05" id="min-prob" value="0.50" /></label>
-    <label>min papers at selected university-year <input type="number" min="1" step="1" id="min-school-papers" value="1" /></label>
   </fieldset>
 
   <fieldset>
@@ -56,7 +55,7 @@
     <select id="evidence-select">
       <option value="all">observed or imputed</option>
       <option value="raw">observed raw affiliation only</option>
-      <option value="imputed">imputed only</option>
+      <option value="imputed">gap-filled or imputed only</option>
     </select>
   </fieldset>
 
@@ -65,7 +64,7 @@
     <select id="sort-by">
       <option value="field_desc">Highest selected-field probability</option>
       <option value="works_desc">Most OpenAlex works</option>
-      <option value="school_papers_desc">Most selected-university papers</option>
+      <option value="school_papers_desc">Most institution evidence papers</option>
       <option value="name">Name</option>
     </select>
   </fieldset>
@@ -82,7 +81,9 @@
 
 <footer>
   <p>Built from the original <code>paper_author_edu_imputed_1940_2000.parquet</code>
-  file. The university search box only lists institutions with exported
+  file, converted here into author-institution-year panel rows by filling years
+  between an author's evidence years at the same institution. The university
+  dropdown only lists institutions with exported
   candidate slices: a selected comparison set of validation schools, prominent
   research universities, and smaller institutions. It
   intentionally ignores faculty roster data and only displays OpenAlex authors

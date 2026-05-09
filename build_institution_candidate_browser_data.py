@@ -106,9 +106,18 @@ def build_data(args: argparse.Namespace) -> None:
     paper_fields = args.oafc_root / "data" / "intermediate" / "scinet" / "preds_e5_v1v2" / "preds_*.parquet"
     paper_subfields = args.oafc_root / "data" / "intermediate" / "scinet" / "preds_subfield_v1" / "preds_*.parquet"
 
-    con = duckdb.connect()
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    db_path = args.output.parent / ".institution_candidates_build.duckdb"
+    temp_dir = args.output.parent / ".duckdb_tmp"
+    temp_dir.mkdir(parents=True, exist_ok=True)
+    for path in (db_path, db_path.with_suffix(db_path.suffix + ".wal")):
+        if path.exists():
+            path.unlink()
+
+    con = duckdb.connect(str(db_path))
     con.execute(f"SET threads={args.threads}")
     con.execute(f"SET memory_limit='{args.memory}'")
+    con.execute(f"SET temp_directory='{_pq(temp_dir)}'")
     con.execute("SET preserve_insertion_order=false")
     con.execute(f"""
         CREATE OR REPLACE TEMP TABLE schools AS
@@ -132,7 +141,7 @@ def build_data(args: argparse.Namespace) -> None:
           ON i.InstitutionID = t.InstitutionID
         GROUP BY i.InstitutionID;
 
-        CREATE OR REPLACE TEMP TABLE author_year AS
+        CREATE OR REPLACE TEMP TABLE school_evidence AS
         SELECT
             s.university_key,
             s.university,
@@ -149,7 +158,7 @@ def build_data(args: argparse.Namespace) -> None:
 
         CREATE OR REPLACE TEMP TABLE candidate_authors AS
         SELECT DISTINCT AuthorID
-        FROM author_year;
+        FROM school_evidence;
 
         CREATE OR REPLACE TEMP TABLE candidate_edges AS
         SELECT DISTINCT i.AuthorID, i.PaperID AS paper_id
@@ -229,68 +238,10 @@ def build_data(args: argparse.Namespace) -> None:
         WHERE rn <= 5
         GROUP BY AuthorID;
 
-        CREATE OR REPLACE TEMP TABLE candidate_rows AS
-        SELECT
-            ay.university_key,
-            ay.university,
-            ay.institution_id,
-            ay.year,
-            ay.AuthorID,
-            coalesce(ad.display_name, sa.display_name, ay.AuthorID) AS display_name,
-            ad.works_count AS openalex_works_count,
-            ad.cited_by_count AS openalex_cited_by_count,
-            sa.h_index AS sciscinet_h_index,
-            coalesce(f.n_papers, 0) AS classifier_sample_pubs,
-            f.year_first,
-            f.year_last,
-            ay.school_papers,
-            ay.raw_affiliation_rows,
-            ay.min_imputed,
-            f.field_top1,
-            f.field_top2,
-            f.field_top3,
-            f.field_p1,
-            f.field_p2,
-            f.field_p3,
-            sf.subfield_top1,
-            sf.subfield_top2,
-            sf.subfield_top3,
-            sf.subfield_top4,
-            sf.subfield_top5,
-            sf.sub_p1,
-            sf.sub_p2,
-            sf.sub_p3,
-            sf.sub_p4,
-            sf.sub_p5,
-            {field_select}
-        FROM author_year ay
-        LEFT JOIN read_parquet('{_pq(author_details)}') ad
-          ON ay.AuthorID = ad.authorid
-        LEFT JOIN read_parquet('{_pq(authors)}') sa
-          ON ay.AuthorID = sa.authorid
-        LEFT JOIN read_parquet('{_pq(fields)}') f
-          ON ay.AuthorID = f.AuthorID
-        LEFT JOIN author_subfields sf
-          ON ay.AuthorID = sf.AuthorID;
     """)
 
-    args.output.parent.mkdir(parents=True, exist_ok=True)
     out_dir = args.output.parent / "institution_candidates"
     out_dir.mkdir(parents=True, exist_ok=True)
-
-    counts = con.execute("""
-        SELECT
-            university_key,
-            university,
-            institution_id,
-            year,
-            COUNT(*) AS author_count,
-            COUNT(*) FILTER (WHERE raw_affiliation_rows > 0) AS raw_author_count
-        FROM candidate_rows
-        GROUP BY 1, 2, 3, 4
-        ORDER BY university_key, year
-    """).fetchall()
-    count_cols = [d[0] for d in con.description]
 
     institution_rows = con.execute("""
         SELECT
@@ -313,13 +264,123 @@ def build_data(args: argparse.Namespace) -> None:
     current_school_key: str | None = None
     current_school_works: dict[tuple[int, str], list[dict[str, Any]]] = {}
 
+    def prepare_school_rows(university_key: str) -> list[dict[str, Any]]:
+        con.execute(f"""
+            CREATE OR REPLACE TEMP TABLE school_panel AS
+            WITH evidence AS (
+                SELECT *
+                FROM school_evidence
+                WHERE university_key = '{_pq(university_key)}'
+            ),
+            spells AS (
+                SELECT
+                    university_key,
+                    university,
+                    institution_id,
+                    AuthorID,
+                    MIN(year) AS panel_start_year,
+                    MAX(year) AS panel_end_year,
+                    SUM(school_papers) AS institution_evidence_papers,
+                    SUM(raw_affiliation_rows) AS institution_raw_affiliation_rows,
+                    MIN(min_imputed) AS spell_min_imputed
+                FROM evidence
+                GROUP BY 1, 2, 3, 4
+            ),
+            years AS (
+                SELECT CAST(range AS INTEGER) AS year
+                FROM range(1940, 2001)
+            )
+            SELECT
+                sp.university_key,
+                sp.university,
+                sp.institution_id,
+                y.year,
+                sp.AuthorID,
+                COALESCE(ev.school_papers, 0) AS school_papers,
+                COALESCE(ev.raw_affiliation_rows, 0) AS raw_affiliation_rows,
+                COALESCE(ev.min_imputed, sp.spell_min_imputed) AS min_imputed,
+                sp.institution_evidence_papers,
+                sp.institution_raw_affiliation_rows,
+                sp.panel_start_year,
+                sp.panel_end_year
+            FROM spells sp
+            JOIN years y
+              ON y.year BETWEEN sp.panel_start_year AND sp.panel_end_year
+            LEFT JOIN evidence ev
+              ON sp.university_key = ev.university_key
+             AND sp.institution_id = ev.institution_id
+             AND sp.AuthorID = ev.AuthorID
+             AND y.year = ev.year;
+
+            CREATE OR REPLACE TEMP TABLE candidate_rows_school AS
+            SELECT
+                ay.university_key,
+                ay.university,
+                ay.institution_id,
+                ay.year,
+                ay.AuthorID,
+                coalesce(ad.display_name, sa.display_name, ay.AuthorID) AS display_name,
+                ad.works_count AS openalex_works_count,
+                ad.cited_by_count AS openalex_cited_by_count,
+                sa.h_index AS sciscinet_h_index,
+                coalesce(f.n_papers, 0) AS classifier_sample_pubs,
+                f.year_first,
+                f.year_last,
+                ay.school_papers,
+                ay.raw_affiliation_rows,
+                ay.min_imputed,
+                ay.institution_evidence_papers,
+                ay.institution_raw_affiliation_rows,
+                ay.panel_start_year,
+                ay.panel_end_year,
+                f.field_top1,
+                f.field_top2,
+                f.field_top3,
+                f.field_p1,
+                f.field_p2,
+                f.field_p3,
+                sf.subfield_top1,
+                sf.subfield_top2,
+                sf.subfield_top3,
+                sf.subfield_top4,
+                sf.subfield_top5,
+                sf.sub_p1,
+                sf.sub_p2,
+                sf.sub_p3,
+                sf.sub_p4,
+                sf.sub_p5,
+                {field_select}
+            FROM school_panel ay
+            LEFT JOIN read_parquet('{_pq(author_details)}') ad
+              ON ay.AuthorID = ad.authorid
+            LEFT JOIN read_parquet('{_pq(authors)}') sa
+              ON ay.AuthorID = sa.authorid
+            LEFT JOIN read_parquet('{_pq(fields)}') f
+              ON ay.AuthorID = f.AuthorID
+            LEFT JOIN author_subfields sf
+              ON ay.AuthorID = sf.AuthorID;
+        """)
+        rows = con.execute("""
+            SELECT
+                university_key,
+                university,
+                institution_id,
+                year,
+                COUNT(*) AS author_count,
+                COUNT(*) FILTER (WHERE raw_affiliation_rows > 0) AS raw_author_count
+            FROM candidate_rows_school
+            GROUP BY 1, 2, 3, 4
+            ORDER BY year
+        """).fetchall()
+        cols = [d[0] for d in con.description]
+        return [dict(zip(cols, row)) for row in rows]
+
     def load_school_works(university_key: str) -> dict[tuple[int, str], list[dict[str, Any]]]:
         print(f"  Loading nearest classified works for {university_key}")
         work_rows = con.execute(f"""
             WITH school_author_year AS (
                 SELECT DISTINCT AuthorID, year
-                FROM author_year
-                WHERE university_key = ?
+                FROM school_panel
             ),
             school_authors AS (
                 SELECT DISTINCT AuthorID
@@ -411,7 +472,7 @@ def build_data(args: argparse.Namespace) -> None:
             FROM ranked
             WHERE rn <= 5
             ORDER BY target_year, AuthorID, rn
-        """, [university_key]).fetchall()
+        """).fetchall()
         work_cols = [d[0] for d in con.description]
         out: dict[tuple[int, str], list[dict[str, Any]]] = {}
         for work_row in work_rows:
@@ -432,97 +493,101 @@ def build_data(args: argparse.Namespace) -> None:
             out.setdefault((int(work["target_year"]), work["AuthorID"]), []).append(item)
         return out
 
-    for row in counts:
-        meta = dict(zip(count_cols, row))
-        years.add(meta["year"])
-        if meta["university_key"] != current_school_key:
-            current_school_key = meta["university_key"]
-            current_school_works = load_school_works(current_school_key)
-        file_name = f"{meta['university_key']}-{meta['year']}.json"
-        print(f"Writing {file_name}: {meta['author_count']} authors")
-        rows = con.execute("""
-            SELECT *
-            FROM candidate_rows
-            WHERE university_key = ?
-              AND year = ?
-            ORDER BY
-                school_papers DESC,
-                openalex_works_count DESC NULLS LAST,
-                lower(display_name)
-        """, [meta["university_key"], meta["year"]]).fetchall()
-        cols = [d[0] for d in con.description]
-        prob_start = cols.index(f"field_prob_{field_codes[0]}")
+    for school in sorted(SCHOOLS, key=lambda item: item["key"]):
+        current_school_key = school["key"]
+        school_counts = prepare_school_rows(current_school_key)
+        current_school_works = load_school_works(current_school_key)
+        for meta in school_counts:
+            years.add(meta["year"])
+            file_name = f"{meta['university_key']}-{meta['year']}.json"
+            print(f"Writing {file_name}: {meta['author_count']} authors")
+            rows = con.execute("""
+                SELECT *
+                FROM candidate_rows_school
+                WHERE year = ?
+                ORDER BY
+                    institution_evidence_papers DESC,
+                    openalex_works_count DESC NULLS LAST,
+                    lower(display_name)
+            """, [meta["year"]]).fetchall()
+            cols = [d[0] for d in con.description]
+            prob_start = cols.index(f"field_prob_{field_codes[0]}")
 
-        works_by_author = {
-            author_id: works
-            for (year, author_id), works in current_school_works.items()
-            if year == meta["year"]
-        }
-
-        authors_out = []
-        for values in rows:
-            item = dict(zip(cols[:prob_start], values[:prob_start]))
-            probs = dict(zip(field_codes, values[prob_start:]))
-            out: dict[str, Any] = {
-                "a": item["AuthorID"],
-                "n": item["display_name"],
-                "yp": int(item["school_papers"] or 0),
+            works_by_author = {
+                author_id: works
+                for (year, author_id), works in current_school_works.items()
+                if year == meta["year"]
             }
-            set_if_present(out, "w", item["openalex_works_count"])
-            set_if_present(out, "c", item["openalex_cited_by_count"])
-            set_if_present(out, "h", item["sciscinet_h_index"])
-            set_if_present(out, "sp", item["classifier_sample_pubs"])
-            set_if_present(out, "yf", item["year_first"])
-            set_if_present(out, "yl", item["year_last"])
-            raw_rows = int(item["raw_affiliation_rows"] or 0)
-            if raw_rows:
-                out["raw"] = raw_rows
-            out["imp"] = int(item["min_imputed"] or 0)
 
-            top_fields = []
-            for i in range(1, 4):
-                code = item.get(f"field_top{i}")
-                prob = item.get(f"field_p{i}")
-                if code and prob is not None:
-                    top_fields.append([code, clean_number(float(prob))])
-            if top_fields:
-                out["tf"] = top_fields
+            authors_out = []
+            for values in rows:
+                item = dict(zip(cols[:prob_start], values[:prob_start]))
+                probs = dict(zip(field_codes, values[prob_start:]))
+                out: dict[str, Any] = {
+                    "a": item["AuthorID"],
+                    "n": item["display_name"],
+                    "yp": int(item["school_papers"] or 0),
+                }
+                set_if_present(out, "ip", item["institution_evidence_papers"])
+                set_if_present(out, "ir", item["institution_raw_affiliation_rows"])
+                set_if_present(out, "ps", item["panel_start_year"])
+                set_if_present(out, "pe", item["panel_end_year"])
+                set_if_present(out, "w", item["openalex_works_count"])
+                set_if_present(out, "c", item["openalex_cited_by_count"])
+                set_if_present(out, "h", item["sciscinet_h_index"])
+                set_if_present(out, "sp", item["classifier_sample_pubs"])
+                set_if_present(out, "yf", item["year_first"])
+                set_if_present(out, "yl", item["year_last"])
+                raw_rows = int(item["raw_affiliation_rows"] or 0)
+                if raw_rows:
+                    out["raw"] = raw_rows
+                out["imp"] = int(item["min_imputed"] or 0)
 
-            top_subfields = []
-            for i in range(1, 6):
-                code = item.get(f"subfield_top{i}")
-                prob = item.get(f"sub_p{i}")
-                if code and prob is not None:
-                    top_subfields.append([code, clean_number(float(prob))])
-            if top_subfields:
-                out["ts"] = top_subfields
+                top_fields = []
+                for i in range(1, 4):
+                    code = item.get(f"field_top{i}")
+                    prob = item.get(f"field_p{i}")
+                    if code and prob is not None:
+                        top_fields.append([code, clean_number(float(prob))])
+                if top_fields:
+                    out["tf"] = top_fields
 
-            fp = {
-                code: clean_number(float(prob))
-                for code, prob in probs.items()
-                if prob is not None and abs(float(prob)) >= 0.0005
+                top_subfields = []
+                for i in range(1, 6):
+                    code = item.get(f"subfield_top{i}")
+                    prob = item.get(f"sub_p{i}")
+                    if code and prob is not None:
+                        top_subfields.append([code, clean_number(float(prob))])
+                if top_subfields:
+                    out["ts"] = top_subfields
+
+                fp = {
+                    code: clean_number(float(prob))
+                    for code, prob in probs.items()
+                    if prob is not None and abs(float(prob)) >= 0.0005
+                }
+                if fp:
+                    out["fp"] = fp
+
+                works = works_by_author.get(item["AuthorID"])
+                if works:
+                    out["wk"] = works
+                authors_out.append(out)
+
+            payload = {
+                "university_key": meta["university_key"],
+                "university": meta["university"],
+                "institution_id": meta["institution_id"],
+                "year": meta["year"],
+                "authors": authors_out,
             }
-            if fp:
-                out["fp"] = fp
-            works = works_by_author.get(item["AuthorID"])
-            if works:
-                out["wk"] = works
-            authors_out.append(out)
-
-        payload = {
-            "university_key": meta["university_key"],
-            "university": meta["university"],
-            "institution_id": meta["institution_id"],
-            "year": meta["year"],
-            "authors": authors_out,
-        }
-        (out_dir / file_name).write_text(
-            json.dumps(payload, ensure_ascii=True, separators=(",", ":"))
-        )
-        data_files.append({
-            **meta,
-            "data_file": f"institution_candidates/{file_name}",
-        })
+            (out_dir / file_name).write_text(
+                json.dumps(payload, ensure_ascii=True, separators=(",", ":"))
+            )
+            data_files.append({
+                **meta,
+                "data_file": f"institution_candidates/{file_name}",
+            })
 
     metadata = {
         "built_from": {
@@ -540,7 +605,6 @@ def build_data(args: argparse.Namespace) -> None:
             "field": "ECON",
             "min_works": 5,
             "min_field_probability": 0.5,
-            "min_school_papers": 1,
         },
         "universities": SCHOOLS,
         "institutions": institutions,
@@ -551,6 +615,10 @@ def build_data(args: argparse.Namespace) -> None:
     args.output.write_text(json.dumps(metadata, ensure_ascii=True, separators=(",", ":")))
     print(f"Wrote {args.output}")
     print(f"Wrote per-school-year data to {out_dir}")
+    con.close()
+    for path in (db_path, db_path.with_suffix(db_path.suffix + ".wal")):
+        if path.exists():
+            path.unlink()
 
 
 def main() -> None:
