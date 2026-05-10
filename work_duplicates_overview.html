@@ -485,6 +485,41 @@
       continuous fig21 NSFNET SE ≈ 0.65 means neither pre nor post
       coefficients are statistically distinguishable from zero.
     </p>
+
+    <h3>fig22 (random 1 pair / paper) and fig23 (bilateral only)</h3>
+    <table class="tier-table">
+      <thead>
+        <tr>
+          <th>Spec</th>
+          <th>Network</th>
+          <th>mean |&Delta;coef|</th>
+          <th>max |&Delta;coef|</th>
+          <th>year-5 (pre)</th>
+          <th>year-5 (post)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td rowspan="4">fig22 (random)</td><td>ARPANET</td><td>0.011</td><td>0.029</td><td> 0.036</td><td> 0.020</td></tr>
+        <tr><td>USENET</td> <td>0.002</td><td>0.006</td><td> 0.005</td><td> 0.011</td></tr>
+        <tr><td>BITNET</td> <td>0.002</td><td>0.007</td><td> 0.026</td><td> 0.022</td></tr>
+        <tr><td>NSFNET</td> <td>0.002</td><td>0.006</td><td>-0.067</td><td>-0.068</td></tr>
+        <tr><td rowspan="4">fig23 (bilateral)</td><td>ARPANET</td><td>0.021</td><td>0.044</td><td> 0.042</td><td> 0.040</td></tr>
+        <tr><td>USENET</td> <td>0.003</td><td>0.005</td><td> 0.007</td><td> 0.003</td></tr>
+        <tr><td>BITNET</td> <td>0.001</td><td>0.005</td><td> 0.011</td><td> 0.012</td></tr>
+        <tr><td>NSFNET</td> <td>0.008</td><td>0.021</td><td>-0.044</td><td>-0.029</td></tr>
+      </tbody>
+    </table>
+    <p>
+      Both robustness specifications are <strong>dedup-robust</strong>:
+      max coefficient shift &le; 0.044 across 88 (rel_time × network)
+      cells, with most cells shifting &lt; 0.005. Random-1-pair-per-paper
+      already implicitly controls duplicate-paper inflation (each paper
+      contributes to one pair regardless of how many duplicate paperids
+      it has), and bilateral-only papers tend to be cleaner records to
+      begin with — both keep the same conclusions before and after
+      dedup. The body's reliance on these specs as the
+      reviewer-facing robustness panels is therefore conservative.
+    </p>
   </section>
 
   <section class="how" id="explore">
