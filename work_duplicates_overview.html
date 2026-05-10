@@ -85,13 +85,27 @@
         (e.g. <code>10.1000/abc</code> vs <code>10.1000/abc-a</code>);
         common Crossref publishing pattern.</li>
       <li><strong>T7 cross-year same DOI</strong> — same normalized DOI
-        in adjacent years; catches reissue / preprint year-drift.</li>
+        within <code>year_diff &le; 2</code>; catches reissue / preprint
+        year-drift.</li>
       <li><strong>T9 cross-year shared author + fuzzy title</strong> —
-        shared author + <code>token_set_ratio &ge; 95</code> across
-        adjacent years (window <code>&plusmn;1</code>); catches the
-        same paper indexed once as preprint, once as published version,
-        with different paperids.</li>
+        shared author + <code>token_set_ratio &ge; 95</code> at
+        <code>year_diff = 1</code> or <code>token_set_ratio &ge; 98</code>
+        at <code>year_diff &isin; {2, 3}</code>; window
+        <code>&plusmn;3</code> years (widened from <code>&plusmn;1</code>
+        on 2026-05-09 after a 50-pair API spot-check showed 98% precision
+        at the wider window). Catches the same paper indexed once as
+        preprint, once as published version, with different paperids
+        and a 1–3 year drift.</li>
     </ul>
+    <p>
+      <strong>Author IDs are pre-deduplicated.</strong> T5 and T9 do
+      shared-author matching on the <em>cleaned</em> AuthorID space
+      coming out of the author-deduplication pipeline (see
+      <a href="duplicates_overview.html">Author dup. overview</a>),
+      so two papers whose authors live under different OpenAlex
+      AuthorIDs but the same canonical author still register as a
+      shared-author match.
+    </p>
   </section>
 
   <section class="how">
@@ -124,8 +138,8 @@
             <td>Same Microsoft Academic Graph ID, same year. Almost never
                 fires (MAG IDs are mostly null in OpenAlex).</td></tr>
         <tr><td>4</td><td><code>T7_cross_year_same_doi</code></td>
-            <td>Same normalized DOI across &plusmn;1 year. Catches reissue
-                and preprint-vs-published year drift.</td></tr>
+            <td>Same normalized DOI across <code>year_diff &le; 2</code>.
+                Catches reissue and preprint-vs-published year drift.</td></tr>
         <tr><td>5</td><td><code>T6_doi_suffix_variant</code></td>
             <td>DOIs equal except for trailing single-letter / punct
                 suffix; Crossref publishing pattern.</td></tr>
@@ -145,9 +159,14 @@
                 <code>token_set_ratio &ge; 95</code> on titles + token /
                 length guards.</td></tr>
         <tr><td>8</td><td><code>T9_cross_year_shared_author</code></td>
-            <td>Same as T5, but spanning adjacent years
-                (window <code>&plusmn;1</code>) with stricter
-                <code>tsr &ge; 95</code> and length-ratio guards.</td></tr>
+            <td>Same as T5, but spanning years
+                (window <code>&plusmn;3</code>; widened from
+                <code>&plusmn;1</code> on 2026-05-09 after spot-check
+                validated 98% precision). Title threshold is
+                <code>tsr &ge; 95</code> at <code>year_diff = 1</code>,
+                stricter <code>tsr &ge; 98</code> at
+                <code>year_diff &isin; {2, 3}</code> to keep
+                cross-year FPs from creeping in.</td></tr>
       </tbody>
     </table>
     <p>
@@ -229,6 +248,243 @@
       among its pairs).
     </p>
     <div id="tier-stats">loading&hellip;</div>
+  </section>
+
+  <section class="how" id="precision">
+    <h2>Per-tier precision: 50-pair API spot-check</h2>
+    <p>
+      To get an honest read on each tier's false-positive rate, we
+      drew 50 accepted pairs per tier (30 for T1, 0 available for T3)
+      stratified across years 1940–2024 in 5-year steps, fetched both
+      works from the live OpenAlex API, and assigned a verdict
+      (<em>true_dup</em>, <em>false_positive</em>, or <em>ambiguous</em>)
+      via <code>build/work_cleaning/spot_check_api.py:assess()</code>.
+    </p>
+    <p>
+      <strong>Translation-aware verdict.</strong> The naive verdict
+      flagged every pair whose API titles diverged
+      (<code>token_set_ratio &lt; 95</code>) as a false positive.
+      That badly underestimated T1/T2 precision because PubMed
+      routinely indexes the English + Spanish (etc.) versions of a
+      paper under one PMID/PMCID. The refined rule promotes a
+      diverged-title pair to <em>true_dup</em> when the merge tier is
+      identifier-decisive (T0/T1/T2/T3/T7) <em>and</em> the API shows
+      <code>&ge; 1</code> shared author — the canonical fingerprint of
+      a translation duplicate.
+    </p>
+    <table class="tier-table">
+      <thead>
+        <tr><th>Tier</th><th>n sampled</th><th>strict</th><th>loose</th>
+            <th>accepted edges (% of total)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>T0_same_doi</code></td>           <td>50</td><td>96.0%</td><td>96.0%</td><td>27,010 (0.22%)</td></tr>
+        <tr><td><code>T1_same_pmid</code></td>          <td>30</td><td>76.7%</td><td>76.7%</td><td>12 (0.00%)</td></tr>
+        <tr><td><code>T2_same_pmcid</code></td>         <td>50</td><td>58.0%</td><td>58.0%</td><td>41 (0.00%)</td></tr>
+        <tr><td><code>T3_same_mag</code></td>           <td>0</td><td>n/a</td><td>n/a</td><td>0</td></tr>
+        <tr><td><code>T4_same_title</code></td>         <td>50</td><td>38.0%</td><td>54.0%</td><td>11,321,952 (92.8%)</td></tr>
+        <tr><td><code>T5_shared_author_fuzzy_title</code></td><td>50</td><td>66.0%</td><td>66.0%</td><td>535,107 (4.4%)</td></tr>
+        <tr><td><code>T6_doi_suffix_variant</code></td> <td>50</td><td>30.0%</td><td>44.0%</td><td>4,593 (0.04%)</td></tr>
+        <tr><td><code>T7_cross_year_same_doi</code></td><td>50</td><td>94.0%</td><td>94.0%</td><td>3,956 (0.03%)</td></tr>
+        <tr><td><code>T9_cross_year_shared_author</code></td><td>50</td><td>98.0%</td><td>98.0%</td><td>307,930 (2.5%)</td></tr>
+      </tbody>
+    </table>
+    <p>
+      <strong>Read.</strong> T0/T7/T9 (96/94/98%) are production-ready.
+      T5 (66%) is the borderline mid-tier signal that contributes 4.4%
+      of edges. T1/T2 look low at 27%/24% naive but clear 77%/58%
+      after the translation-aware fix; their combined contribution
+      (53 edges out of 12.2 M, 0.0004%) is negligible regardless. T6
+      (44% loose) is borderline but only 0.04% of edges.
+    </p>
+    <p>
+      <strong>The dominant tier — T4 — sits at 38% strict, 54% loose
+      precision.</strong> T4 contributes 92.8% of all merges, so its
+      precision is the headline number for the whole pipeline. The
+      current frontmatter blocklist (60+ keys), reply-like regex, and
+      block-size cap clear obvious junk; remaining FPs are pairs with
+      a generic medical / scientific title appearing twice in the
+      same year by different authors (e.g. <em>"SURGERY IN DIABETES
+      MELLITUS"</em>, <em>"Mental Health Services"</em>). Tightening
+      this further would require an additional shared-author or same-
+      DOI-prefix gate, which would push T4 toward T5's 66% precision
+      but also drop a substantive share of accepted edges — the kind
+      of substantive trade-off a referee should weigh in on. We
+      report T4's strict precision as-is in the paper.
+    </p>
+    <p>
+      Total accepted edges across the run: 12.2 M, collapsing 16.8 M
+      OpenAlex paperids into 7.6 M canonical clusters (modal cluster
+      size 2 covers 89% of clusters; max single cluster size 2,190).
+      The "edges" column above sums to 12,200,601 — matching
+      <code>work_duplicates_stats.json</code>.
+    </p>
+  </section>
+
+  <section class="how" id="erratum">
+    <h2>Erratum / correction / retraction handling</h2>
+    <p>
+      OpenAlex assigns a separate PaperID to most erratum, correction,
+      retraction, and reply notices. <strong>These should NOT be merged
+      with the original paper</strong> — they are distinct publications
+      with their own citation graphs.
+    </p>
+    <p>
+      Step 07 (<code>07_tier_rules.py</code>) rejects any candidate
+      pair from the title-based tiers (T4, T5, T6, T9) where either
+      side's title matches a <code>REPLYLIKE_REGEXES</code> pattern
+      (<code>^erratum</code>, <code>^errata</code>,
+      <code>^correction(s| to|:)</code>,
+      <code>^corrigendum</code>,
+      <code>^retract(ion|ed|ing)</code>, <code>^withdrawn</code>,
+      <code>^reply (to|on)</code>, <code>^response (to|on)</code>,
+      <code>^comment (on|to)</code>, <code>^addendum</code>,
+      <code>^rejoinder</code>, etc. — 33 patterns total). The
+      identifier-decisive tiers (T0/T1/T2/T3/T7) bypass this filter
+      since same-DOI / PMID / PMCID is a publisher-side merge signal
+      we want to preserve.
+    </p>
+    <p>
+      <strong>Audit (post-2026-05-09 rebuild)</strong>:
+      <code>audit_current_output.py</code> finds <strong>132
+      canonical clusters out of 7.6 M (0.0017%)</strong> whose
+      canonical titles start with erratum / correction / retraction
+      / reply patterns. Inspection of the largest of these
+      (sizes 8, 6, 5, 5, 5, 4, 4, 4...) shows they are
+      genuinely-titled papers using "correction" in its medical /
+      practical sense — not erratum notices — e.g. <em>"Correction
+      of the Cornrow Hair Transplant"</em>, <em>"Correction of the
+      Paralytic Claw-Thumb..."</em>, <em>"Correction of an Inborn
+      Error of Metabolism..."</em>. The dedup pipeline correctly
+      keeps standalone erratum publications separate while merging
+      amended re-publications (T0 / T7 same DOI) and translations.
+    </p>
+  </section>
+
+  <section class="how">
+    <h2>Citation aggregation: union, not max</h2>
+    <p>
+      Two members of a cluster can share citers (a citing paper that
+      lists both versions in its references) or have disjoint citers
+      (e.g. preprint cited in arXiv-citing literature, journal version
+      cited in journal-citing literature). For each canonical cluster
+      we now compute the <strong>union of distinct citing
+      paperids</strong> across all members
+      (<code>union_cited_by</code>) — implemented in step
+      <code>09_citation_union.py</code> as a single DuckDB pass over
+      the citation edge table joined to the global crosswalk.
+    </p>
+    <p>
+      The naive alternative (<code>max_cited_by</code> across cluster
+      members) under-counts citations whenever the citers are disjoint.
+      In the 1900–2024 run, <code>union_cited_by</code> recovers 33%
+      more citers than <code>max_cited_by</code> on average across
+      multi-member clusters. Both columns are written to
+      <code>canonical_papers.parquet</code>; <code>union_cited_by</code>
+      is the default for downstream panels.
+    </p>
+  </section>
+
+  <section class="how" id="wiring">
+    <h2>Downstream wiring: canonical-view registry</h2>
+    <p>
+      Rather than rebuild the 114 GB <code>papers.parquet</code> with
+      canonical IDs baked in, every panel builder
+      (<code>build_authors</code>, <code>build_pairs</code>,
+      <code>build_institutions</code>, <code>precompute_aux</code>,
+      <code>build_exposure</code>) now opens its DuckDB connection
+      through <code>bitnet.work_dedup.register_canonical_views()</code>,
+      which exposes <em>views</em> like <code>pa_canon</code> and
+      <code>sci_canon</code> that apply the work crosswalk and the
+      author crosswalk on the fly:
+    </p>
+    <pre><code>CREATE OR REPLACE VIEW pa_canon AS
+  SELECT
+    COALESCE(work_xw.canonical_paperid, raw.paperid)  AS paperid,
+    COALESCE(auth_xw.canonical_authorid, raw.authorid) AS authorid,
+    raw.year, raw.field, raw.affiliation_id, raw....
+  FROM read_parquet('paper_author_imputed.parquet') raw
+  LEFT JOIN read_parquet('crosswalk.parquet')        work_xw
+    ON raw.paperid = work_xw.paperid
+  LEFT JOIN read_parquet('author_crosswalk.parquet') auth_xw
+    ON raw.authorid = auth_xw.authorid;</code></pre>
+    <p>
+      This means downstream panels see the deduplicated paper-author
+      edges without any pre-materialization step, and the same
+      crosswalks are applied to the citation graph
+      (<code>paper_references_canon</code>) and to SciSciNet metadata
+      (<code>sci_canon</code>). The toggle is governed by the
+      environment variable <code>BITNET_WORK_DEDUP=1</code> (set in
+      every Sherlock SLURM script that rebuilds panels).
+    </p>
+  </section>
+
+  <section class="how" id="impact">
+    <h2>Effect on published estimates (R1, primary fields)</h2>
+    <p>
+      We re-fit the two headline event studies on both pre-dedup and
+      post-dedup panels for all four networks: <code>fig20</code>
+      (binary treatment) and <code>fig21</code> (continuous
+      <code>E_join</code> dose). Same R1 frame, same primary-field
+      bundle, same residualization on institution-size&times;year FE.
+      Computed by <code>analysis/dedup_numeric_diff.py</code>;
+      side-by-side PNGs in
+      <code>results/dedup_before_after/&lt;net&gt;/</code>.
+    </p>
+    <h3>fig20 (binary)</h3>
+    <table class="tier-table">
+      <thead>
+        <tr>
+          <th>Network</th>
+          <th>mean |&Delta;coef|</th>
+          <th>max |&Delta;coef|</th>
+          <th>year-5 (pre)</th>
+          <th>year-5 (post)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>ARPANET</td><td>0.027</td><td>0.042</td><td>-0.014</td><td>-0.039</td></tr>
+        <tr><td>USENET</td> <td>0.003</td><td>0.008</td><td>-0.004</td><td>-0.007</td></tr>
+        <tr><td>BITNET</td> <td>0.016</td><td>0.045</td><td> 0.151</td><td> 0.106</td></tr>
+        <tr><td>NSFNET</td> <td>0.032</td><td>0.088</td><td> 0.086</td><td>-0.002</td></tr>
+      </tbody>
+    </table>
+    <h3>fig21 (continuous E_join)</h3>
+    <table class="tier-table">
+      <thead>
+        <tr>
+          <th>Network</th>
+          <th>mean |&Delta;coef|</th>
+          <th>max |&Delta;coef|</th>
+          <th>year-5 (pre)</th>
+          <th>year-5 (post)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>ARPANET</td><td>0.079</td><td>0.131</td><td>-0.013</td><td>-0.114</td></tr>
+        <tr><td>USENET</td> <td>0.013</td><td>0.032</td><td>-0.009</td><td>-0.037</td></tr>
+        <tr><td>BITNET</td> <td>0.042</td><td>0.175</td><td> 0.432</td><td> 0.256</td></tr>
+        <tr><td>NSFNET</td> <td>0.443</td><td>1.056</td><td> 1.186</td><td> 0.130</td></tr>
+      </tbody>
+    </table>
+    <p>
+      <strong>No sign flips on any pre-trend.</strong> USENET is
+      essentially unchanged (the R1 STEM USENET sample was already
+      duplicate-light). BITNET shifts modestly in both
+      specifications: binary year-5 drops 0.151 → 0.106 (~30%);
+      continuous year-5 drops 0.43 → 0.26 (~40%). The slow-ramp
+      shape and significance pattern are intact in both. ARPANET
+      shows a uniform slight downward shift consistent with a small
+      denominator effect.
+      <strong>NSFNET attenuates the most</strong>: the previously-
+      positive (but already noisy) NSFNET year-5 coefficients drop
+      to near zero. NSFNET is the network we already flagged as the
+      federally-subsidized tail (rather than the full American
+      research internet — see
+      <code>docs/treatment_implementation.md</code> &sect;3.8); the
+      continuous fig21 NSFNET SE ≈ 0.65 means neither pre nor post
+      coefficients are statistically distinguishable from zero.
+    </p>
   </section>
 
   <section class="how" id="explore">
