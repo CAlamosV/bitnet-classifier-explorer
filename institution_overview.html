@@ -125,33 +125,210 @@
   <section class="how">
     <h2>How the institution file is built</h2>
     <p>
-      We start from SciSciNet/OpenAlex paper-author-institution rows and keep
-      only institutions whose OpenAlex type is <code>education</code>. The goal
-      is a university/college affiliation file for publication analysis, not a
-      complete employer-history file.
+      We want one row per <em>(paper, author)</em> pair giving the
+      university we believe that author was at when the paper came out.
+      The starting point is the raw OpenAlex authorship table: each
+      coauthorship row says &ldquo;author <em>a</em> appeared on paper
+      <em>p</em> with affiliation tag <em>i</em>&rdquo;. A paper-author
+      pair can have <strong>zero</strong> such rows (OpenAlex never
+      tagged an affiliation), <strong>one</strong>, or
+      <strong>several</strong> (joint appointments, or OpenAlex split a
+      single department into a university and a medical school). We
+      keep only rows whose institution OpenAlex classifies as
+      <code>education</code> &mdash; we throw out hospitals, government
+      labs, and companies, because we want a university affiliation
+      file, not a full employer history.
     </p>
+
+    <h3>Step 1: build the author's own publication history per year</h3>
     <p>
-      For each <code>PaperID, AuthorID</code> slot we collect the author's
-      education-affiliation observations in a &plusmn;3-year window around the
-      publication year. The most-common institution in that window (the
-      &ldquo;modal&rdquo; institution) is the candidate. If it accounts for at
-      least 75&percnt; of the window observations and shows up on at least 4
-      papers, we assign it &mdash; even if a single raw row on the paper says
-      something different. This is what catches obvious coauthor-leak rows
-      where a visiting Stanford coauthor's affiliation gets propagated to
-      every author on the paper.
+      For each author we count, for every year, how many of their
+      papers in that year were raw-tagged with each university. So if
+      Jane Doe wrote 3 papers in 1980 and all three were tagged
+      <em>Stanford</em>, then for her, <code>(year=1980,
+      institution=Stanford, count=3)</code>.
     </p>
+
+    <h3>Step 2: the &plusmn;3-year window vote</h3>
     <p>
-      If the strong-window rule does not fire, we fall back to the raw
-      paper-author-institution row. Slots that have no raw row at all get
-      filled by the same window vote at a more permissive threshold
-      (50&percnt; of observations, at least 2 papers). Slots with neither raw
-      nor window evidence get filled only when the author's nearest pre- and
-      post-gap years agree on a single institution. Roughly a third of the
-      file is from raw rows, a third is window-filled, and a small share is
-      long-distance-interpolated; less than 1&percnt; is window-strong
-      override.
+      Now take any one of her papers, say from 1981. We pool her
+      institution counts across <strong>1978&ndash;1984</strong> &mdash;
+      a seven-year window centered on the paper. Suppose those counts
+      add up to 8 Stanford and 1 MIT. The
+      <strong>window total</strong> is 9, the
+      <strong>window-modal university</strong> (the one that wins the
+      vote) is Stanford with 8 papers, and its
+      <strong>window share</strong> is 8/9 &asymp; 89&percnt;.
     </p>
+
+    <h3>Step 3: rules, applied in order &mdash; first match wins</h3>
+    <ol>
+      <li>
+        <strong>Strong-window rule.</strong> If the window-modal
+        university wins by &ge;&nbsp;75&percnt; of the window
+        <em>and</em> shows up on at least 4 of the author's papers in
+        that window, we assign it. This is strong enough that we use it
+        <em>even if the raw row on this paper says something
+        different</em>. That different raw row is usually a coauthor
+        leak: OpenAlex sometimes copies one author's affiliation onto
+        every author on the paper, so a Stanford visitor on a Berkeley
+        paper turns the whole author list into &ldquo;Stanford&rdquo;.
+        Less than 1&percnt; of slots in the file actually have their
+        raw row overridden this way (we tag those as
+        <code>imputed = 3</code>).
+      </li>
+      <li>
+        <strong>Use the raw row.</strong> If the strong-window rule
+        didn't fire, but the slot has at least one raw OpenAlex
+        affiliation row, we use it. If there are several raw rows on
+        the same slot (joint appointment), we pick the one that has
+        the most support in the author's window. Tagged
+        <code>imputed = 0</code>.
+      </li>
+      <li>
+        <strong>Weak-window fill.</strong> If the slot has
+        <em>no</em> raw row at all but the window vote still has a
+        winner with &ge;&nbsp;50&percnt; share over at least 2 papers,
+        use that. Tagged <code>imputed = 1</code>.
+      </li>
+      <li>
+        <strong>Long interpolation.</strong> Some slots have no raw
+        row and not enough nearby publications for a window vote. For
+        those we look at the author's nearest publication year
+        <em>before</em> the paper and nearest publication year
+        <em>after</em>, and ask which university wins each of those
+        years on its own. If those two years agree on the same
+        university, we assign it. If they disagree, we leave the slot
+        blank. Tagged <code>imputed = 2</code>.
+      </li>
+      <li>
+        <strong>Otherwise</strong> we leave the slot blank.
+      </li>
+    </ol>
+
+    <p>
+      Roughly a third of the file is from raw rows, a third is
+      window-filled, a small share is long-distance interpolated, and
+      less than 1&percnt; is the strong-window override.
+    </p>
+
+    <details class="code-details">
+      <summary>Show the underlying code (DuckDB SQL)</summary>
+      <p class="chart-note">
+        Excerpts from
+        <code>build/upstream/03_impute_affiliations.py</code>. The
+        thresholds <code>--s-strong=0.75</code>,
+        <code>--p-strong=4</code>, <code>--s-weak=0.50</code>,
+        <code>--p-weak=2</code>, and <code>--window=3</code> are the
+        production defaults.
+      </p>
+      <p><strong>Step 1 &mdash; author-year-institution counts (the
+      raw vote tally each author carries with them):</strong></p>
+<pre><code>-- one row per (author, year, institution): how many of the author's
+-- papers in that year were raw-tagged with that institution.
+CREATE TABLE ayi AS
+SELECT
+    AuthorID,
+    year AS obs_year,
+    InstitutionID,
+    COUNT(DISTINCT PaperID) AS n_papers
+FROM raw_obs                        -- restricted to type='education'
+GROUP BY AuthorID, year, InstitutionID;</code></pre>
+
+      <p><strong>Step 2 &mdash; for each paper-author slot, the
+      &plusmn;3-year window vote:</strong></p>
+<pre><code>-- pool the author's per-year counts across [year-3, year+3]
+CREATE TABLE window_evidence AS
+SELECT s.PaperID, s.AuthorID, s.year,
+       ay.InstitutionID,
+       SUM(ay.n_papers) AS n_papers_w
+FROM slots s
+INNER JOIN ayi ay
+  ON s.AuthorID = ay.AuthorID
+ AND ay.obs_year BETWEEN s.year - 3 AND s.year + 3
+GROUP BY s.PaperID, s.AuthorID, s.year, ay.InstitutionID;
+
+-- pick the winning institution per slot (window-modal) and compute its share
+CREATE TABLE slot_window AS
+WITH totals AS (
+    SELECT PaperID, AuthorID, year, SUM(n_papers_w) AS total_papers_w
+    FROM window_evidence GROUP BY PaperID, AuthorID, year
+),
+ranked AS (
+    SELECT we.*,
+           ROW_NUMBER() OVER (
+               PARTITION BY PaperID, AuthorID, year
+               ORDER BY n_papers_w DESC, InstitutionID
+           ) AS rn
+    FROM window_evidence we
+)
+SELECT r.PaperID, r.AuthorID, r.year,
+       r.InstitutionID AS modal_inst,
+       r.n_papers_w     AS modal_papers,
+       r.n_papers_w * 1.0 / NULLIF(t.total_papers_w, 0) AS modal_share
+FROM ranked r JOIN totals t USING (PaperID, AuthorID, year)
+WHERE r.rn = 1;</code></pre>
+
+      <p><strong>Step 3 &mdash; the priority cascade (strong-window
+      &rarr; raw &rarr; weak-window &rarr; long-interp):</strong></p>
+<pre><code>SELECT s.PaperID, s.AuthorID, s.year,
+    CASE
+        -- (a) strong-window rule: >= 75% share AND >= 4 papers
+        WHEN sw.modal_share >= 0.75 AND sw.modal_papers >= 4
+            THEN sw.modal_inst
+        -- (b) raw paper-author-institution row from OpenAlex
+        WHEN srp.raw_pick_inst IS NOT NULL
+            THEN srp.raw_pick_inst
+        -- (c) weak-window fill: no raw row, >= 50% AND >= 2 papers
+        WHEN sw.modal_share >= 0.50 AND sw.modal_papers >= 2
+            THEN sw.modal_inst
+        -- (d) long interpolation: nearest pre and post year agree
+        WHEN li.interp_inst IS NOT NULL
+            THEN li.interp_inst
+        ELSE NULL
+    END AS InstitutionID,
+    CASE
+        WHEN sw.modal_share >= 0.75 AND sw.modal_papers >= 4 THEN
+            CASE
+                WHEN srp.raw_pick_inst = sw.modal_inst THEN 0   -- agreed with raw
+                WHEN srp.raw_pick_inst IS NULL         THEN 1   -- filled missing
+                ELSE 3                                          -- overrode raw
+            END
+        WHEN srp.raw_pick_inst IS NOT NULL                 THEN 0
+        WHEN sw.modal_share >= 0.50 AND sw.modal_papers >= 2 THEN 1
+        WHEN li.interp_inst IS NOT NULL                    THEN 2
+        ELSE NULL
+    END AS imputed
+FROM slots s
+LEFT JOIN slot_window      sw  USING (PaperID, AuthorID, year)
+LEFT JOIN slot_raw_picked  srp USING (PaperID, AuthorID, year)
+LEFT JOIN long_interp      li  USING (PaperID, AuthorID, year);</code></pre>
+
+      <p>
+        The <code>long_interp</code> helper is also a SQL block: it
+        finds, per slot, the largest observation year strictly before
+        the paper and the smallest strictly after, then keeps the slot
+        only if both years' modal university match.
+      </p>
+<pre><code>-- nearest pre/post observation years
+CREATE TABLE slot_brackets AS
+SELECT s.PaperID, s.AuthorID, s.year,
+       MAX(CASE WHEN ay.obs_year < s.year THEN ay.obs_year END) AS before_year,
+       MIN(CASE WHEN ay.obs_year > s.year THEN ay.obs_year END) AS after_year
+FROM slots s
+INNER JOIN ayi ay ON s.AuthorID = ay.AuthorID
+GROUP BY s.PaperID, s.AuthorID, s.year;
+
+-- assign only when both sides exist AND agree
+CREATE TABLE long_interp AS
+SELECT sb.PaperID, sb.AuthorID, sb.year, bm.modal_inst AS interp_inst
+FROM slot_brackets sb
+INNER JOIN ayi_modal bm ON sb.AuthorID = bm.AuthorID AND bm.obs_year = sb.before_year
+INNER JOIN ayi_modal am ON sb.AuthorID = am.AuthorID AND am.obs_year = sb.after_year
+WHERE sb.before_year IS NOT NULL
+  AND sb.after_year  IS NOT NULL
+  AND bm.modal_inst = am.modal_inst;</code></pre>
+    </details>
   </section>
 
   <section class="how">

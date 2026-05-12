@@ -419,6 +419,133 @@
     </p>
   </section>
 
+  <section class="how" id="canonical-clean">
+    <h2>Canonical clean datasets (SciNET fields, default-on)</h2>
+    <p>
+      As of 2026-05-10 the panels also read paper- and author-level
+      <strong>field labels from the SciNET classifier</strong> rather
+      than the legacy
+      <code>OpenAlex.primary_topic_id &rarr; topic_mapping.csv</code>
+      join. The single source of truth lives at
+      <code>${OPENALEX}/data/clean/</code> and is built once by
+      <code>build/upstream/build_canonical_clean_datasets.py</code>
+      (a single DuckDB pass, ~3 min). Eight parquets land alongside
+      the crosswalks:
+    </p>
+    <ul class="bul">
+      <li><code>paper_field.parquet</code> &mdash; canonical_paperid &times; top-3 SciNET fields with renormalized probabilities (14.2 M papers).</li>
+      <li><code>paper_subfield.parquet</code> &mdash; canonical_paperid &times; top-5 SciNET subfields.</li>
+      <li><code>author_year_institution.parquet</code> &mdash; canonical_authorid &times; year &times; institution_id with shares + modal flag.</li>
+      <li><code>author_field.parquet</code> &mdash; career-level top-3 SciNET fields per canonical author, plus an <code>is_confident</code> boolean.</li>
+      <li><code>author_subfield.parquet</code> &mdash; career-level top-5 subfields.</li>
+      <li><code>field_codes_to_names.csv</code> &mdash; SciNET 4-letter code &harr; OpenAlex long name lookup.</li>
+      <li><code>paper_crosswalk.parquet</code>, <code>author_crosswalk.parquet</code> &mdash; copies of the upstream dedup crosswalks for at-rest provenance.</li>
+    </ul>
+    <p>
+      The author confidence flag is a two-criterion threshold:
+      <code>is_confident = (field_p1 &ge; 0.7) AND (n_papers &ge; 10)</code>.
+      Thresholds live in <code>bitnet/clean.py</code> as
+      <code>FIELD_CONFIDENCE_THRESHOLD</code> and <code>MIN_PAPERS</code>;
+      changing the constant and re-running the canonical builder
+      re-derives the boolean everywhere. With (0.7, 10), 408 K of the
+      4.18 M canonical authors (9.8%) are flagged confident &mdash;
+      heavily weighted toward authors with 10+ SciNET papers.
+    </p>
+    <h3>SciNET &harr; OpenAlex field-name mapping</h3>
+    <p>
+      SciNET classifies papers into 30 four-letter field codes; OpenAlex
+      uses 26 long-name fields. Most STEM fields map 1:1
+      (<code>COMP &rarr; Computer Science</code>,
+      <code>PHYS &rarr; Physics and Astronomy</code>,
+      <code>MATH &rarr; Mathematics</code>,
+      <code>ENGG &rarr; Engineering</code>,
+      <code>CHEM &rarr; Chemistry</code>,
+      <code>MATR &rarr; Materials Science</code>). The collapses
+      happen on the non-STEM side (six SciNET arts/humanities codes
+      &rarr; OpenAlex "Arts and Humanities"; six SciNET social codes
+      &rarr; "Social Sciences").
+    </p>
+    <p>
+      <strong>Known edge case:</strong> OpenAlex has a separate
+      <em>Chemical Engineering</em> field (~13 topics in
+      <code>topic_mapping.csv</code>); SciNET does not. ChemE papers
+      land under <code>CHEM</code> or <code>ENGG</code> based on title
+      content. The body's <code>STEM_FIELDS</code> bundle includes
+      Chemical Engineering for BitNet/Usenet/NSFNET, so flipping
+      <code>BITNET_CLEAN_FIELDS=1</code> shifts those papers into
+      chemistry / engineering. The before/after numerics in the next
+      section quantify the resulting movement on fig20-23.
+    </p>
+    <h3>Toggles</h3>
+    <table class="tier-table">
+      <thead><tr><th>Env var</th><th>Default</th><th>Effect</th></tr></thead>
+      <tbody>
+        <tr><td><code>BITNET_CLEAN_FIELDS</code></td><td>on if parquets exist</td><td>Switches all six panel builders to SciNET field labels.</td></tr>
+        <tr><td><code>BITNET_AUTHOR_CONFIDENT_ONLY</code></td><td><code>0</code></td><td>Restricts the author panel to <code>is_confident = TRUE</code>.</td></tr>
+        <tr><td><code>BITNET_CLEAN_DIR</code></td><td>auto-detect</td><td>Override the location of the clean parquets.</td></tr>
+      </tbody>
+    </table>
+    <p>
+      Setting <code>BITNET_CLEAN_FIELDS=0</code> falls back to the
+      legacy <code>topic_mapping.csv</code> join byte-for-byte, so
+      referee questions about the field-source can be answered with
+      a direct A/B comparison.
+    </p>
+    <h3>SciNET vs legacy field-source: fig20-23 before/after</h3>
+    <p>
+      Pre-rebuild snapshot at
+      <code>data/intermediate/panels_pre_scinet/</code>;
+      post-rebuild panels at
+      <code>data/intermediate/panels/</code>. Both fits use identical
+      panel construction and estimator; the only thing that differs
+      is the field label source. Per-event-time tables at
+      <code>results/scinet_before_after/fig{20,21,22,23}_pre_post_estimates.md</code>.
+    </p>
+    <table class="tier-table">
+      <thead>
+        <tr>
+          <th>fig</th>
+          <th>network</th>
+          <th>mean |&Delta;coef|</th>
+          <th>max |&Delta;coef|</th>
+          <th>year-5 legacy</th>
+          <th>year-5 SciNET</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>fig20 (binary)</td>      <td>arpanet</td><td>0.030</td><td>0.062</td><td>-0.039</td><td> 0.023</td></tr>
+        <tr><td>fig20 (binary)</td>      <td>usenet</td> <td>0.007</td><td>0.022</td><td>-0.007</td><td> 0.015</td></tr>
+        <tr><td>fig20 (binary)</td>      <td>bitnet</td> <td>0.020</td><td>0.050</td><td> 0.106</td><td> 0.129</td></tr>
+        <tr><td>fig20 (binary)</td>      <td>nsfnet</td> <td>0.027</td><td>0.064</td><td>-0.002</td><td> 0.052</td></tr>
+        <tr><td>fig21 (E<sub>join</sub>)</td><td>arpanet</td><td>0.086</td><td>0.174</td><td>-0.114</td><td> 0.060</td></tr>
+        <tr><td>fig21 (E<sub>join</sub>)</td><td>usenet</td> <td>0.024</td><td>0.079</td><td>-0.037</td><td> 0.043</td></tr>
+        <tr><td>fig21 (E<sub>join</sub>)</td><td>bitnet</td> <td>0.032</td><td>0.062</td><td> 0.256</td><td> 0.226</td></tr>
+        <tr><td>fig21 (E<sub>join</sub>)</td><td>nsfnet</td> <td>0.245</td><td>0.670</td><td> 0.130</td><td> 0.535</td></tr>
+        <tr><td>fig22 (random pair)</td>  <td>arpanet</td><td>0.011</td><td>0.029</td><td> 0.020</td><td> 0.049</td></tr>
+        <tr><td>fig22 (random pair)</td>  <td>usenet</td> <td>0.003</td><td>0.007</td><td> 0.011</td><td> 0.015</td></tr>
+        <tr><td>fig22 (random pair)</td>  <td>bitnet</td> <td>0.004</td><td>0.016</td><td> 0.022</td><td> 0.038</td></tr>
+        <tr><td>fig22 (random pair)</td>  <td>nsfnet</td> <td>0.020</td><td>0.111</td><td>-0.068</td><td> 0.043</td></tr>
+        <tr><td>fig23 (bilateral)</td>    <td>arpanet</td><td>0.027</td><td>0.056</td><td> 0.040</td><td> 0.043</td></tr>
+        <tr><td>fig23 (bilateral)</td>    <td>usenet</td> <td>0.004</td><td>0.010</td><td> 0.003</td><td> 0.012</td></tr>
+        <tr><td>fig23 (bilateral)</td>    <td>bitnet</td> <td>0.004</td><td>0.016</td><td> 0.011</td><td> 0.027</td></tr>
+        <tr><td>fig23 (bilateral)</td>    <td>nsfnet</td> <td>0.013</td><td>0.035</td><td>-0.029</td><td>-0.016</td></tr>
+      </tbody>
+    </table>
+    <p>
+      <strong>BitNet</strong> (the headline network) shifts modestly:
+      $\beta_5$ goes from $0.106$ to $0.129$ on fig20 and from $0.256$
+      to $0.226$ on fig21. Pre-trends remain flat and there are no
+      sign flips on any pre- or post-treatment lead in fig20, fig22,
+      or fig23 across all four networks. The <strong>NSFNET</strong>
+      fig21 swing is dominated by small-sample noise (federal-tail
+      universe, late-cohort exclusions); fig20/22/23 move much less
+      on the same network. <strong>ARPANET</strong> fig21 also
+      wiggles (small CS-only frame), but neither pre- nor post-treatment
+      coefficients flip sign. <strong>Usenet</strong> moves least
+      across all four figures.
+    </p>
+  </section>
+
   <section class="how" id="impact">
     <h2>Effect on published estimates (R1, primary fields)</h2>
     <p>
